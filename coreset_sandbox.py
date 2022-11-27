@@ -4,7 +4,67 @@ from sklearn.random_projection import SparseRandomProjection
 import sys
 sys.setrecursionlimit(5000)
 
-class HST:
+class ListHST:
+    def __init__(self, P):
+        """
+        Initialize Hierarchically Separated Tree
+        input:
+            P : numpy array, shape (n x d)
+        """
+        self.P = P
+        self.n, self.d = P.shape
+        self.layers = [[self.P]]
+        self.corners = [[np.zeros([self.n])]]
+
+        self.get_delta()
+        self.random_shift()
+
+        self.split_d = 0
+        self.num_arrays = 1
+        self.fit()
+
+    def get_delta(self):
+        """ Get maximum distance in P along one axis """
+        axis_dists = np.array([np.max(self.P[:, i]) - np.min(self.P[:, i]) for i in range(self.d)])
+        self.delta = np.max(axis_dists)
+
+    def random_shift(self):
+        """ Apply a random shift to P so that HST has appropriate distance in expectation """
+        # Move pointset to all-positive values
+        self.P -= np.min(self.P, axis=1, keepdims=True)
+
+        # Apply a random shift in [0, delta]
+        self.P += np.random.random([1, self.d]) * self.delta
+
+    def _update_split_vars(self):
+        self.split_d += 1
+        if self.split_d >= self.d:
+            self.split_d = 0
+            self.delta /= 2
+
+    def fit(self):
+        while len(self.layers[-1]) < self.n:
+            next_layer = []
+            next_corners = []
+            for i, (points, corner) in enumerate(zip(self.layers[-1], self.corners[-1])):
+                left_inds = points[:, self.split_d] <= (corner[self.split_d] + self.delta)
+                left_P = points[left_inds]
+                right_P = points[np.logical_not(left_inds)]
+                if len(left_P) > 0:
+                    next_layer.append(left_P)
+                    next_corners.append(corner)
+                if len(right_P) > 0:
+                    next_layer.append(right_P)
+                    split_corner = np.copy(corner)
+                    split_corner[self.split_d] += self.delta
+                    next_corners.append(split_corner)
+                self._update_split_vars()
+            self.layers.append(next_layer)
+            self.corners.append(next_corners)
+            print([len(l) for l in self.layers[-1]])
+
+
+class TreeHST:
     def __init__(self, P, delta=None, split_d=0, prev_split=None, root=True, depth=0):
         """
         Initialize Hierarchically Separated Tree
@@ -98,8 +158,11 @@ class HST:
         if self.right_child is not None and self.right_child.depth < max_depth:
             self.right_child.consolidate_depths(self.max_depth)
 
-        # If we are at a leaf, then subdivide into ever smaller cells until it is at the correct depth
+        # If we are at a leaf leaf into ever smaller cells until it is at the correct depth
+        # FIXME -- want to do a split here like in the fit function
         print(len(self.P))
+
+
 
 if __name__ == '__main__':
     P = np.random.randn(500, 1000)
@@ -109,4 +172,5 @@ if __name__ == '__main__':
     jl_proj = SparseRandomProjection(d)
 
     P = jl_proj.fit_transform(P)
-    hst = HST(P)
+    hst = ListHST(P)
+    print(len(hst.layers))
