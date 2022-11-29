@@ -25,6 +25,10 @@
 \bibliography{references}
 \allowdisplaybreaks
 
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+
 \title{Fast Coreset Generation for K-Means}
 \author{Andrew Draganov}
 
@@ -128,6 +132,74 @@ leaves $x$ and $y$ in the tree. Embedding our dataset into an HST provides sever
 embedding, which is already the time that we need to read the dataset.
 
 \subsection{k-median clustering in $O(n)$ time on a 2-RHST}
+
+\algdef{SE}% flags used internally to indicate we're defining a new block statement
+[STRUCT]% new block type, not to be confused with loops or if-statements
+{Class}% "\Struct{name}" will indicate the start of the struct declaration
+{EndClass}% "\EndStruct" ends the block indent
+[1]% There is one argument, which is the name of the data structure
+{\textbf{class} \textsc{#1}}% typesetting of the start of a struct
+{\textbf{end class}}% typesetting the end of the struct
+
+\begin{algorithm}
+\caption{$O(n)$-time algorithm for $k$-median in a $2$-RHST}\label{RHST_alg}
+\hspace*{\algorithmicindent} \textbf{Input} \\
+\hspace*{\algorithmicindent*2} Root : Top-level node of tree. \\
+\hspace*{\algorithmicindent*2} Dists : Array of $n-1$ distances from leaf $i$ to leaf $i+1$. Obtained during HST creation.
+\begin{algorithmic}[1]
+
+\Function{2-RHST $k$-Median}{Root, Dists, $k$}
+    \BState \emph{Base Case}:
+    \State // Make a center for each leaf
+    \If {$\text{Root } \textbf{is} \text{ BaseNode}$} \Comment A BaseNode is any node with $<k$ leaves
+        \State $\mathcal{C} \gets \text{Array}( \; \text{Center}(l, [l], l, l) \textbf{ for } l \textbf{ in } \text{Root.leaves}\;)$
+            \State \Return $\mathcal{C}$
+        \EndIf
+    \BState \emph{Recursive Call}:
+    \State // Combine two sets of centers together
+    \State $\mathcal{C}_L \gets$ 2-RHST $k$-Median(Root.LeftChild, Dists, $k$)
+    \State $\mathcal{C}_R \gets$ 2-RHST $k$-Median(Root.RightChild, Dists, $k$)
+    \State MinCenterDists $\gets$ FindMinDists($\mathcal{C}_L$, $\mathcal{C}_R$, $k$)
+    \State $\mathcal{C} \gets $ Array( )
+    \For {$0 \leq i < k$}
+        \State MinDist $\gets$ MinCenterDists[$i$]
+        \State $\mathcal{C}$[$i$] $\gets$ Merge(MinDist.LeftCenter, MinDist.RightCenter)
+    \EndFor
+    \State \Return $\mathcal{C}$
+\EndFunction
+\item[]
+
+\Class{Center}
+    \State \textbf{variables} $\gets$ Loc, PointList, RightMostPoint
+\EndClass
+\item[]
+
+\Function{Merge}{$c_1$, $c_2$}
+    % FIXME -- is this true?
+    \State Points $ \gets c_1\text{.PointList} \cup c_2\text{.PointList}$
+    \If {$c_1\text{.size} \neq c_2\text{.size}$}
+    \State Loc $ \gets (\text{argmax}(|c_1|, |c_2|)$).Loc \Comment Center will be the center of the larger one
+    \State \Return Center(Loc, Points, $c_2$.RightMostPoint)
+    \EndIf
+    \State \Return Center($c_1$.Loc, Points, $c_2$.RightMostPoint) \Comment WLOG
+\EndFunction
+\item[]
+
+\Function{FindMinDists}{$\mathcal{C}_L$, $\mathcal{C}_R$, $k$, Dists}
+    \State // Get $k$ smallest weighted distances between centers
+    \State $\mathcal{C} \gets \mathcal{C}_L \cup \mathcal{C}_R$
+    \State WeightedDists $\gets$ Array( )
+    \For{$0 \leq i < 2k - 1$}
+        \State D $\gets$ Dists$ [\mathcal{C}_i\text{.RightMostPoint}]$ \Comment ``Distance from this leaf to the one on its right''
+        \State Size $\gets$ $\min(|\mathcal{C}_i|, |\mathcal{C}_{i+1}|)$ \Comment ``How many points will pay the cost''
+        \State WeightedDists[$i$] $\gets$ D $\times$ Size
+    \EndFor
+    \State MinCenterDists $\gets$ minimum $k$ values from WeightedDists (unsorted) \Comment Requires $O(k)$ time
+    \State \Return MinCenterDists
+\EndFunction
+
+\end{algorithmic}
+\end{algorithm}
 
 It appears to be possible to get an optimal k-median clustering in a 2-RHST in $O(n)$ time. The underlying reason for this is that each center $c_i$
 has one closest center $c_j$ and, for all leaves $v \in c_i$, $v$'s second closest center is $c_j$. Thus, we can recursively find the $k$-median clustering
