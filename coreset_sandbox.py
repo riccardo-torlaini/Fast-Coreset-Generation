@@ -61,10 +61,11 @@ class ListHST:
                 self._update_split_vars()
             self.layers.append(next_layer)
             self.corners.append(next_corners)
-            print([len(l) for l in self.layers[-1]])
+            print(self.corners[-1][-1])
+            quit()
 
 
-class TreeHST:
+class HST:
     def __init__(self, P, delta=None, split_d=0, prev_split=None, root=True, depth=0):
         """
         Initialize Hierarchically Separated Tree
@@ -148,20 +149,6 @@ class TreeHST:
             right_depth = 0
 
         self.max_depth = max(left_depth, right_depth)
-
-    def consolidate_depths(self, max_depth=None):
-        if max_depth is None:
-            max_depth = self.max_depth
-        # DFS to get to every leaf in the tree that is not at the maximum depth
-        if self.left_child is not None and self.left_child.depth < max_depth:
-            self.left_child.consolidate_depths(self.max_depth)
-        if self.right_child is not None and self.right_child.depth < max_depth:
-            self.right_child.consolidate_depths(self.max_depth)
-
-        # If we are at a leaf leaf into ever smaller cells until it is at the correct depth
-        # FIXME -- want to do a split here like in the fit function
-        print(len(self.P))
-
 
 
 if __name__ == '__main__':
