@@ -11,8 +11,9 @@ class HST:
         input:
             P : numpy array, shape (n x d)
         """
+        # FIXME -- There must be a better way to handle the point id's.
+        #       -- Appending them outside of the class is so ugly
         self.points = points
-        self.n, self.d = points.shape
         self.depth = depth
         self.max_depth = 0
         self.cell_path = cell_path
@@ -23,12 +24,19 @@ class HST:
         self.right_child = None
 
         if self.root:
+            indices = np.expand_dims(np.arange(len(self.points)), -1)
+            self.points = np.concatenate((indices, self.points), axis=1)
+            self.n, self.d = self.points.shape
+            self.d -= 1
             self.get_delta()
+            # FIXME -- do I need to multiply by 2 here for the diam?
+            self.diam = self.delta * np.sqrt(self.d)
+            self.scalar = np.power(0.5, 1.0/(self.d))
             self.random_shift()
 
     def get_delta(self):
         """ Get maximum distance in points along one axis """
-        axis_dists = np.array([np.max(self.points[:, i]) - np.min(self.points[:, i]) for i in range(1, self.d)])
+        axis_dists = np.array([np.max(self.points[:, i]) - np.min(self.points[:, i]) for i in range(1, self.d+1)])
         self.delta = np.max(axis_dists)
 
     def random_shift(self):
@@ -38,7 +46,7 @@ class HST:
         self.points[:, 1:] += 1e-3
 
         # Apply a random shift in [0, delta]
-        self.points[:, 1:] += np.random.random([1, self.d - 1]) * self.delta
+        self.points[:, 1:] += np.random.random([1, self.d]) * self.delta
 
     def has_left_child(self):
         return self.left_child != None
@@ -74,7 +82,7 @@ def fit_tree(points):
         left_points = node.points[left_inds]
         right_points = node.points[np.logical_not(left_inds)]
 
-        next_d, next_delta = get_split_vars(split_d, delta, node.d)
+        next_d, next_delta = get_split_vars(split_d, delta, node.points.shape[-1] - 1)
 
         if len(left_points) >= 1:
             left_split = np.copy(prev_split)
@@ -108,27 +116,27 @@ def tree_dist(ptc_dict, a, b, root):
     """
     cell_a = ptc_dict[a]
     cell_b = ptc_dict[b]
-    substring = ''
-    i = 0
-    while cell_a.cell_path[i] == cell_b.cell_path[i]:
-        substring += cell_a.cell_path[i]
-        i += 1
+    lca = ''
+    lca_depth = 0
+    while cell_a.cell_path[lca_depth] == cell_b.cell_path[lca_depth]:
+        lca += cell_a.cell_path[lca_depth]
+        lca_depth += 1
 
-    print(substring)
-    print(cell_a.cell_path, cell_b.cell_path)
+    distance = 2 * root.diam * np.sum(np.power(root.scalar, np.arange(lca_depth, root.max_depth)))
+    return distance
 
 
 if __name__ == '__main__':
     points = np.random.randn(5000, 1000)
     k = 10
-    eps = 1e-1
-    d = np.ceil(np.log(k) / (eps ** 2)).astype(np.int32)
-    jl_proj = SparseRandomProjection(d)
+    eps = 0.5
+    jl_dim = np.ceil(np.log(k) / (eps ** 2)).astype(np.int32)
+    jl_proj = SparseRandomProjection(jl_dim)
 
     points = jl_proj.fit_transform(points)
-    indices = np.expand_dims(np.arange(len(points)), -1)
-    points = np.concatenate((indices, points), axis=1)
     root, ptc_dict = fit_tree(points)
-    print(root.max_depth)
 
-    tree_dist(ptc_dict, 10, 30, root)
+    true_dist = np.sqrt(np.sum(np.square(points[10] - points[30])))
+    tree_dist = tree_dist(ptc_dict, 10, 30, root)
+    print(tree_dist / (true_dist * np.log2(len(points))))
+    print(24 * true_dist * np.log2(len(points)))
