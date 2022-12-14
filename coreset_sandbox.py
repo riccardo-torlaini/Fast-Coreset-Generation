@@ -86,7 +86,12 @@ def fit_tree(points):
 
         if len(left_points) >= 1:
             left_split = np.copy(prev_split)
-            node.left_child = HST(left_points, root=False, depth=node.depth+1, cell_path=node.cell_path + 'l')
+            node.left_child = HST(
+                left_points,
+                root=False,
+                depth=node.depth + 1,
+                cell_path=node.cell_path + 'l'
+            )
             _fit(node.left_child, next_d, next_delta, left_split)
             node.left_child.parent = node
             left_depth = node.left_child.max_depth
@@ -96,20 +101,24 @@ def fit_tree(points):
         if len(right_points) >= 1:
             right_split = np.copy(prev_split)
             right_split[split_d] += delta
-            node.right_child = HST(right_points, root=False, depth=node.depth+1, cell_path=node.cell_path + 'r')
+            node.right_child = HST(
+                right_points,
+                root=False,
+                depth=node.depth + 1,
+                cell_path=node.cell_path + 'r'
+            )
             _fit(node.right_child, next_d, next_delta, right_split)
             node.right_child.parent = node
             right_depth = node.right_child.max_depth
         else:
             right_depth = 0
-            right_id = 0
 
         node.max_depth = max(left_depth, right_depth)
 
     _fit(root, g_split_d, g_delta, g_prev_split)
     return root, point_to_cell_dict
 
-def tree_dist(ptc_dict, a, b, root):
+def hst_dist(ptc_dict, a, b, root):
     """
     root -- base of the tree
     a, b -- two points that we want the tree-distance between
@@ -125,11 +134,32 @@ def tree_dist(ptc_dict, a, b, root):
     distance = 2 * root.diam * np.sum(np.power(root.scalar, np.arange(lca_depth, root.max_depth)))
     return distance
 
+class Center:
+    def __init__(self, cell, size):
+        self.cell = cell
+        self.size = size
 
-if __name__ == '__main__':
-    points = np.random.randn(5000, 1000)
-    k = 10
-    eps = 0.5
+def get_min_dists(C, k):
+    min_dists = []
+
+def tree_k_median(root, ptc_dict, k):
+    C = []
+    if len(root.points) <= k:
+        for leaf in root.points:
+            # Dim 0 of the point is the point_id and is one of the ptc_dict keys
+            new_center = Center(ptc_dict[leaf[0]], 1)
+            C.append(ptc_dict[leaf[0]])
+        return C
+    if root.left_child is not None:
+        C += tree_k_median(root.left_child, ptc_dict, k)
+    if root.right_child is not None:
+        C += tree_k_median(root.right_child, ptc_dict, k)
+
+    dists = get_min_dists(C, k)
+    print(len(C))
+    quit()
+
+def make_coreset(points, k, eps):
     jl_dim = np.ceil(np.log(k) / (eps ** 2)).astype(np.int32)
     jl_proj = SparseRandomProjection(jl_dim)
 
@@ -137,6 +167,15 @@ if __name__ == '__main__':
     root, ptc_dict = fit_tree(points)
 
     true_dist = np.sqrt(np.sum(np.square(points[10] - points[30])))
-    tree_dist = tree_dist(ptc_dict, 10, 30, root)
+    tree_dist = hst_dist(ptc_dict, 10, 30, root)
     print(tree_dist / (true_dist * np.log2(len(points))))
+    print(tree_dist)
     print(24 * true_dist * np.log2(len(points)))
+
+    tree_k_median(root, ptc_dict, k)
+
+if __name__ == '__main__':
+    g_points = np.random.randn(20000, 1000)
+    g_k = 10
+    g_eps = 0.5
+    make_coreset(g_points, g_k, g_eps)
