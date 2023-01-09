@@ -2,9 +2,11 @@ import numpy as np
 from time import time
 import matplotlib as plt
 from sklearn.random_projection import SparseRandomProjection
+from sklearn.datasets import make_blobs
 import sys
 sys.setrecursionlimit(5000)
 
+### HST code ###
 class HST:
     def __init__(self, points, root=True, depth=0, cell_path=''):
         """
@@ -42,6 +44,10 @@ class HST:
         axis_dists = np.array([np.max(self.points[:, i]) - np.min(self.points[:, i]) for i in range(1, self.d+1)])
         return spread_func(axis_dists)
 
+    def set_dict_values(self, target_cost, k, cost):
+        self.k_per_target[target_cost] = k
+        self.cost_per_target[target_cost] = cost
+
     def random_shift(self):
         """ Apply a random shift to points so that all points are in the [0, 2 * max_spread]^d box """
         # Move pointset to all-positive values
@@ -63,6 +69,9 @@ class HST:
         return len(self.points)
 
 def get_split_vars(split_d, max_spread, d):
+    """
+    Helper function to determine how HST is splitting the cell in half
+    """
     next_d = split_d + 1
     next_max_spread = max_spread
     if next_d >= d + 1:
@@ -72,6 +81,9 @@ def get_split_vars(split_d, max_spread, d):
     return next_d, next_max_spread
 
 def propagate_leaf_info(root, max_depth, leaf_diam, top_diam, scalar):
+    """
+    Our leaves are not actually at the same depth, so if a node is a leaf, we must give it the appropriate diameter
+    """
     root.max_depth = max_depth
     root.diam = top_diam * np.power(scalar, root.depth)
     if root.has_left_child or root.has_right_child:
@@ -143,8 +155,6 @@ def fit_tree(points):
         node.max_depth = max(left_depth, right_depth)
 
     _fit(root, g_split_d, g_max_spread, g_prev_split)
-    # FIXME -- leaf diameter is the diameter at max_depth, so we have to take the geometric ratio constant
-    # FIXME    to the power of max_depth and multiply by root.diam
     leaf_diam = root.diam * np.power(root.scalar, root.max_depth)
     propagate_leaf_info(root, root.max_depth, leaf_diam, root.diam, root.scalar)
     return root, point_to_cell_dict
@@ -165,8 +175,33 @@ def hst_dist(ptc_dict, a, b, root):
     distance = 2 * root.diam * np.sum(np.power(root.scalar, np.arange(lca_depth, root.max_depth)))
     return distance
 
+def assert_hst_correctness(root, ptc_dict, points):
+    true_dist = np.sqrt(np.sum(np.square(points[10] - points[30])))
+    tree_dist = hst_dist(ptc_dict, 10, 30, root)
+    assert tree_dist > true_dist
+    assert tree_dist < 24 * np.log2(len(root)) * true_dist
+
+def make_HST(points, k, eps):
+    jl_dim = np.ceil(np.log(k) / (eps ** 2)).astype(np.int32)
+    jl_proj = SparseRandomProjection(jl_dim)
+    points = jl_proj.fit_transform(points)
+
+    root, ptc_dict = fit_tree(points)
+    assert_hst_correctness(root, ptc_dict, points)
+    return root, ptc_dict
+
+### END HST code ###
+
+
+### k-median code ###
+class Center:
+    def __init__(self, cell, size):
+        self.cell = cell
+        self.size = size
+
 def get_right_cost(left_cost, cost_list, upper_bound):
     """ Return the smallest v_j such that v_i + v_j > target_cost """
+    # FIXME -- this should just be a lookup
     i = 0
     while left_cost + cost_list[i] < upper_bound:
         i += 1
@@ -187,15 +222,8 @@ def min_k(root, target_cost, cost_list):
     # If the cell has left and right subtrees then check all left/right cost splits
     if root.has_left_child and root.has_right_child:
         smallest_k = np.inf
-        corresponding_cost = 0
-        k_size = 1
         for left_target_cost in cost_list:
-            # FIXME -- what do we default k_size to if we break before setting it?
-            # if left_target_cost >= target_cost:
-            #     break
             right_target_cost = get_right_cost(left_target_cost, cost_list, target_cost)
-            # if left_target_cost + right_target_cost >= target_cost:
-            #     break
 
             left_size, left_cost = min_k(root.left_child, left_target_cost, cost_list)
             right_size, right_cost = min_k(root.right_child, right_target_cost, cost_list)
@@ -203,45 +231,39 @@ def min_k(root, target_cost, cost_list):
 
             # If we could afford each sub-cell but not their sum, need one center for the parent cell
             if k_cost > target_cost and k_size == 0:
-                # FIXME -- what is k_cost then??
+                # FIXME -- what is k_cost upon putting a center in here?
+                # A simple estimate is half the diameter of the cell times the number of points in it.
+                #   Intuition is that we put one center in the middle of the cell, so everything is at most diam/2 from that
+                #   center
+                #   But I'm not confident that that preserves 'correctness' since it can be an unboundedly bad approximation
                 k_size = 1
+                k_cost = len(root) * root.diam / 2
+
             if k_size < smallest_k:
                 smallest_k = k_size
                 corresponding_cost = k_cost
 
-        root.k_per_target[target_cost] = k_size
-        root.cost_per_target[target_cost] = corresponding_cost
-        return k_size, corresponding_cost
-
     # If just one child, recur on it with no added logic
-    if root.has_left_child:
-        k_size, corresponding_cost = min_k(root.left_child, target_cost, cost_list)
-        root.k_per_target[target_cost] = k_size
-        root.cost_per_target[target_cost] = corresponding_cost
-        return k_size, corresponding_cost
-    if root.has_right_child:
-        k_size, corresponding_cost = min_k(root.right_child, target_cost, cost_list)
-        root.k_per_target[target_cost] = k_size
-        root.cost_per_target[target_cost] = corresponding_cost
-        return k_size, corresponding_cost
+    elif root.has_left_child:
+        smallest_k, corresponding_cost = min_k(root.left_child, target_cost, cost_list)
+    elif root.has_right_child:
+        smallest_k, corresponding_cost = min_k(root.right_child, target_cost, cost_list)
 
     # This is a leaf and we could not afford it, so add a center on it
-    root.k_per_target[target_cost] = 1
-    root.cost_per_target[target_cost] = 0
-    return 1, 0
+    else:
+        smallest_k, corresponding_cost = 1, 0
 
-class Center:
-    def __init__(self, cell, size):
-        self.cell = cell
-        self.size = size
+    root.set_dict_values(target_cost, smallest_k, corresponding_cost)
+    return smallest_k, corresponding_cost
+
 
 def get_cost_list(root, eps):
     min_diam = root.get_spread(spread_func=np.min) * np.sqrt(root.d)
-    # Upper bound on the value of delta
-    delta = root.diam / min_diam
+    delta = root.diam / min_diam # Upper bound on the value of delta
     base = 1 + eps / (root.d * np.log2(delta))
     min_val = eps * delta / root.n
     max_val = root.n * delta
+
     cost_list = []
     v = 1
     i = 0
@@ -253,15 +275,7 @@ def get_cost_list(root, eps):
         v = base ** i
     return cost_list
 
-def make_coreset(points, k, eps):
-    jl_dim = np.ceil(np.log(k) / (eps ** 2)).astype(np.int32)
-    jl_proj = SparseRandomProjection(jl_dim)
-
-    points = jl_proj.fit_transform(points)
-    root, ptc_dict = fit_tree(points)
-    # true_dist = np.sqrt(np.sum(np.square(points[10] - points[30])))
-    # tree_dist = hst_dist(ptc_dict, 10, 30, root)
-
+def k_median(root, k, eps):
     cost_list = get_cost_list(root, eps)
     start = time()
     found_k = 0
@@ -284,33 +298,19 @@ def make_coreset(points, k, eps):
     end = time()
     print(end - start)
 
+### END k-median code ###
+
+def make_coreset(points, k, eps):
+    root, ptc_dict = make_HST(points, k, eps)
+    print(points[:, 0])
+    k_median(root, k, eps)
+    # TODO -- estimate sensitivities based on this
+    # sample according to sensitivities
+    # Redo ideal coreset procedure on the produced coreset
+
 if __name__ == '__main__':
-    g_points = np.random.randn(2000, 1000)
+    g_points, _ = make_blobs(200, 1000, centers=10)
+    # g_points = np.random.randn(200, 1000)
     g_k = 10
     g_eps = 0.5
     make_coreset(g_points, g_k, g_eps)
-
-
-
-
-# Assume the smallest distance is 1, the largest Delta
-# let v_1, ..., v_T be powers of (1+\eps/(d log Delta)) between eps*Delta
-# / n and n*Delta
-# 
-# def SmallestK(node, targetValue):
-# #finds the smallest k' necessary to have a k'-median cost <= target
-# value in the subtree rooted at node
-#    if the number of vertices in the subtree * diameter < targetValue:
-#      return 0
-#    let L, R the children of node
-#    curSmallest= infinity
-#    for each v_i, v_j such that v_i + v_j < (1+eps) targetValue:
-#      curSmallest min= SmallestK(L, v_i) + SmallestK(R, v_j)
-# 
-#    return curSmallest
-# 
-# Note that the inner loop can be implemented in O(T) and not T^2 because
-# there is only 1 relevant j for each given i
-# When rounding the v_i we need to rescale eps to account for the
-# accumulation of error, I think eps/(d log Delta) (ie number of tree
-# level) should be the right value but I didn't check the math
