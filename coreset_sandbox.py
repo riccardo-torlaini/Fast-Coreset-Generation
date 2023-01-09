@@ -231,11 +231,6 @@ def min_k(root, target_cost, cost_list):
 
             # If we could afford each sub-cell but not their sum, need one center for the parent cell
             if k_cost > target_cost and k_size == 0:
-                # FIXME -- what is k_cost upon putting a center in here?
-                # A simple estimate is half the diameter of the cell times the number of points in it.
-                #   Intuition is that we put one center in the middle of the cell, so everything is at most diam/2 from that
-                #   center
-                #   But I'm not confident that that preserves 'correctness' since it can be an unboundedly bad approximation
                 k_size = 1
                 k_cost = len(root) * root.diam / 2
 
@@ -302,15 +297,14 @@ def k_median(root, k, eps):
 
 def make_coreset(points, k, eps):
     root, ptc_dict = make_HST(points, k, eps)
-    print(points[:, 0])
     k_median(root, k, eps)
     # TODO -- estimate sensitivities based on this
     # sample according to sensitivities
     # Redo ideal coreset procedure on the produced coreset
 
 if __name__ == '__main__':
-    g_points, _ = make_blobs(200, 1000, centers=10)
-    # g_points = np.random.randn(200, 1000)
+    # g_points, _ = make_blobs(200, 1000, centers=10)
+    g_points = np.random.randn(200, 1000)
     g_k = 10
     g_eps = 0.5
     make_coreset(g_points, g_k, g_eps)
