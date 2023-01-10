@@ -23,6 +23,7 @@ class HST:
         self.root = root # Only true if this is the root of the tree
         self.k_per_target = {}
         self.cost_per_target = {}
+        self.marked = False
 
         self.parent = None
         self.left_child = None
@@ -38,6 +39,10 @@ class HST:
             self.diam = self.max_spread * np.sqrt(self.d)
             self.scalar = np.power(0.5, 1.0/(self.d))
             self.random_shift()
+
+    def mark(self):
+        assert not self.marked
+        self.marked = True
 
     def get_spread(self, spread_func=np.max):
         """ Get maximum distance in points along one axis """
@@ -64,6 +69,10 @@ class HST:
     @property
     def has_right_child(self):
         return self.right_child != None
+
+    @property
+    def is_leaf(self):
+        return not (self.has_left_child or self.has_right_child)
 
     def __len__(self):
         return len(self.points)
@@ -166,6 +175,8 @@ def hst_dist(ptc_dict, a, b, root):
     """
     cell_a = ptc_dict[a]
     cell_b = ptc_dict[b]
+    if cell_a == cell_b:
+        return 0
     lca = ''
     lca_depth = 0
     while cell_a.cell_path[lca_depth] == cell_b.cell_path[lca_depth]:
@@ -295,7 +306,7 @@ def k_median(root, k, eps):
 
 ### END k-median code ###
 
-def make_coreset(points, k, eps):
+def make_kmedian_coreset(points, k, eps):
     root, ptc_dict = make_HST(points, k, eps)
     k_median(root, k, eps)
     # TODO -- estimate sensitivities based on this
@@ -307,4 +318,4 @@ if __name__ == '__main__':
     g_points = np.random.randn(200, 1000)
     g_k = 10
     g_eps = 0.5
-    make_coreset(g_points, g_k, g_eps)
+    make_kmedian_coreset(g_points, g_k, g_eps)
