@@ -1,6 +1,7 @@
 import numpy as np
 import numba
 from time import time
+from tqdm.auto import tqdm
 import matplotlib.pyplot as plt
 from sklearn.random_projection import SparseRandomProjection
 from sklearn.decomposition import PCA
@@ -180,7 +181,7 @@ def fast_cluster_pp(points, k, eps, norm=2):
     st_ptc_dict = {i: -1 for i in np.arange(n)}
     sample_tree = create_sample_tree(points, np.arange(n), st_ptc_dict)
     labels = np.ones((n)) * -1
-    while len(centers) < k:
+    for i in tqdm(range(k), total=k):
         if len(centers) == 0:
             c = np.random.choice(n)
         else:
@@ -255,7 +256,6 @@ def jl_proj(points, k, eps):
 def make_rough_coreset(points, k, eps, norm, alpha):
     # O(nd) coreset time
     # The meat of the algorithm. Project down with JL, build HST, cluster HST, bound sensitivities
-    points = jl_proj(points, k, eps)
     centers, labels, costs = fast_cluster_pp(points, k, eps, norm=norm)
     sensitivities = bound_sensitivities(centers, labels, costs, alpha=alpha)
     sensitivities /= np.sum(sensitivities)
@@ -280,7 +280,7 @@ def make_rough_coreset(points, k, eps, norm, alpha):
 
     return q_points, q_weights, q_labels
 
-def make_true_coreset(points, k, eps, alpha, norm):
+def make_true_coreset(points, k, eps, norm, alpha):
     # O(ndk) coreset time
     centers = cluster_pp(points, 2 * k)
     assignments, costs = get_cluster_assignments(points, centers)
@@ -288,7 +288,6 @@ def make_true_coreset(points, k, eps, alpha, norm):
     sensitivities /= np.sum(sensitivities)
 
     # Get constants as function of parameters
-    # FIXME -- Oh ChrIIIiiiissss, what should m be?
     n = int(points.shape[0])
     d = int(points.shape[1])
     m = int(k * d ** norm / eps)
@@ -297,6 +296,7 @@ def make_true_coreset(points, k, eps, alpha, norm):
     replace = False
     if m > n:
         replace = True
+    # np.random.choice is extremely slow as it makes a permutation of the whole list just to sample a few elements
     rng = np.random.default_rng()
     true_coreset_inds = rng.choice(np.arange(len(sensitivities)), size=m, replace=replace, p=sensitivities)
 
@@ -308,32 +308,30 @@ def make_true_coreset(points, k, eps, alpha, norm):
     return r_points, r_weights, r_labels
 
 if __name__ == '__main__':
-    n_points = 10000
+    n_points = 250000
     D = 1000
     num_centers = 10
     g_alpha = 10
     g_norm = 1
     g_points, _ = make_blobs(n_points, D, centers=num_centers)
     # g_points = np.random.randn(200, 1000)
-    g_k = 200
+    g_k = 500
     g_eps = 0.5
-
-
+    g_points = jl_proj(g_points, g_k, g_eps)
 
     start = time()
     q_points, _, _ = make_rough_coreset(g_points, g_k, g_eps, g_norm, g_alpha)
     print(q_points.shape)
-    q_points, q_weights, q_labels = make_true_coreset(q_points, g_k, g_eps, g_alpha, g_norm)
+    q_points, q_weights, q_labels = make_true_coreset(q_points, g_k, g_eps, g_norm, g_alpha)
     end = time()
     print(end - start)
 
     start = time()
-    r_points, r_weights, r_labels = make_true_coreset(g_points, g_k, g_eps, g_alpha, g_norm)
+    r_points, r_weights, r_labels = make_true_coreset(g_points, g_k, g_eps, g_norm, g_alpha)
     end = time()
     print(end - start)
 
-
     # Visualize
-    embedding = PCA(n_components=2).fit_transform(q_points)
-    plt.scatter(embedding[:, 0], embedding[:, 1], c=q_labels)
-    plt.show()
+    # embedding = PCA(n_components=2).fit_transform(q_points)
+    # plt.scatter(embedding[:, 0], embedding[:, 1], c=q_labels)
+    # plt.show()
