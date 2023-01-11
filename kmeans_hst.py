@@ -1,4 +1,5 @@
 import numpy as np
+import numba
 from time import time
 import matplotlib.pyplot as plt
 from sklearn.random_projection import SparseRandomProjection
@@ -190,14 +191,56 @@ def fast_cluster_pp(points, k, eps, norm=2):
 
     return centers, labels, costs
 
-def evaluate_sensitivities(centers, labels, costs, alpha=10):
+@numba.njit(fastmath=True, parallel=False)
+def get_min_dists_to_centers(dists, points, new_center, dim, num_points):
+    for i in numba.prange(num_points):
+        dist = 0
+        for d in numba.prange(dim):
+            dist += (points[i, d] - new_center[d]) ** 2
+        if dist < dists[i]:
+            dists[i] = dist
+    return dists
+
+@numba.njit(fastmath=True, parallel=False)
+def get_all_dists_to_centers(pc_dists, points, centers, dim, num_points, num_centers):
+    for i in numba.prange(num_points):
+        for j in numba.prange(num_centers):
+            dist = 0
+            for d in numba.prange(dim):
+                dist += (points[i, d] - centers[j, d]) ** 2
+            pc_dists[i, j] = dist
+    return pc_dists
+
+def cluster_pp(points, k):
+    n, d = int(points.shape[0]), int(points.shape[1])
+    centers = [np.random.choice(n)]
+    dists = np.ones((n)) * np.inf
+    while len(centers) < k:
+        sq_dists = get_min_dists_to_centers(dists, points, points[np.array(centers)[-1]], d, n)
+        probs = sq_dists / np.sum(sq_dists)
+        centers.append(np.random.choice(n, p=probs))
+    return np.array(centers)
+
+def get_cluster_assignments(points, centers):
+    n, d = int(points.shape[0]), int(points.shape[1])
+    k = len(centers)
+    all_dists = np.zeros((n, k))
+    all_dists = get_all_dists_to_centers(all_dists, points, points[centers], d, n, k)
+    cluster_assignments = np.argmin(all_dists, axis=1)
+    cluster_assignments = centers[cluster_assignments]
+    costs = np.min(all_dists, axis=1)
+    return cluster_assignments, costs
+
+def bound_sensitivities(centers, labels, costs, alpha=10):
     cost_per_center = np.zeros((len(centers)))
     sensitivities = np.zeros((len(labels)))
     for i in range(len(centers)):
         points_in_cluster = np.where(labels == centers[i])
-        if len(points_in_cluster) == 0:
-            break
-        cost_per_center[i] = np.sum(np.take(costs, points_in_cluster))
+        if len(points_in_cluster[0]) == 0:
+            raise ValueError('No points in this cluster?')
+        cost_per_center[i] = np.sum(costs[points_in_cluster])
+        if cost_per_center[i] == 0:
+            cost_per_center[i] = 1
         sensitivities[points_in_cluster] = costs[points_in_cluster] / cost_per_center[i]
         sensitivities[points_in_cluster] *= alpha
         sensitivities[points_in_cluster] += 1 / len(points_in_cluster[0])
@@ -209,34 +252,88 @@ def jl_proj(points, k, eps):
     points = jl_model.fit_transform(points)
     return points
 
+def make_rough_coreset(points, k, eps, norm, alpha):
+    # O(nd) coreset time
+    # The meat of the algorithm. Project down with JL, build HST, cluster HST, bound sensitivities
+    points = jl_proj(points, k, eps)
+    centers, labels, costs = fast_cluster_pp(points, k, eps, norm=norm)
+    sensitivities = bound_sensitivities(centers, labels, costs, alpha=alpha)
+    sensitivities /= np.sum(sensitivities)
+
+    # Get constants as function of parameters
+    # FIXME -- Oh ChrIIIiiiissss, what should m be?
+    n = int(points.shape[0])
+    d = int(points.shape[1])
+    m = int(k * d ** norm / eps)
+
+    # Sampling the coreset based on the sensitivities
+    replace = False
+    if m > n:
+        replace = True
+    rng = np.random.default_rng()
+    rough_coreset_inds = rng.choice(np.arange(len(sensitivities)), size=m, replace=replace, p=sensitivities)
+
+    # The coreset itself
+    q_points = points[rough_coreset_inds]
+    q_labels = labels[rough_coreset_inds]
+    q_weights = 1 / sensitivities[rough_coreset_inds]
+
+    return q_points, q_weights, q_labels
+
+def make_true_coreset(points, k, eps, alpha, norm):
+    # O(ndk) coreset time
+    centers = cluster_pp(points, 2 * k)
+    assignments, costs = get_cluster_assignments(points, centers)
+    sensitivities = bound_sensitivities(centers, assignments, costs, alpha=alpha)
+    sensitivities /= np.sum(sensitivities)
+
+    # Get constants as function of parameters
+    # FIXME -- Oh ChrIIIiiiissss, what should m be?
+    n = int(points.shape[0])
+    d = int(points.shape[1])
+    m = int(k * d ** norm / eps)
+
+    # Sampling the coreset based on the sensitivities
+    replace = False
+    if m > n:
+        replace = True
+    rng = np.random.default_rng()
+    true_coreset_inds = rng.choice(np.arange(len(sensitivities)), size=m, replace=replace, p=sensitivities)
+
+    # The coreset itself
+    r_points = points[true_coreset_inds]
+    r_labels = assignments[true_coreset_inds]
+    r_weights = 1 / sensitivities[true_coreset_inds]
+
+    return r_points, r_weights, r_labels
+
 if __name__ == '__main__':
     n_points = 10000
     D = 1000
     num_centers = 10
-    alpha = 10
-    norm = 1
+    g_alpha = 10
+    g_norm = 1
     g_points, _ = make_blobs(n_points, D, centers=num_centers)
     # g_points = np.random.randn(200, 1000)
-    g_k = 10
+    g_k = 200
     g_eps = 0.5
-    g_points = jl_proj(g_points, g_k, g_eps)
-    d = int(g_points.shape[1])
-    centers, labels, costs = fast_cluster_pp(g_points, g_k, g_eps)
-    sensitivities = evaluate_sensitivities(centers, labels, costs, alpha=10)
 
-    # FIXME -- Oh ChrIIIiiiissss, what should m be?
-    m = int(g_k * d ** norm / g_eps)
-    replace = False
-    if m > n_points:
-        replace = True
-    rough_coreset = np.random.choice(n_points, size=m, replace=replace, p=sensitivities/np.sum(sensitivities))
-    q_points = g_points[rough_coreset]
-    q_labels = labels[rough_coreset]
 
-    # Labels are in range [0, n] but we want them in range [0, k]
-    center_to_label_dict = {centers[i]: i for i in range(len(centers))}
-    labels = np.array([center_to_label_dict[c] for c in labels])
 
+    start = time()
+    q_points, _, _ = make_rough_coreset(g_points, g_k, g_eps, g_norm, g_alpha)
+    print(q_points.shape)
+    q_points, q_weights, q_labels = make_true_coreset(q_points, g_k, g_eps, g_alpha, g_norm)
+    end = time()
+    print(end - start)
+
+    start = time()
+    r_points, r_weights, r_labels = make_true_coreset(g_points, g_k, g_eps, g_alpha, g_norm)
+    end = time()
+    print(end - start)
+
+
+    # Visualize
     embedding = PCA(n_components=2).fit_transform(q_points)
     plt.scatter(embedding[:, 0], embedding[:, 1], c=q_labels)
     plt.show()
