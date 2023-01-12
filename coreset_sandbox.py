@@ -220,7 +220,7 @@ def get_right_cost(left_cost, cost_list, upper_bound):
             return cost_list[-1]
     return cost_list[i]
 
-def min_k(root, target_cost, cost_list):
+def min_k(root, target_cost, cost_list, d):
     # Check if the dynamic program has already filled this in
     if target_cost in root.k_per_target:
         assert target_cost in root.cost_per_target
@@ -285,13 +285,13 @@ def k_median(root, k, eps):
     cost_list = get_cost_list(root, eps)
     start = time()
     found_k = 0
+    d = root.d
     min_cost, max_cost = 0, root.n * root.diam
     target_cost = (max_cost + min_cost) / 2
     count = 0
     while found_k != k:
         count += 1
-        found_k, found_cost = min_k(root, target_cost, cost_list)
-        print(found_k, found_cost, min_cost, target_cost, max_cost)
+        found_k, found_cost = min_k(root, target_cost, cost_list, d)
         if found_k > k:
             min_cost = target_cost
             target_cost = (target_cost + max_cost) / 2
