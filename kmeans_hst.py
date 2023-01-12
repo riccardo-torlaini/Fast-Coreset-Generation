@@ -189,7 +189,7 @@ def fast_cluster_pp(points, k, eps, norm=2):
         costs = np.array([st_ptc_dict[i].cost for i in np.arange(n)])
         centers.append(c)
 
-    return centers, labels, costs
+    return np.array(centers), labels, costs
 
 def get_min_dists_to_centers(points, new_center):
     dists = np.ones((len(points))) * np.inf
@@ -214,30 +214,35 @@ def cluster_pp(points, k, weights):
         sq_dists *= weights
         probs = sq_dists / np.sum(sq_dists)
         centers.append(np.random.choice(n, p=probs))
-    assignments, costs = get_cluster_assignments(points, centers)
-    return np.array(centers), assignments, costs
+    centers = np.array(centers)
+    assignments, costs = get_cluster_assignments(points, centers, points[centers])
+    return centers, assignments, costs
 
-def get_cluster_assignments(points, centers):
+def get_cluster_assignments(points, center_inds, center_pts):
     n, d = int(points.shape[0]), int(points.shape[1])
-    k = len(centers)
+    k = len(center_inds)
     all_dists = np.zeros((n, k))
-    all_dists = get_all_dists_to_centers(all_dists, points, points[centers])
+    all_dists = get_all_dists_to_centers(all_dists, points, center_pts)
     cluster_assignments = np.argmin(all_dists, axis=1)
-    cluster_assignments = centers[cluster_assignments]
+    cluster_assignments = center_inds[cluster_assignments]
     costs = np.min(all_dists, axis=1)
     return cluster_assignments, costs
 
-def bound_sensitivities(centers, labels, costs, alpha=10):
+def get_cost_per_center(centers, labels, costs):
     cost_per_center = np.zeros((len(centers)))
-    sensitivities = np.zeros((len(labels)))
     for i in range(len(centers)):
         points_in_cluster = np.where(labels == centers[i])
-        if len(points_in_cluster[0]) == 0:
-            raise ValueError('No points in this cluster?')
         cost_per_center[i] = np.sum(costs[points_in_cluster])
-        if cost_per_center[i] == 0:
-            cost_per_center[i] = 1
-        sensitivities[points_in_cluster] = costs[points_in_cluster] / cost_per_center[i]
+    return cost_per_center
+
+def bound_sensitivities(centers, labels, costs, alpha=10):
+    sensitivities = np.zeros((len(labels)))
+    cost_per_center = get_cost_per_center(centers, labels, costs)
+    for i in range(len(centers)):
+        points_in_cluster = np.where(labels == centers[i])
+        if cost_per_center[i] > 0:
+            sensitivities[points_in_cluster] = costs[points_in_cluster] / cost_per_center[i]
+        # FIXME -- what's a reasonable value for alpha?
         sensitivities[points_in_cluster] *= alpha
         sensitivities[points_in_cluster] += 1 / len(points_in_cluster[0])
 
@@ -264,13 +269,17 @@ def get_coreset(sensitivities, m, points, labels, weights=None):
     points = points[coreset_inds]
     labels = labels[coreset_inds]
     # FIXME -- is this treatment of weights correct?
-    weights = weights[coreset_inds] * (1 / sensitivities[coreset_inds])
-
+    weights = weights[coreset_inds] * (1 / sensitivities[coreset_inds]) / m
+    # weights = (1 / sensitivities[coreset_inds]) / m
+ 
     return points, labels, weights
 
 def make_rough_coreset(points, k, eps, norm, alpha):
     # FIXME -- do we need to do 2k here since we are doing (fast)kmeans++?
-    centers, labels, costs = fast_cluster_pp(points, k, eps, norm=norm)
+    # Alternatively, we only incur a log(k) distortion by doing it for k, which
+    #   we can oversample our coreset by. That seems faster...
+    centers, labels, costs = fast_cluster_pp(points, 2 * k, eps, norm=norm)
+    uniform_weights = np.ones((len(labels)))
     sensitivities = bound_sensitivities(centers, labels, costs, alpha=alpha)
 
     m = int(10 * k / (eps ** 2))
@@ -281,6 +290,7 @@ def make_true_coreset(points, weights, k, eps, norm, alpha):
     # O(ndk) coreset time
     # FIXME -- do we need to evaluate whether the 2k is necessary here?
     centers, labels, costs = cluster_pp(points, 2 * k, weights)
+    costs *= weights
     sensitivities = bound_sensitivities(centers, labels, costs, alpha=alpha)
 
     # Sampling the coreset based on the sensitivities
@@ -288,24 +298,33 @@ def make_true_coreset(points, weights, k, eps, norm, alpha):
     r_points, r_labels, r_weights = get_coreset(sensitivities, m, points, labels, weights=weights)
     return r_points, r_weights, r_labels
 
+def evaluate_coreset(points, k, coreset, weights):
+    uniform_weights = np.ones((len(points)))
+    centers, labels, costs = cluster_pp(points, k, weights=uniform_weights)
+    total_cost = np.sum(costs)
+
+    coreset_assignments, coreset_costs = get_cluster_assignments(coreset, centers, points[centers])
+    coreset_costs *= weights
+    coreset_cost = np.sum(coreset_costs)
+    return max(total_cost / coreset_cost, coreset_cost / total_cost)
+
 if __name__ == '__main__':
-    n_points = 10000
+    n_points = 50000
     D = 1000
     num_centers = 10
     g_alpha = 10
     g_norm = 1
     g_points, _ = make_blobs(n_points, D, centers=num_centers)
-    g_k = 10
+    g_k = 100
     g_eps = 0.5
     g_points = jl_proj(g_points, g_k, g_eps)
 
     start = time()
     q_points, q_weights, _ = make_rough_coreset(g_points, g_k, g_eps, g_norm, g_alpha)
-    print(q_points.shape)
     q_points, q_weights, q_labels = make_true_coreset(q_points, q_weights, g_k, g_eps, g_norm, g_alpha)
-    print(q_points.shape)
     end = time()
     print(end - start)
+    print(evaluate_coreset(g_points, g_k, q_points, q_weights))
 
     start = time()
     weights = np.ones((len(g_points)))
