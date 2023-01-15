@@ -90,31 +90,30 @@ def evaluate_coreset(points, k, coreset, weights):
     return max(total_cost / coreset_cost, coreset_cost / total_cost)
 
 if __name__ == '__main__':
-    n_points = 200000
+    n_points = 100000
     D = 1000
-    num_centers = 10
+    num_centers = 1000
     g_alpha = 10
     g_norm = 2
     g_points, _ = make_blobs(n_points, D, centers=num_centers)
-    g_k = 500
+    g_k = 5000
     g_eps = 0.5
     g_points = jl_proj(g_points, g_k, g_eps)
     g_kmeans_alg = cluster_pp#_slow
 
     start = time()
     q_points, q_weights, _ = make_rough_coreset(g_points, g_k, g_eps, g_norm, g_alpha)
-    q_points, q_weights, q_labels = make_true_coreset(
-        q_points,
-        q_weights,
-        g_k,
-        g_eps,
-        g_norm,
-        g_alpha,
-        kmeans_alg=g_kmeans_alg
-    )
+    # q_points, q_weights, q_labels = make_true_coreset(
+    #     q_points,
+    #     q_weights,
+    #     g_k,
+    #     g_eps,
+    #     g_norm,
+    #     g_alpha,
+    #     kmeans_alg=g_kmeans_alg
+    # )
     end = time()
     print(end - start)
-    print('Coreset cost ratio:', evaluate_coreset(g_points, g_k, q_points, q_weights))
 
     start = time()
     weights = np.ones((len(g_points)))
@@ -129,8 +128,9 @@ if __name__ == '__main__':
     )
     end = time()
     print(end - start)
+    # print('Coreset cost ratio:', evaluate_coreset(g_points, g_k, q_points, q_weights))
 
     # Visualize
-    embedding = PCA(n_components=2).fit_transform(q_points)
-    plt.scatter(embedding[:, 0], embedding[:, 1], c=q_labels)
-    plt.show()
+    # embedding = PCA(n_components=2).fit_transform(q_points)
+    # plt.scatter(embedding[:, 0], embedding[:, 1], c=q_labels)
+    # plt.show()

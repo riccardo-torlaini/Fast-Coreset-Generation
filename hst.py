@@ -2,6 +2,8 @@ import numpy as np
 import sys
 sys.setrecursionlimit(5000)
 
+from utils import tree_dist
+
 ### HST code ###
 class CubeHST:
     def __init__(self, points, root=True, depth=0, center=None, edge_length=None, cell_path=None):
@@ -41,7 +43,8 @@ class CubeHST:
 
 
     def mark(self):
-        assert not self.marked
+        if self.marked:
+            print(self.is_leaf)
         self.marked = True
 
     def get_spread(self):
@@ -127,8 +130,7 @@ def hst_dist(ptc_dict, a, b, root):
             break
     assert lca_depth > 0
 
-    distance = 2 * root.diam * np.sum(np.power(0.5, np.arange(lca_depth, root.max_depth)))
-    return distance
+    return tree_dist(root.diam, lca_depth, root.max_depth)
 
 def assert_hst_correctness(root, ptc_dict, points):
     true_dist = np.sqrt(np.sum(np.square(points[10] - points[30])))

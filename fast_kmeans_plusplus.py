@@ -1,6 +1,7 @@
 import numpy as np
 from tqdm.auto import tqdm
 # from coreset_sandbox import HST, hst_dist, fit_tree, assert_hst_correctness
+from utils import tree_dist
 from hst import hst_dist
 from multi_hst import make_multi_HST
 
@@ -99,24 +100,43 @@ def update_sample_tree(node, cost_update):
             if node.has_parent:
                 update_sample_tree(node.parent, cost_update)
 
-def set_all_dists(sample_tree, st_ptc_dict, labels, curr_node, c, root, hst_ptc_dict, norm):
+def set_all_dists(
+    sample_tree,
+    st_ptc_dict,
+    labels,
+    curr_node,
+    center_node,
+    c,
+    root,
+    hst_ptc_dict,
+    norm,
+    dist=0,
+    depth=0
+):
     if curr_node.is_leaf:
         curr_point = int(curr_node.points[0][0])
         # FIXME -- Don't need to actually get distance for each point since
         #          we should know distance based on parent and which cell we went to
-        sq_dist = hst_dist(hst_ptc_dict, c, curr_point, root) ** norm
+        # sq_dist = hst_dist(hst_ptc_dict, c, curr_point, root) ** norm
         sample_tree_node = st_ptc_dict[curr_point]
-        if sq_dist < sample_tree_node.cost or sample_tree_node.cost == -1:
-            update_sample_tree(sample_tree_node, sq_dist)
+        if dist < sample_tree_node.cost or sample_tree_node.cost == -1:
+            update_sample_tree(sample_tree_node, dist)
             labels[curr_point] = c
     for child in curr_node.children:
-        set_all_dists(sample_tree, st_ptc_dict, labels, child, c, root, hst_ptc_dict, norm)
+        # FIXME -- if we split away from where the center node is, then we can just set all those distances since we know
+        #          what each one will be. Don't need to recurse down into each leaf
+        new_dist = dist
+        if depth < len(center_node.cell_path) and center_node.cell_path[depth] == child.cell_path[depth]:
+            new_dist = tree_dist(root.diam, depth, root.max_depth)
+        if child == center_node:
+            new_dist = 0
+        set_all_dists(sample_tree, st_ptc_dict, labels, child, center_node, c, root, hst_ptc_dict, norm, dist=new_dist, depth=depth+1)
 
 def multi_tree_open(multi_hst, c, sample_tree, st_ptc_dict, labels, norm):
     for i, (root, hst_ptc_dict) in enumerate(zip(multi_hst.roots, multi_hst.ptc_dicts)):
         leaf = hst_ptc_dict[c]
         top_unmarked = mark_nodes(leaf)
-        set_all_dists(sample_tree, st_ptc_dict, labels, top_unmarked, c, root, hst_ptc_dict, norm)
+        set_all_dists(sample_tree, st_ptc_dict, labels, top_unmarked, leaf, c, root, hst_ptc_dict, norm)
     return labels
 
 def multi_tree_sample(sample_tree):

@@ -1,3 +1,4 @@
+import numba
 import numpy as np
 from sklearn.random_projection import SparseRandomProjection
 
@@ -55,3 +56,6 @@ def get_all_dists_to_centers(pc_dists, points, centers):
         pc_dists[i] = dists_to_point
     return pc_dists
 
+@numba.njit(fastmath=True)
+def tree_dist(diam, curr_depth, max_depth):
+    return 4 * diam * (0.5 ** curr_depth - 0.5 ** max_depth)
