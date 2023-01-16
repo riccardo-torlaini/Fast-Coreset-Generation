@@ -1,0 +1,181 @@
+%%%%%%%% ICML 2022 EXAMPLE LATEX SUBMISSION FILE %%%%%%%%%%%%%%%%%
+
+\documentclass[nohyperref]{article}
+
+% Recommended, but optional, packages for figures and better typesetting:
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{booktabs} % for professional tables
+
+% hyperref makes hyperlinks in the resulting PDF.
+% If your build breaks (sometimes temporarily if a hyperlink spans a page)
+% please comment out the following usepackage line and replace
+% \usepackage{icml2022} with \usepackage[nohyperref]{icml2022} above.
+\usepackage{hyperref}
+
+
+% Attempt to make hyperref and algorithmic work together better:
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+
+% Use the following line for the initial blind version submitted for review:
+\usepackage{icml2022}
+
+% If accepted, instead use the following line for the camera-ready submission:
+% \usepackage[accepted]{icml2022}
+
+% For theorems and such
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{amsthm}
+
+% if you use cleveref..
+\usepackage[capitalize,noabbrev]{cleveref}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% THEOREMS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+% Todonotes is useful during development; simply uncomment the next line
+%    and comment out the line below the next line to turn off comments
+%\usepackage[disable,textsize=tiny]{todonotes}
+\usepackage[textsize=tiny]{todonotes}
+
+
+% The \icmltitle you define below is probably too long as a header.
+% Therefore, a short form for the running title is supplied here:
+\icmltitlerunning{Linear-Time Construction of Coreset}
+
+
+\DeclareMathOperator{\polylog}{polylog}
+\DeclareMathOperator{\cost}{cost}
+\DeclareMathOperator{\dist}{dist}
+
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\coreset}{\Omega}
+\newcommand{\calC}{\mathcal C}
+%\newcommand{\dist}{\text{dist}}
+\newcommand{\opt}{\text{OPT}}
+%\newcommand{\cost}{\text{cost}}
+
+\newcommand{\eps}{\varepsilon}
+
+\newcommand{\lpar}{\left(}
+\newcommand{\rpar}{\right)}
+\newcommand{\lbra}{\left\{}
+\newcommand{\rbra}{\right\}}
+\newcommand{\lnor}{\left\|}
+\newcommand{\rnor}{\right\|}
+
+
+\newcounter{sideremark}
+\newcommand{\marrow}{\stepcounter{sideremark}\marginpar{$\boldsymbol{
+\longleftarrow\scriptstyle\arabic{sideremark}}$}}
+
+ \newcommand{\david}[1]{
+ %  \ifdraft{
+    \textsf{{\color{blue} *** (David) \marrow #1 ***}}
+ %  }
+ %  \fi
+ }
+\begin{document}
+
+\twocolumn[
+\icmltitle{Linear-Time Construction of Coreset for Clustering}
+
+% It is OKAY to include author information, even for blind
+% submissions: the style file will automatically remove it for you
+% unless you've provided the [accepted] option to the icml2022
+% package.
+
+% List of affiliations: The first argument should be a (short)
+% identifier you will use later to specify author affiliations
+% Academic affiliations should list Department, University, City, Region, Country
+% Industry affiliations should list Company, City, Region, Country
+
+% You can specify symbols, otherwise they are numbered in order.
+% Ideally, you should not use this facility. Affiliations will be numbered
+% in order of appearance and this is the preferred way.
+\icmlsetsymbol{equal}{*}
+
+\begin{icmlauthorlist}
+\icmlauthor{Vincent Cohen-Addad}{equal,google}
+\icmlauthor{Andrew Draganov}{equal,aarhus}
+\icmlauthor{David Saulpic}{equal, univie}
+\icmlauthor{Chris Schwiegelshohn}{equal, aarhus}
+\end{icmlauthorlist}
+
+\icmlaffiliation{google}{Google Research, Franche}
+\icmlaffiliation{aarhus}{Aarhus University, Denmark}
+\icmlaffiliation{univie}{University of Vienna, Austria}
+%
+\icmlcorrespondingauthor{David Saulpic}{david.saulpic@lip6.fr}
+%\icmlcorrespondingauthor{Firstname2 Lastname2}{first2.last2@www.uk}
+
+% You may provide any keywords that you
+% find helpful for describing your paper; these are used to populate
+% the "keywords" metadata in the PDF but will not be shown in the document
+\icmlkeywords{coreset, clustering, k-means}
+
+\vskip 0.3in
+]
+
+% this must go after the closing bracket ] following \twocolumn[ ...
+
+% This command actually creates the footnote in the first column
+% listing the affiliations and the copyright notice.
+% The command takes one argument, which is text to display at the start of the footnote.
+% The \icmlEqualContribution command is standard text for equal contribution.
+% Remove it (just {}) if you do not need this facility.
+
+%\printAffiliationsAndNotice{}  % leave blank if no need to mention equal contribution
+\printAffiliationsAndNotice{\icmlEqualContribution} % otherwise use the standard text.
+
+\begin{abstract}
+We study the ways of compressing a dataset of points in $\R^d$ while preserving some guarantee. For this problem, show how to implement the so called sensitivity sampling in near-linear time $\tilde O (nd)$. 
+This sampling distribution ensures that the sample forms a coreset for $k$-median and $k$-means, namely, it preserves the cost with respect to any $k$-median or $k$-means solution.
+We implement this algorithm and illustrates its efficiency on real-life datasets. 
+In particular, it is faster than any coreset algorithm with provable guarantees, and it shows way better guarantees than uniform sampling.
+%This document provides a basic paper template and submission guidelines.
+%Abstracts must be a single paragraph, ideally between 4--6 sentences long.
+%Gross violations will trigger corrections at the camera-ready phase.
+\end{abstract}
+
+\input{introduction}
+\input{theory}
+
+
+
+% Acknowledgements should only appear in the accepted version.
+
+
+\bibliography{references}
+\bibliographystyle{icml2022}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% APPENDIX
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\appendix
+\onecolumn
+\section{Appendix.}
+
+
+
+\end{document}
