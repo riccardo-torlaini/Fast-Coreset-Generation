@@ -9,6 +9,7 @@ def get_cost_per_center(centers, labels, costs):
         cost_per_center[i] = np.sum(costs[points_in_cluster])
     return cost_per_center
 
+# FIXME -- does the alpha actually matter here?
 def bound_sensitivities(centers, labels, costs, alpha=10):
     sensitivities = np.zeros((len(labels)))
     cost_per_center = get_cost_per_center(centers, labels, costs)
