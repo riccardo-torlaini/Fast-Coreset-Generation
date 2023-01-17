@@ -14,8 +14,11 @@ To cope with this issue, a different sampling distribution called \textit{sensit
 This distribution have been proven successful, both for practical purposes \cite{} and to provide theoretical guarantees \cite{}. 
 The downside is the computation time required: for instance, for $k$-means, the best known algorithms run in time $O(nk+nd)$, which is prohibitive for really large datasets.
 
+One of the main selling point for sensitivity sampling for $k$-means is that it produces a \textit{coreset}, namely, a set such that the cost of any possible $k$-means solution is the same on the coreset than on the full dataset.
+If the coreset is small, it means that any algorithm can be run on the coreset instead of the full dataset: this ensures a faster algorithm  -- the coreset may even have size independent of $n$ -- while preserving the theoretical guarantees of the algorithm.
+However, the bottleneck in the complexity is in the time to perform the sensitivity sampling: a running time $\Omega(nk)$ is often 	unimaginable.
 
-In this paper, we show how to implement sensitivity sampling for $k$-means and $k$-median in near-linear time.
+In this paper, we show how to implement sensitivity sampling for $k$-means and $k$-median in near-linear time $\tilde O(nd)$.
 This is surprisingly fast: merely evaluating the cost of a solution to $k$-median and $k$-means requires time $O(nk)$, as for each point it takes time $O(k)$ to compute its cost in the solution. 
 We furthermore provide an implementation of our algorithm, \david{say how crazy good it is here}
 
@@ -36,7 +39,7 @@ Taking $\coreset$ to be a uniform sample of size $t$ of $P$, each smapled point 
 The theoretically best sampling distribution to construct coreset is called \textit{group sampling}, from \cite{stoc21}. This allows to sample merely $t = \tilde O(k \eps^{-z - 2})$ many points: one can therefore compute a compressed version of the dataset, with strong theoretical guarantee -- it is an $\eps$-coreset -- and a size \textit{independent of $|P|$}.
 It was shown in \cite{chrisESA} that another distribution, called \textit{sensitivity sampling} performs best in practice, and it is known to have essentially the same theoretical guarantees. We will therefore focus on this distribution in our experiments and the following discussion, although our theoretical results hold for group sampling as well -- and, actually, for \textit{any} coreset construction algorithm.
 
-The sensitivity of a point $p \in P$ is the maximum relative contribution $p$ can have in any solution: it is formally defined as $\sup_{\calC} \frac{\dist^z(p, \calC)}{\cost(P, \calC}$. 
+The sensitivity of a point $p \in P$ is the maximum relative contribution $p$ can have in any solution: it is formally defined as $\sup_{\calC} \frac{\dist^z(p, \calC)}{\cost(P, \calC)}$. 
 Sensitivity sampling simply samples each point $p$ proportionate to its sensitivity $s(p)$. This is one of the key distributions to build sketches, and was used in many different contexts \cite{}.
 
 Computing the sensitivities exactly is often NP-hard: thankfully, having an upper-bound on them is enough to build coreset \cite{}. Furthermore, to compute such an upper-bound, it is enough to compute a bi-criteria approximation, namely a solution that can have $O(k)$ many centers (instead of exactly $k$) and cost $O(\opt)$, where $\opt$ is the optimal cost when using exactly $k$ centers. 
@@ -58,3 +61,19 @@ The proof of this theorem is surprisingly simple: we show that it is enough to c
 We also show how to reduce the dependency in the aspect ratio, by presenting an algorithm running in time $\tilde O\lpar nd + n \log \Delta\rpar$. As this is only theoretical improvement, we focus on \cref{thm:main} and explain later how to improve.
 
 \david{talk about experiments here}
+
+\subsection{Related Work.}
+
+Coreset algorithms have recently attracted a lot of attention, with a long line of work trying to get the smallest coreset possible in many different metric spaces. The most prominent example is for Euclidean space \cite{}. In this case, the group sampling algorithm developed in \cite{stoc21, stoc22} yields a coreset of size $\tilde O\lpar k \eps^{-z-2}\rpar$, while we know that any coreset must have size $\Omega \lpar k\eps^{-2}\rpar$ \cite{stoc22}.
+Small size coresets also exist in doubling metrics \cite{}, discrete metrics \cite{}, metrics induced by minor-free graphs \cite{} or graphs with bounded treewidth \cite{}. 
+In general metric, running time $\Omega(nk)$ is required to compute any approximation to $k$-median or $k$-means \cite{}. We therefore focus on Euclidean space, where the lower bound does not hold.
+
+
+All efficient coreset constructions are probabilistic. This comes with a disadvantage: it is co-NP-hard to check whether a set is an $\eps$-coreset \cite{chrisESA}. Therefore, although the algorithm succeed with some high probability, it is impossible to check whether they are actually good are not. 
+In particular, it is not obvious how to experimentally check the quality of a coreset.
+A recent work proposed a pipeline for doing so, and showed that sensitivity sampling algorithm slightly outperforms the theoretically best group sampling \cite{chrisESA}. 
+We will use this pipeline to evaluate the quality of the coreset produced with our method.
+
+Besides clustering, the use of coreset have spread to other context, as for instance compression of neural nets \cite{} or speeding up computation of quadratic regression \cite{}.
+This last one is particularly representative of the potential usage of coreset: processing a computation on a coreset rather than on the full input allows for faster algorithm while preserving great accuracy.
+For that however, one needs to compute the coreset fast: this is our goal in the present paper.
