@@ -1,0 +1,48 @@
+\section{The algorithm, and proof of \cref{thm:main}}
+
+In this section, we present our algorithm and a very clean proof of \cref{thm:main}. Those are based on the following observation, about the coreset construction algorithms based on group sampling \cite{stoc21} or sensitivity sampling \cite{}. 
+
+Both start by computing a solution $\calA$. When $\calA$ is a $c$-approximation, those algorithms compute a $c \eps$-coreset of size $\tilde O\lpar k \eps^{-z-2}\rpar$ and $\tilde O\lpar k \eps^{-2z -2}\rpar$, respectively. Hence, by rescaling, they provide $\eps$-coreset with size $\tilde O\lpar k (\eps/c)^{-z-2}\rpar$ and $\tilde O\lpar k (\eps/c)^{-2z-2}\rpar$. 
+
+Therefore, taking $c = O(\log k)$ merely affects the size of the computed coreset, while allowing for approximation algorithms that are way faster.
+
+We note that, as it is co-NP hard to check the quality of a coreset after its computation \cite{chrisESA}, it is important to have a theoretical proof of efficiency of the coreset algorithms. 
+Showing, as we do, that one can use $O(\log k)$-approximation (e.g., $k$-means++) while benefiting from the same guarantees as with a slow $O(1)$-approximation is thus not only an artifact, but a crucial piece of coreset's success. 
+
+It is indeed tempting to use those large-factor approximations, especially since they seem to perform better in practice. 
+It might however have been the case that coresets constructed that way have poor quality, without being able to notice it due to the aforementioned hardness. 
+We show that this unfortunate event does not happen, and that, even with the ``worst-case" guarantee $O(\log k)$, these algorithms indeed produce coresets.
+
+
+Our algorithm is based on the \fkmeans algorithm from \cite{cohen2020fast}: it allows to embed points in a very simple metric,  where it is easy to compute the distance to previously opened centers. The two key properties of this algorithm are the following: it runs in $\tilde O\lpar n d \log \Delta\rpar$ time, and computes an assignment from input point to centers that is a $O\lpar d^z \log k\rpar = O\lpar\log^{z+1} k\rpar$ approximation to $k$-median ($z=1$) and $k$-means ($z=2$).
+We use it, in combination with sensitivity sampling, as follows.
+
+
+\begin{algorithm}[tb]
+   \caption{Fast Coreset Algorithm}
+   \label{alg:main}
+\begin{algorithmic}
+   \STATE {\bfseries Input:} data $P$, number of clusters $k$, precision $\eps$ and target size $S$
+   \STATE Use Johnson-Lindenstrauss embedding to reduce the dimension to $O(\log k)$.
+   \STATE Compute a set of centers $\calA$ and an assignment $\sigma : P \rightarrow \calA$ using \fkmeans
+   \STATE For each point $p \in P$, define $s(p) = \frac{\dist^z(p, \sigma(p))}{\sum_{p' \in P} \dist^z(p, \sigma(p))} + \frac{1}{|\sigma^{-1}(\sigma(p))|}$.
+   \STATE {\bfseries Output:} a set $\coreset$ of $S$ points randomly sampled from $P$ proportionate to $s$.
+\end{algorithmic}
+\end{algorithm}
+
+
+We formalize the proof of \cref{thm:main}, using the previous algorithm.
+
+\begin{proof}[Proof of \cref{thm:main}]
+Performing the Johnson-Lindenstrauss embedding takes time $\tilde O(nd)$, and allows to consider $\tilde d=O(\log k)$ with only a constant-factor loss in the approximation quality  \cite{makarychev2019performance}. 
+On the projected dataset, the algorithm \fkmeans runs in time $\tilde O\lpar n \log \Delta\rpar$, and the solution it computes has cost $O(\log^3 k)$. 
+
+Therefore, sampling according to the sensitivities $s(p)$ defined in \cref{alg:main} provides a coreset with size $O \lpar k \eps^{-2z -2}\polylog(k) \rpar$  and takes time $O(n)$ \david{has it been shown somewhere that standard sensitivity sampling gives that guarantee? Or combined with dimension reduction? The Huang Vishnoi paper has a different algorithm, so I think I am missing something}
+\end{proof}
+
+\paragraph{Generalizations.} 
+We make a few remarks, that allow to generalize \cref{alg:main}.
+First, instead of using sensitivity sampling, one could use the group sampling procedure of \cite{stoc21}, or virtually any coreset construction: all those run in linear time, once provided with an initial solution $\calA$. 
+
+Second, one could compute the solution $\calA$ via a different algorithm: \cref{alg:main} only need to be provided an assignment to a solution that is a $O(\polylog k)$ approximation. 
+This initial solution may as well be an $O\lpar\polylog \lnor P \rnor_0 \rpar$ approximation: using the iterative coreset construction from \cite{BravermanJKW21}, one could then derive a near-optimal coreset size, only suffering a $O(\log^* n)$ loss in the running time.
