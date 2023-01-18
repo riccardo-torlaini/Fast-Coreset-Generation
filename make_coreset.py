@@ -95,8 +95,9 @@ def uniform_coreset(
     # Uniform coreset size should be the same as the other coreset sizes
     #   to show that it is super fast but terrible quality
     m = get_coreset_size(k, eps, double_k, oversample=1)
-    q_points = np.random.choice(points, m)
-    q_weights = np.ones(m) * n / m
+    n = len(points)
+    q_points = points[np.random.choice(n, m)]
+    q_weights = np.ones(m) * float(n) / m
     q_labels = np.ones(m)
     return q_points, q_weights, q_labels
 
@@ -138,7 +139,7 @@ def fast_coreset(
     q_points, q_weights, q_labels = make_rough_coreset(points, k, eps, norm, oversample, double_k, hst_count_from_norm)
     if make_second_coreset:
         q_points, q_weights, q_labels = make_true_coreset(
-            points=points,
+            points=q_points,
             weights=q_weights,
             k=k,
             eps=eps,

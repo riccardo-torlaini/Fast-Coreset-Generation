@@ -21,7 +21,7 @@ def get_experiment_params(default_values, norm, param, val):
 def run_sweeps():
     results = {}
     datasets = ['blobs', 'single_blob']
-    methods = ['fast_coreset', 'sens_sampling', 'uniform_sampling']
+    methods = ['uniform_sampling', 'fast_coreset', 'sens_sampling']
 
     # Only apply for Gaussian mixture model dataset
     n_points = 10000
@@ -29,6 +29,7 @@ def run_sweeps():
     num_centers = 10
 
     # Default values for sweep parameters
+    # FIXME -- make_second_coreset doesn't work!!!
     default_values = {
         'k': 20,
         'eps': 0.5,
@@ -66,13 +67,13 @@ def run_sweeps():
     pbar = tqdm(methods, total=len(methods))
     pbar_description = 'method --- {} ; dataset --- {} dataset ; norm --- {} norm ; param --- {}; value --- {}'
     for method in pbar:
-        print('Method --- {}\n'.format(method))
+        print('Method --- {}\n\n\n\n'.format(method))
         coreset_alg = get_algorithm(method)
         method_output_path = os.path.join(outputs_path, method)
         if not os.path.isdir(method_output_path):
             os.makedirs(method_output_path)
         for dataset in datasets:
-            print('Dataset --- {}\n'.format(dataset))
+            print('Dataset --- {}\n\n\n'.format(dataset))
             points, _ = get_dataset(dataset, n_points, D, num_centers)
             n, d = points.shape # Will be different from n_points or D if dataset is real-world data
 
@@ -84,7 +85,7 @@ def run_sweeps():
             if not os.path.isdir(dataset_output_path):
                 os.makedirs(dataset_output_path)
             for norm in [1, 2]:
-                print('Norm --- {}\n'.format(str(norm)))
+                print('Norm --- {}\n\n'.format(str(norm)))
                 norm_output_path = os.path.join(dataset_output_path, str(norm))
                 if not os.path.isdir(norm_output_path):
                     os.makedirs(norm_output_path)
@@ -94,6 +95,7 @@ def run_sweeps():
                     if not os.path.isdir(param_output_path):
                         os.makedirs(param_output_path)
                     for val in vals:
+                        print('Value --- {}'.format(param))
                         if param == 'k':
                             # If our parameter is k, we need to get a new kmeans++ solution to evaluate against
                             one_approx_centers, _, one_approx_costs = cluster_pp(points, val, uniform_weights, double_k=True)
@@ -113,7 +115,6 @@ def run_sweeps():
                         coreset_results = {'coreset_points': q_points, 'coreset_weights': q_weights}
                         np.save(os.path.join(val_output_path, 'metrics.npy'), metric_results)
                         np.save(os.path.join(val_output_path, 'coreset.npy'), coreset_results)
-                        print('\n')
 
 if __name__ == '__main__':
     run_sweeps()
