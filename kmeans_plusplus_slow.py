@@ -1,3 +1,5 @@
+from time import time
+from tqdm.auto import tqdm
 import numpy as np
 
 def get_cluster_assignments(points, center_inds, center_pts):
@@ -30,23 +32,28 @@ def get_min_dists_to_centers(points, new_center, min_dists):
         if dist < min_dists[i]:
             min_dists[i] = dist
 
-def cluster_pp_slow(points, k, weights, double_k=True):
+def cluster_pp_slow(points, k, weights, allotted_time=np.inf):
     points = points.tolist()
     weights = weights.tolist()
     # kmeans++ with 2k gives an O(1) approximation while with just k it gives a log(k) approx
-    if double_k:
-        k *= 2
-
     n, d = len(points), len(points[0])
     centers = [np.random.choice(n)]
     sq_dists = (np.ones((len(points))) * np.inf).tolist()
-    while len(centers) < k:
+    elapsed_time = 0
+    start = time()
+    for i in tqdm(range(k), total=k):
         center_point = points[centers[-1]]
         get_min_dists_to_centers(points, center_point, sq_dists)
         weighted_sq_dists = [sq_d * weights[i] for i, sq_d in enumerate(sq_dists)]
         sum_errors = sum(weighted_sq_dists)
         probs = [w_sq_d / sum_errors for w_sq_d in weighted_sq_dists]
         centers.append(np.random.choice(n, p=probs))
+        elapsed_time = time() - start
+        if elapsed_time > allotted_time:
+            break
+
+    if elapsed_time > allotted_time:
+        print('Ran out of time! Only processed {} of {} centers'.format(len(centers), k))
     center_points = []
     for center in centers:
         center_points.append(points[center])

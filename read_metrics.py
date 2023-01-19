@@ -113,7 +113,6 @@ def make_scores_vs_k_plot(results, dataset, norm='2'):
     plt.legend(handles, labels)
     plt.ylabel('Coreset accuracy')
     plt.title('Effect of k on coreset accuracy for k-{}'.format(ALG_DICT[norm]))
-    plt.ylim([1.0, 1.075])
     plt.xticks(
         [i * (len(metrics)) for i in k_loc_dict.values()],
         list(k_loc_dict.keys())
@@ -178,7 +177,6 @@ def make_scores_vs_eps_plot(results, dataset, norm='2'):
     plt.legend(handles, labels)
     plt.ylabel('Coreset accuracy')
     plt.title('Effect of epsilon on coreset accuracy')
-    plt.ylim([1.0, 1.07])
     plt.xticks(
         [i * (len(metrics)) for i in eps_loc_dict.values()],
         list(eps_loc_dict.keys())
@@ -278,8 +276,8 @@ if __name__ == '__main__':
         filter_strs=[''],
     )
 
-    norm = '2'
+    norm = '1'
     dataset = 'blobs'
-    # make_scores_vs_k_plot(results, dataset, norm)
+    make_scores_vs_k_plot(results, dataset, norm)
     # make_scores_vs_oversample_plot(results, dataset, norm)
-    make_scores_vs_eps_plot(results, dataset, norm)
+    # make_scores_vs_eps_plot(results, dataset, norm)

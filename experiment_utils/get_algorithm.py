@@ -20,12 +20,10 @@ def get_results(
     q_points, q_weights, _ = coreset_alg(
         points,
         k=params['k'],
-        eps=params['eps'],
+        m=params['m'],
         norm=params['norm'],
-        oversample=params['oversample'],
-        double_k=params['double_k'],
-        make_second_coreset=params['make_second_coreset'],
         hst_count_from_norm=params['hst_count_from_norm'],
+        allotted_time=params['allotted_time'],
     )
     end = time()
     acc = evaluate_coreset(

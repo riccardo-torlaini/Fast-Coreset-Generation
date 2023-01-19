@@ -1,6 +1,6 @@
+from time import time
 import numpy as np
 from tqdm.auto import tqdm
-# from coreset_sandbox import HST, hst_dist, fit_tree, assert_hst_correctness
 from utils import tree_dist
 from hst import hst_dist
 from multi_hst import make_multi_HST
@@ -122,7 +122,19 @@ def set_all_dists(
             new_dist = tree_dist(root.diam, depth, root.max_depth) ** norm
         if child == center_node:
             new_dist = 0
-        set_all_dists(sample_tree, st_ptc_dict, labels, child, center_node, c, root, hst_ptc_dict, norm, dist=new_dist, depth=depth+1)
+        set_all_dists(
+            sample_tree,
+            st_ptc_dict,
+            labels,
+            child,
+            center_node,
+            c,
+            root,
+            hst_ptc_dict,
+            norm,
+            dist=new_dist,
+            depth=depth+1
+        )
 
 def multi_tree_open(multi_hst, c, sample_tree, st_ptc_dict, labels, norm):
     for i, (root, hst_ptc_dict) in enumerate(zip(multi_hst.roots, multi_hst.ptc_dicts)):
@@ -140,16 +152,18 @@ def multi_tree_sample(sample_tree):
         return multi_tree_sample(sample_tree.left_child)
     return multi_tree_sample(sample_tree.right_child)
 
-def fast_cluster_pp(points, k, eps, norm=2, double_k=True, hst_count_from_norm=True):
-    # kmeans++ with 2k gives an O(1) approximation while with just k it gives a log(k) approx
-    if double_k:
-        k *= 2
-
+def fast_cluster_pp(points, k, norm=2, hst_count_from_norm=True, allotted_time=np.inf):
     assert norm == 1 or norm == 2
+    elapsed_time = 0
+    start = time()
     if hst_count_from_norm:
-        multi_hst = make_multi_HST(points, k, eps, num_trees=norm+1)
+        multi_hst = make_multi_HST(points, k, num_trees=norm+1)
     else:
-        multi_hst = make_multi_HST(points, k, eps, num_trees=1)
+        multi_hst = make_multi_HST(points, k, num_trees=1)
+    elapsed_time = time() - start
+    if elapsed_time > allotted_time:
+        return None, None, None
+
     centers = []
     n = len(points)
     st_ptc_dict = {i: -1 for i in np.arange(n)}
@@ -163,5 +177,10 @@ def fast_cluster_pp(points, k, eps, norm=2, double_k=True, hst_count_from_norm=T
         labels = multi_tree_open(multi_hst, c, sample_tree, st_ptc_dict, labels, norm)
         costs = np.array([st_ptc_dict[i].cost for i in np.arange(n)])
         centers.append(c)
+        elapsed_time = time() - start
+        if elapsed_time > allotted_time:
+            break
 
+    if elapsed_time > allotted_time:
+        print('Ran out of time! Only processed {} of {} centers'.format(len(centers), k))
     return np.array(centers), labels, costs

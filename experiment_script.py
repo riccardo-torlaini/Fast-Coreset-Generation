@@ -14,49 +14,36 @@ from make_coreset import sensitivity_coreset, fast_coreset, uniform_coreset
 
 def get_experiment_params(default_values, norm, param, val):
     params = copy.copy(default_values)
-    params['norm'] = norm
     params[param] = val
+    params['norm'] = norm
+    params['m'] = params['k'] * params['m_scalar']
     return params
 
 def run_sweeps():
     results = {}
-    datasets = ['blobs']
-    methods = ['uniform_sampling', 'fast_coreset', 'sens_sampling']
+    datasets = ['blobs', 'mnist']
+    methods = ['fast_coreset', 'uniform_sampling', 'sens_sampling']
 
     # Only apply for Gaussian mixture model dataset
-    n_points = 10000
+    n_points = 100000
     D = 50
-    num_centers = 10
+    num_centers = 50
 
     # Default values for sweep parameters
     default_values = {
         'k': 100,
-        'eps': 0.5,
-        'oversample': 10,
-        'double_k': False,
-        'make_second_coreset': False,
+        'm_scalar': 50,
+        'allotted_time': 600,
         'hst_count_from_norm': True,
     }
 
-    # sweep_params = {
-    #     # Params to sweep for all coreset algorithms
-    #     'k': [10, 25, 50, 100, 200, 400]
-    #     'eps': [0.05, 0.1, 0.2, 0.4, 0.8],
-    #     'oversample': [1, 2, 5, 10],
-    #     # Params to sweep for fast_coreset algorithm
-    #     'make_second_coreset': [True, False],
-    #     'hst_count_from_norm': [True, False],
-    #     'double_k': [True, False],
-    # }
     sweep_params = {
         # Params to sweep for all coreset algorithms
         'k': [10, 40, 100],
-        'eps': [0.2, 0.4, 0.8],
-        'oversample': [1, 2, 4, 8],
+        'm_scalar': [2, 5, 10, 20],
+        'allotted_time': [10, 30, 60, 120, 360],
         # Params to sweep for fast_coreset algorithm
         'hst_count_from_norm': [True, False],
-        # 'hst_count_from_norm': [True],
-        # 'double_k': [True],
     }
 
     outputs_path = 'outputs'
@@ -82,7 +69,6 @@ def run_sweeps():
                 points,
                 default_values['k'],
                 uniform_weights,
-                double_k=True
             )
 
             dataset_output_path = os.path.join(method_output_path, dataset)
@@ -102,14 +88,14 @@ def run_sweeps():
                         print('\t\t\t\tValue --- {}'.format(str(val)))
                         if param == 'k':
                             # If our parameter is k, we need to get a new kmeans++ solution to evaluate against
-                            one_approx_centers, _, one_approx_costs = cluster_pp(points, val, uniform_weights, double_k=True)
+                            one_approx_centers, _, one_approx_costs = cluster_pp(points, val, uniform_weights)
                         val_output_path = os.path.join(param_output_path, str(val))
                         if not os.path.isdir(val_output_path):
                             os.makedirs(val_output_path)
                         # Update progress bar
                         pbar.set_description(pbar_description.format(method, dataset, str(norm), param, str(val)))
 
-                        if param in ['make_second_coreset', 'hst_count_from_norm', 'double_k'] and method != 'fast_coreset':
+                        if param in ['hst_count_from_norm'] and method != 'fast_coreset':
                             print('Boolean parameters only apply to fast coreset algorithm. Continuing...\n')
                             continue
 
