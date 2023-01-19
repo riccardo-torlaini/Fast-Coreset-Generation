@@ -20,7 +20,7 @@ def get_experiment_params(default_values, norm, param, val):
 
 def run_sweeps():
     results = {}
-    datasets = ['blobs', 'single_blob']
+    datasets = ['blobs']
     methods = ['uniform_sampling', 'fast_coreset', 'sens_sampling']
 
     # Only apply for Gaussian mixture model dataset
@@ -29,21 +29,20 @@ def run_sweeps():
     num_centers = 10
 
     # Default values for sweep parameters
-    # FIXME -- make_second_coreset doesn't work!!!
     default_values = {
-        'k': 20,
+        'k': 100,
         'eps': 0.5,
-        'oversample': 5,
-        'double_k': True,
-        'make_second_coreset': True,
+        'oversample': 10,
+        'double_k': False,
+        'make_second_coreset': False,
         'hst_count_from_norm': True,
     }
 
     # sweep_params = {
     #     # Params to sweep for all coreset algorithms
-    #     'k': [10, 40, 160]
+    #     'k': [10, 25, 50, 100, 200, 400]
     #     'eps': [0.05, 0.1, 0.2, 0.4, 0.8],
-    #     'n': [1000, 10000],
+    #     'oversample': [1, 2, 5, 10],
     #     # Params to sweep for fast_coreset algorithm
     #     'make_second_coreset': [True, False],
     #     'hst_count_from_norm': [True, False],
@@ -51,11 +50,11 @@ def run_sweeps():
     # }
     sweep_params = {
         # Params to sweep for all coreset algorithms
-        'k': [10, 40],
-        'eps': [0.4, 0.8],
-        'n': [1000, 10000],
+        'k': [10, 40, 100],
+        'eps': [0.2, 0.4, 0.8],
+        'oversample': [1, 2, 4, 8],
         # Params to sweep for fast_coreset algorithm
-        'make_second_coreset': [True],
+        'hst_count_from_norm': [True, False],
         # 'hst_count_from_norm': [True],
         # 'double_k': [True],
     }
@@ -67,35 +66,40 @@ def run_sweeps():
     pbar = tqdm(methods, total=len(methods))
     pbar_description = 'method --- {} ; dataset --- {} dataset ; norm --- {} norm ; param --- {}; value --- {}'
     for method in pbar:
-        print('Method --- {}\n\n\n\n'.format(method))
+        print('Method --- {}'.format(method))
         coreset_alg = get_algorithm(method)
         method_output_path = os.path.join(outputs_path, method)
         if not os.path.isdir(method_output_path):
             os.makedirs(method_output_path)
         for dataset in datasets:
-            print('Dataset --- {}\n\n\n'.format(dataset))
+            print('\tDataset --- {}'.format(dataset))
             points, _ = get_dataset(dataset, n_points, D, num_centers)
             n, d = points.shape # Will be different from n_points or D if dataset is real-world data
 
             # Get solution that we will evaluate coreset against
             uniform_weights = np.ones(n)
-            one_approx_centers, _, one_approx_costs = cluster_pp(points, default_values['k'], uniform_weights, double_k=True)
+            one_approx_centers, _, one_approx_costs = cluster_pp(
+                points,
+                default_values['k'],
+                uniform_weights,
+                double_k=True
+            )
 
             dataset_output_path = os.path.join(method_output_path, dataset)
             if not os.path.isdir(dataset_output_path):
                 os.makedirs(dataset_output_path)
             for norm in [1, 2]:
-                print('Norm --- {}\n\n'.format(str(norm)))
+                print('\t\tNorm --- {}'.format(str(norm)))
                 norm_output_path = os.path.join(dataset_output_path, str(norm))
                 if not os.path.isdir(norm_output_path):
                     os.makedirs(norm_output_path)
                 for param, vals in sweep_params.items():
-                    print('Param --- {}\n'.format(param))
+                    print('\t\t\tParam --- {}'.format(param))
                     param_output_path = os.path.join(norm_output_path, param)
                     if not os.path.isdir(param_output_path):
                         os.makedirs(param_output_path)
                     for val in vals:
-                        print('Value --- {}'.format(param))
+                        print('\t\t\t\tValue --- {}'.format(str(val)))
                         if param == 'k':
                             # If our parameter is k, we need to get a new kmeans++ solution to evaluate against
                             one_approx_centers, _, one_approx_costs = cluster_pp(points, val, uniform_weights, double_k=True)
@@ -108,8 +112,14 @@ def run_sweeps():
                         if param in ['make_second_coreset', 'hst_count_from_norm', 'double_k'] and method != 'fast_coreset':
                             print('Boolean parameters only apply to fast coreset algorithm. Continuing...\n')
                             continue
+
                         params = get_experiment_params(default_values, norm, param, val)
-                        acc, time, q_points, q_weights = get_results(points, coreset_alg, params, one_approx_centers, one_approx_costs)
+                        acc, time, q_points, q_weights = get_results(
+                            points,
+                            coreset_alg,
+                            params,
+                        )
+                        print(acc, time)
                         
                         metric_results = {'acc': acc, 'time': time}
                         coreset_results = {'coreset_points': q_points, 'coreset_weights': q_weights}

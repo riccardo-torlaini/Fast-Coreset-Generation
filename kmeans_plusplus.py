@@ -13,6 +13,8 @@ def cluster_pp(points, k, weights, double_k=True):
         sq_dists = get_min_dists_to_centers(points, points[np.array(centers)[-1]], sq_dists)
         weighted_sq_dists = sq_dists * weights
         probs = weighted_sq_dists / np.sum(weighted_sq_dists)
+        if np.isnan(probs).any():
+            probs = np.ones_like(probs) / len(probs)
         centers.append(np.random.choice(n, p=probs))
     centers = np.array(centers)
     assignments, costs = get_cluster_assignments(points, centers, points[centers])

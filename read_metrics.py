@@ -2,6 +2,11 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
+ALG_DICT = {
+    '1': 'medians',
+    '2': 'means'
+}
+
 def update_results_dict(results_dict, directory, metrics):
     path = directory.split('/')
     method = path[1]
@@ -80,33 +85,56 @@ def make_scores_vs_k_plot(results, dataset, norm='2'):
             metrics[method][param_value][0] = scores['acc']
             metrics[method][param_value][1] = scores['time']
 
-    method_loc_dict = {
+    k_loc_dict = {
         '10': 1,
         '40': 2,
+        '100': 3,
     }
     colors = {
         'uniform_sampling': 'red',
         'fast_coreset': 'blue',
         'sens_sampling': 'green'
     }
+    labels = {
+        'uniform_sampling': 'Uniform Sampling',
+        'fast_coreset': 'Fast Coreset',
+        'sens_sampling': 'Sensitivity Sampling'
+    }
+    handles = [plt.Rectangle((0, 0), 1, 1, color=colors[method]) for method in metrics]
+    labels = [labels[method] for method in metrics]
     for i, method in enumerate(metrics):
         param_values = metrics[method]
         plt.bar(
-            [method_loc_dict[value] * len(metrics) + 1 - (len(metrics) + 1) / 2 + i for value in param_values],
+            [k_loc_dict[value] * len(metrics) + 1 - (len(metrics) + 1) / 2 + i for value in param_values],
             [metrics[method][value][0] for value in param_values],
-            width=1,
+            width=1.0,
             color=colors[method]
         )
+    plt.legend(handles, labels)
+    plt.ylabel('Coreset accuracy')
+    plt.title('Effect of k on coreset accuracy for k-{}'.format(ALG_DICT[norm]))
+    plt.ylim([1.0, 1.075])
+    plt.xticks(
+        [i * (len(metrics)) for i in k_loc_dict.values()],
+        list(k_loc_dict.keys())
+    )
     plt.show()
 
     for i, method in enumerate(metrics):
         param_values = metrics[method]
         plt.bar(
-            [method_loc_dict[value] * len(metrics) + 1 - (len(metrics) + 1) / 2 + i for value in param_values],
+            [k_loc_dict[value] * len(metrics) + 1 - (len(metrics) + 1) / 2 + i for value in param_values],
             [metrics[method][value][1] for value in param_values],
             width=1,
             color=colors[method]
         )
+    plt.legend(handles, labels)
+    plt.ylabel('Runtime in seconds')
+    plt.xticks(
+        [i * (len(metrics)) for i in k_loc_dict.values()],
+        list(k_loc_dict.keys())
+    )
+    plt.title('Effect of k on runtime for k-{}'.format(ALG_DICT[norm]))
     plt.show()
 
 
@@ -122,34 +150,123 @@ def make_scores_vs_eps_plot(results, dataset, norm='2'):
             metrics[method][param_value][0] = scores['acc']
             metrics[method][param_value][1] = scores['time']
 
-    method_loc_dict = {
-        '0.4': 1,
-        '0.8': 2,
+    eps_loc_dict = {
+        '0.2': 1,
+        '0.4': 2,
+        '0.8': 3,
     }
     colors = {
         'uniform_sampling': 'red',
         'fast_coreset': 'blue',
         'sens_sampling': 'green'
     }
+    labels = {
+        'uniform_sampling': 'Uniform Sampling',
+        'fast_coreset': 'Sensitivity Sampling',
+        'sens_sampling': 'Fast-Coreset'
+    }
+    handles = [plt.Rectangle((0, 0), 1, 1, color=colors[method]) for method in metrics]
+    labels = [labels[method] for method in metrics]
     for i, method in enumerate(metrics):
         param_values = metrics[method]
         plt.bar(
-            [method_loc_dict[value] * len(metrics) + 1 - (len(metrics) + 1) / 2 + i for value in param_values],
+            [eps_loc_dict[value] * len(metrics) + 1 - (len(metrics) + 1) / 2 + i for value in param_values],
             [metrics[method][value][0] for value in param_values],
             width=1,
             color=colors[method]
         )
+    plt.legend(handles, labels)
+    plt.ylabel('Coreset accuracy')
+    plt.title('Effect of epsilon on coreset accuracy')
+    plt.ylim([1.0, 1.07])
+    plt.xticks(
+        [i * (len(metrics)) for i in eps_loc_dict.values()],
+        list(eps_loc_dict.keys())
+    )
     plt.show()
 
     for i, method in enumerate(metrics):
         param_values = metrics[method]
         plt.bar(
-            [method_loc_dict[value] * len(metrics) + 1 - (len(metrics) + 1) / 2 + i for value in param_values],
+            [eps_loc_dict[value] * len(metrics) + 1 - (len(metrics) + 1) / 2 + i for value in param_values],
             [metrics[method][value][1] for value in param_values],
             width=1,
             color=colors[method]
         )
+    plt.legend(handles, labels)
+    plt.ylabel('Runtime in seconds')
+    plt.title('Effect of epsilon on runtime for k-{}'.format(ALG_DICT[norm]))
+    plt.xticks(
+        [i * (len(metrics)) for i in eps_loc_dict.values()],
+        list(eps_loc_dict.keys())
+    )
     plt.show()
+
+
+def make_scores_vs_oversample_plot(results, dataset, norm='2'):
+    metrics = {}
+    all_methods = {}
+    for method, datasets in results.items():
+        # get runtimes and accuracies for k parameter on this dataset under the 1 norm
+        for param_value, scores in datasets[dataset][norm]['oversample'].items():
+            if method not in metrics:
+                metrics[method] = {}
+            metrics[method][param_value] = [0, 0]
+            metrics[method][param_value][0] = scores['acc']
+            metrics[method][param_value][1] = scores['time']
+
+    eps_loc_dict = {
+        '1': 1,
+        '2': 2,
+        '4': 3,
+        '8': 4,
+    }
+    colors = {
+        'uniform_sampling': 'red',
+        'fast_coreset': 'blue',
+        'sens_sampling': 'green'
+    }
+    labels = {
+        'uniform_sampling': 'Uniform Sampling',
+        'fast_coreset': 'Fast-Coreset',
+        'sens_sampling': 'Sensitivity Sampling'
+    }
+    handles = [plt.Rectangle((0, 0), 1, 1, color=colors[method]) for method in metrics]
+    labels = [labels[method] for method in metrics]
+    for i, method in enumerate(metrics):
+        param_values = metrics[method]
+        plt.bar(
+            [eps_loc_dict[value] * len(metrics) + 1 - (len(metrics) + 1) / 2 + i for value in param_values],
+            [metrics[method][value][0] for value in param_values],
+            width=1,
+            color=colors[method]
+        )
+    plt.legend(handles, labels)
+    plt.ylabel('Coreset accuracy')
+    plt.title('Effect of Oversample scalar on coreset accuracy')
+    plt.xticks(
+        [i * (len(metrics)) for i in eps_loc_dict.values()],
+        list(eps_loc_dict.keys())
+    )
+    plt.show()
+
+    for i, method in enumerate(metrics):
+        param_values = metrics[method]
+        plt.bar(
+            [eps_loc_dict[value] * len(metrics) + 1 - (len(metrics) + 1) / 2 + i for value in param_values],
+            [metrics[method][value][1] for value in param_values],
+            width=1,
+            color=colors[method]
+        )
+    plt.legend(handles, labels)
+    plt.ylabel('Runtime in seconds')
+    plt.title('Effect of epsilon on runtime for k-{}'.format(ALG_DICT[norm]))
+    plt.xticks(
+        [i * (len(metrics)) for i in eps_loc_dict.values()],
+        list(eps_loc_dict.keys())
+    )
+    plt.show()
+
 
 
 
@@ -161,5 +278,8 @@ if __name__ == '__main__':
         filter_strs=[''],
     )
 
-    # make_scores_vs_k_plot(results, 'single_blob')
-    make_scores_vs_eps_plot(results, 'single_blob')
+    norm = '2'
+    dataset = 'blobs'
+    # make_scores_vs_k_plot(results, dataset, norm)
+    # make_scores_vs_oversample_plot(results, dataset, norm)
+    make_scores_vs_eps_plot(results, dataset, norm)

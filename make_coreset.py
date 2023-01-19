@@ -11,10 +11,7 @@ from fast_kmeans_plusplus import fast_cluster_pp
 from hst import CubeHST, hst_dist
 from multi_hst import make_multi_HST
 from utils import bound_sensitivities, jl_proj, get_cluster_assignments
-
-import sys
-np.set_printoptions(threshold=np.inf)
-sys.setrecursionlimit(5000)
+from experiment_utils.get_data import get_dataset
 
 
 def get_coreset(sensitivities, m, points, labels, weights=None):
@@ -26,12 +23,15 @@ def get_coreset(sensitivities, m, points, labels, weights=None):
 
     if weights is None:
         weights = np.ones_like(labels)
-    points = points[coreset_inds]
-    labels = labels[coreset_inds]
-    # Want the sum of the weights to equal n
-    weights = weights[coreset_inds] * (1 / sensitivities[coreset_inds]) / m
+    q_points = points[coreset_inds]
+    q_labels = labels[coreset_inds]
+    new_weights = 1 / sensitivities[coreset_inds]
+    # Want our coreset to be an unbiased estimator, so the sum of the new weights
+    #   has to equal the sum of the old weights
+    new_weights *= np.sum(weights) / np.sum(new_weights)
+    q_weights = weights[coreset_inds] * new_weights
  
-    return points, labels, weights
+    return q_points, q_weights, q_labels
 
 def make_rough_coreset(
     points,
@@ -39,7 +39,7 @@ def make_rough_coreset(
     eps,
     norm,
     oversample=10,
-    double_k=True,
+    double_k=False,
     hst_count_from_norm=True
 ):
     centers, labels, costs = fast_cluster_pp(
@@ -52,7 +52,7 @@ def make_rough_coreset(
     )
     sensitivities = bound_sensitivities(centers, labels, costs)
     m = get_coreset_size(k, eps, double_k, oversample)
-    q_points, q_labels, q_weights = get_coreset(sensitivities, m, points, labels)
+    q_points, q_weights, q_labels = get_coreset(sensitivities, m, points, labels)
     return q_points, q_weights, q_labels
 
 def get_coreset_size(k, eps, double_k, oversample):
@@ -69,7 +69,7 @@ def make_true_coreset(
     k,
     eps,
     norm,
-    double_k=True,
+    double_k=False,
     kmeans_alg=cluster_pp_slow,
     **kwargs
 ):
@@ -79,7 +79,7 @@ def make_true_coreset(
     sensitivities = bound_sensitivities(centers, labels, costs)
 
     m = get_coreset_size(k, eps, double_k, oversample=1)
-    r_points, r_labels, r_weights = get_coreset(sensitivities, m, points, labels, weights=weights)
+    r_points, r_weights, r_labels = get_coreset(sensitivities, m, points, labels, weights=weights)
     return r_points, r_weights, r_labels
 
 def uniform_coreset(
@@ -87,7 +87,7 @@ def uniform_coreset(
     k,
     eps,
     norm,
-    double_k=True,
+    double_k=False,
     kmeans_alg=cluster_pp_slow,
     weights=None,
     **kwargs
@@ -106,7 +106,7 @@ def sensitivity_coreset(
     k,
     eps,
     norm,
-    double_k=True,
+    double_k=False,
     kmeans_alg=cluster_pp_slow,
     weights=None,
     **kwargs
@@ -130,13 +130,21 @@ def fast_coreset(
     eps,
     norm,
     oversample=10,
-    double_k=True,
-    make_second_coreset=True,
+    double_k=False,
+    make_second_coreset=False,
     hst_count_from_norm=True,
     kmeans_alg=cluster_pp_slow,
     **kwargs
 ):
-    q_points, q_weights, q_labels = make_rough_coreset(points, k, eps, norm, oversample, double_k, hst_count_from_norm)
+    q_points, q_weights, q_labels = make_rough_coreset(
+        points,
+        k,
+        eps,
+        norm,
+        oversample,
+        double_k,
+        hst_count_from_norm
+    )
     if make_second_coreset:
         q_points, q_weights, q_labels = make_true_coreset(
             points=q_points,
@@ -149,34 +157,57 @@ def fast_coreset(
         )
     return q_points, q_weights, q_labels
 
-def evaluate_coreset(points, k, coreset, weights, centers=None, costs=None):
-    if centers is None or costs is None:
-        assert centers is None and costs is None
-        uniform_weights = np.ones((len(points)))
-        centers, _, costs = cluster_pp(points, k, weights=uniform_weights)
-    total_cost = np.sum(costs)
-
-    coreset_assignments, coreset_costs = get_cluster_assignments(coreset, centers, points[centers])
+def evaluate_coreset(points, k, coreset, weights):
+    # Cost of solution on coreset with respect to original dataset
+    centers, _, _ = cluster_pp(coreset, k, weights=weights)
+    coreset_assignments, coreset_costs = get_cluster_assignments(coreset, centers, coreset[centers])
     coreset_costs *= weights
     coreset_cost = np.sum(coreset_costs)
-    return max(total_cost / coreset_cost, coreset_cost / total_cost)
+
+    dataset_assignments, dataset_costs = get_cluster_assignments(points, centers, coreset[centers])
+    dataset_cost = np.sum(dataset_costs)
+    acc = max(dataset_cost / coreset_cost, coreset_cost / dataset_cost)
+
+    return acc
 
 if __name__ == '__main__':
-    n_points = 100000
-    D = 1000
-    num_centers = 1000
     g_norm = 2
-    g_points, _ = make_blobs(n_points, D, centers=num_centers)
-    g_k = 50
+    g_points, _ = get_dataset('blobs', 10000, 50)
+    g_k = 100
     g_eps = 0.5
+    g_alpha = 1
+    g_oversample = 1
     g_points = jl_proj(g_points, g_k, g_eps)
     g_kmeans_alg = cluster_pp#_slow
 
     start = time()
-    q_points, q_weights, _ = make_rough_coreset(g_points, g_k, g_eps, g_norm)
-    # q_points, q_weights, q_labels = make_true_coreset(
-    #     q_points,
-    #     q_weights,
+    q_points, q_weights, _ = fast_coreset(
+        g_points,
+        g_k,
+        g_eps,
+        g_norm,
+        oversample=g_oversample,
+        kmeans_alg=g_kmeans_alg
+    )
+
+    g_weights = np.ones((len(g_points)))
+    # q_points, q_weights, q_labels = sensitivity_coreset(
+    #     g_points,
+    #     g_k,
+    #     g_eps,
+    #     g_norm,
+    #     kmeans_alg=g_kmeans_alg,
+    #     weights=g_weights
+    # )
+
+    # q_points, q_weights, q_labels = uniform_coreset(g_points, g_k, g_eps, g_norm)
+    end = time()
+    print(end - start)
+
+    start = time()
+    # r_points, r_weights, r_labels = make_true_coreset(
+    #     g_points,
+    #     weights,
     #     g_k,
     #     g_eps,
     #     g_norm,
@@ -184,21 +215,8 @@ if __name__ == '__main__':
     #     kmeans_alg=g_kmeans_alg
     # )
     end = time()
-    print(end - start)
+    # print(end - start)
 
-    start = time()
-    weights = np.ones((len(g_points)))
-    r_points, r_weights, r_labels = make_true_coreset(
-        g_points,
-        weights,
-        g_k,
-        g_eps,
-        g_norm,
-        g_alpha,
-        kmeans_alg=g_kmeans_alg
-    )
-    end = time()
-    print(end - start)
     print('Coreset cost ratio:', evaluate_coreset(g_points, g_k, q_points, q_weights))
 
     # Visualize

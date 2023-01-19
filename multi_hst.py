@@ -36,9 +36,9 @@ def make_multi_HST(points, k, eps, num_trees):
     roots, ptc_dicts = [], []
     for i in range(num_trees):
         root, ptc_dict = fit_tree(points)
-        assert_hst_correctness(root, ptc_dict, points)
+        # assert_hst_correctness(root, ptc_dict, points)
         roots.append(root)
         ptc_dicts.append(ptc_dict)
     multi_hst = MultiHST(roots, ptc_dicts)
-    assert_multi_hst_correctness(multi_hst, points)
+    # assert_multi_hst_correctness(multi_hst, points)
     return multi_hst
