@@ -88,7 +88,6 @@ def fit_tree(points):
             point_to_cell_dict[node.points[0, 0]] = node
             return
 
-        # FIXME -- can probably just look at some of the dimensions -- probably enough to split on anyway
         center_comparison = (node.points[:, 1:] > node.center) * 2 - 1
         # FIXME -- the np.unique does a sort over all n elements. We can instead turn the list of 0s and 1s
         # into a binary number and do list(set()) on those?
@@ -137,4 +136,3 @@ def assert_hst_correctness(root, ptc_dict, points):
     tree_dist = hst_dist(ptc_dict, 10, 30, root)
     assert tree_dist > true_dist
     assert tree_dist < 24 * np.log2(len(root)) * true_dist
-

@@ -44,8 +44,6 @@ def create_sample_tree(points, inds, sample_tree_ptc_dict):
     split = int(len(points) / 2)
     left_points, left_inds = points[:split], inds[:split]
     right_points, right_inds = points[split:], inds[split:]
-    # FIXME remove once sure
-    assert len(points) == len(left_points) + len(right_points)
 
     left_child = create_sample_tree(left_points, left_inds, sample_tree_ptc_dict)
     right_child = create_sample_tree(right_points, right_inds, sample_tree_ptc_dict)
@@ -54,7 +52,6 @@ def create_sample_tree(points, inds, sample_tree_ptc_dict):
     right_child.set_parent(node)
 
     return node
-
 
 
 
@@ -115,19 +112,14 @@ def set_all_dists(
 ):
     if curr_node.is_leaf:
         curr_point = int(curr_node.points[0][0])
-        # FIXME -- Don't need to actually get distance for each point since
-        #          we should know distance based on parent and which cell we went to
-        # sq_dist = hst_dist(hst_ptc_dict, c, curr_point, root) ** norm
         sample_tree_node = st_ptc_dict[curr_point]
         if dist < sample_tree_node.cost or sample_tree_node.cost == -1:
             update_sample_tree(sample_tree_node, dist)
             labels[curr_point] = c
     for child in curr_node.children:
-        # FIXME -- if we split away from where the center node is, then we can just set all those distances since we know
-        #          what each one will be. Don't need to recurse down into each leaf
         new_dist = dist
         if depth < len(center_node.cell_path) and center_node.cell_path[depth] == child.cell_path[depth]:
-            new_dist = tree_dist(root.diam, depth, root.max_depth)
+            new_dist = tree_dist(root.diam, depth, root.max_depth) ** norm
         if child == center_node:
             new_dist = 0
         set_all_dists(sample_tree, st_ptc_dict, labels, child, center_node, c, root, hst_ptc_dict, norm, dist=new_dist, depth=depth+1)
@@ -148,15 +140,16 @@ def multi_tree_sample(sample_tree):
         return multi_tree_sample(sample_tree.left_child)
     return multi_tree_sample(sample_tree.right_child)
 
-def fast_cluster_pp(points, k, eps, norm=2, double_k=True):
+def fast_cluster_pp(points, k, eps, norm=2, double_k=True, hst_count_from_norm=True):
     # kmeans++ with 2k gives an O(1) approximation while with just k it gives a log(k) approx
     if double_k:
         k *= 2
 
     assert norm == 1 or norm == 2
-    # FIXME -- do we actually need norm+1 trees?
-    # multi_hst = make_multi_HST(points, k, eps, num_trees=norm+1)
-    multi_hst = make_multi_HST(points, k, eps, num_trees=1)
+    if hst_count_from_norm:
+        multi_hst = make_multi_HST(points, k, eps, num_trees=norm+1)
+    else:
+        multi_hst = make_multi_HST(points, k, eps, num_trees=1)
     centers = []
     n = len(points)
     st_ptc_dict = {i: -1 for i in np.arange(n)}
@@ -172,5 +165,3 @@ def fast_cluster_pp(points, k, eps, norm=2, double_k=True):
         centers.append(c)
 
     return np.array(centers), labels, costs
-
-
