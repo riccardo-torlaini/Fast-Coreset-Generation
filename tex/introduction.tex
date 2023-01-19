@@ -20,7 +20,7 @@ However, the bottleneck in the complexity is in the time to perform the sensitiv
 
 In this paper, we show how to implement sensitivity sampling for $k$-means and $k$-median in near-linear time $\tilde O(nd)$.
 This is surprisingly fast: merely evaluating the cost of a solution to $k$-median and $k$-means requires time $O(nk)$, as for each point it takes time $O(k)$ to compute its cost in the solution. 
-We furthermore provide an implementation of our algorithm, \david{say how crazy good it is here}
+We provide an implementation of our algorithm, and demonstrate with thorough experiments that it outperforms by orders of magnitudes previous algorithms in terms of running time while constructing coreset that are as accurate. \david{say how crazy good it is here}
 
 
 
