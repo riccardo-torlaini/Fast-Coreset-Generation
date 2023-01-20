@@ -1,8 +1,12 @@
 import numpy as np
 from time import time
+from tqdm import tqdm
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 from sklearn.datasets import make_blobs
+
+from bico_master.bico.core import BICO
+from bico_master.bico.geometry.point import Point
 
 from kmeans_plusplus import cluster_pp
 from kmeans_plusplus_slow import cluster_pp_slow
@@ -31,6 +35,15 @@ def get_coreset(sensitivities, m, points, labels, weights=None):
     q_weights = weights[coreset_inds] * new_weights
  
     return q_points, q_weights, q_labels
+
+def bico_coreset(points, k, m, allotted_time):
+    bico = BICO(points.shape[1], 100, m)
+    for row in tqdm(points, total=len(points)):
+        bico.insert_point(Point(row))
+    c = bico.get_coreset()
+    q_weights = c[:, 0]
+    q_points = c[:, 1:]
+    return q_points, q_weights, np.ones_like(q_weights)
 
 def uniform_coreset(points, m, **kwargs):
     # Uniform coreset size should be the same as the other coreset sizes
@@ -110,8 +123,8 @@ def evaluate_coreset(points, k, coreset, weights):
 
 if __name__ == '__main__':
     g_norm = 1
-    g_k = 20
-    g_points, _ = get_dataset('benchmark', n_points=10000, D=50, k=g_k)
+    g_k = 40
+    g_points, _ = get_dataset('kdd_cup', n_points=10000, D=50, k=g_k)
     g_m_scalar = 50
     g_allotted_time = np.inf
     g_hst_count_from_norm = True
@@ -120,6 +133,7 @@ if __name__ == '__main__':
 
     method = 'fast'
     # method = 'sensitivity'
+    # method = 'bico'
     # method = 'uniform'
 
     start = time()
@@ -143,6 +157,8 @@ if __name__ == '__main__':
             weights=g_weights,
             allotted_time=g_allotted_time
         )
+    elif method == 'bico':
+        q_points, q_weights, q_labels = bico_coreset(g_points, g_k, g_k * g_m_scalar, g_allotted_time)
     else:
         q_points, q_weights, q_labels = uniform_coreset(g_points, g_k * g_m_scalar)
     end = time()
@@ -150,6 +166,6 @@ if __name__ == '__main__':
     print('Coreset cost ratio:', evaluate_coreset(g_points, g_k, q_points, q_weights))
 
     # Visualize
-    embedding = PCA(n_components=2).fit_transform(q_points)
-    plt.scatter(embedding[:, 0], embedding[:, 1], c=q_labels)
-    plt.show()
+    # embedding = PCA(n_components=2).fit_transform(q_points)
+    # plt.scatter(embedding[:, 0], embedding[:, 1], c=q_labels)
+    # plt.show()
