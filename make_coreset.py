@@ -110,43 +110,46 @@ def evaluate_coreset(points, k, coreset, weights):
 
 if __name__ == '__main__':
     g_norm = 1
-    g_k = 100
-    g_points, _ = get_dataset('benchmark', n_points=100000, D=50, k=g_k)
-    print(g_points.shape)
-    g_m_scalar = 100
+    g_k = 20
+    g_points, _ = get_dataset('benchmark', n_points=10000, D=50, k=g_k)
+    g_m_scalar = 50
     g_allotted_time = np.inf
     g_hst_count_from_norm = True
     g_kmeans_alg = cluster_pp#_slow
-
     # g_points = jl_proj(g_points, g_k, eps=0.5)
 
+    method = 'fast'
+    # method = 'sensitivity'
+    # method = 'uniform'
+
     start = time()
-    # q_points, q_weights, q_labels = fast_coreset(
-    #     g_points,
-    #     g_k,
-    #     g_k * g_m_scalar,
-    #     g_norm,
-    #     hst_count_from_norm=g_hst_count_from_norm,
-    #     allotted_time=g_allotted_time
-    # )
-
     g_weights = np.ones((len(g_points)))
-    # q_points, q_weights, q_labels = sensitivity_coreset(
-    #     g_points,
-    #     g_k,
-    #     g_k * g_m_scalar,
-    #     g_norm,
-    #     kmeans_alg=g_kmeans_alg,
-    #     weights=g_weights,
-    #     allotted_time=g_allotted_time
-    # )
-
-    q_points, q_weights, q_labels = uniform_coreset(g_points, g_k * g_m_scalar)
+    if method == 'fast':
+        q_points, q_weights, q_labels = fast_coreset(
+            g_points,
+            g_k,
+            g_k * g_m_scalar,
+            g_norm,
+            hst_count_from_norm=g_hst_count_from_norm,
+            allotted_time=g_allotted_time
+        )
+    elif method == 'sensitivity':
+        q_points, q_weights, q_labels = sensitivity_coreset(
+            g_points,
+            g_k,
+            g_k * g_m_scalar,
+            g_norm,
+            kmeans_alg=g_kmeans_alg,
+            weights=g_weights,
+            allotted_time=g_allotted_time
+        )
+    else:
+        q_points, q_weights, q_labels = uniform_coreset(g_points, g_k * g_m_scalar)
     end = time()
     print(end - start)
     print('Coreset cost ratio:', evaluate_coreset(g_points, g_k, q_points, q_weights))
 
     # Visualize
-    # embedding = PCA(n_components=2).fit_transform(q_points)
-    # plt.scatter(embedding[:, 0], embedding[:, 1], c=q_labels)
-    # plt.show()
+    embedding = PCA(n_components=2).fit_transform(q_points)
+    plt.scatter(embedding[:, 0], embedding[:, 1], c=q_labels)
+    plt.show()
