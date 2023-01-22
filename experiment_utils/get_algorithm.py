@@ -1,11 +1,17 @@
 from time import time
 import numpy as np
-from make_coreset import fast_coreset, sensitivity_coreset, uniform_coreset, evaluate_coreset
+from make_coreset import \
+    fast_coreset, \
+    sensitivity_coreset, \
+    uniform_coreset, \
+    evaluate_coreset, \
+    semi_uniform_coreset
 
 ALG_DICT = {
     'sens_sampling': sensitivity_coreset,
     'fast_coreset': fast_coreset,
-    'uniform_sampling': uniform_coreset
+    'uniform_sampling': uniform_coreset,
+    'semi_uniform': semi_uniform_coreset
 }
 
 def get_algorithm(algorithm_type):
@@ -20,6 +26,7 @@ def get_results(
     q_points, q_weights, _ = coreset_alg(
         points,
         k=params['k'],
+        j_func=params['j_func'],
         m=params['m'],
         norm=params['norm'],
         hst_count_from_norm=params['hst_count_from_norm'],
