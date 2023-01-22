@@ -10,13 +10,13 @@ Furthermore, it allows to process the data in many different scenario where memo
 The hope is that sampling allows to solve faster downstream tasks, and that uniform sampling will preserve the main characteristic of the dataset and of the solutions.
 
 This is of course not always the case: uniform sampling may miss few important features of the data. 
-To cope with this issue, a different sampling distribution called \textit{sensitivity sampling} was introduced, which allows to have some guarantees \textit{with high probability} instead of mere expectation.
-This distribution have been proven successful, both for practical purposes \cite{} and to provide theoretical guarantees \cite{}. 
+To cope with this issue, a different sampling distribution called \textit{sensitivity sampling} was introduced \cite{LS10}, which allows to have some guarantees \textit{with high probability} instead of mere expectation.
+This distribution have been proven successful, both for practical purposes \cite{} and to provide theoretical guarantees \cite{FeldmanL11, CohenP15}. 
 The downside is the computation time required: for instance, for $k$-means, the best known algorithms run in time $O(nk+nd)$, which is prohibitive for really large datasets.
 
 One of the main selling point for sensitivity sampling for $k$-means is that it produces a \textit{coreset}, namely, a set such that the cost of any possible $k$-means solution is the same on the coreset than on the full dataset.
 If the coreset is small, it means that any algorithm can be run on the coreset instead of the full dataset: this ensures a faster algorithm  -- the coreset may even have size independent of $n$ -- while preserving the theoretical guarantees of the algorithm.
-However, the bottleneck in the complexity is in the time to perform the sensitivity sampling: a running time $\Omega(nk)$ is often 	unimaginable.
+However, the bottleneck in the complexity is in the time to perform the sensitivity sampling: a running time $\Omega(nk)$ is often 	unimaginable. The coreset construction time is listed as one of the main potential drawback of coreset in \cite{Feldman20}.
 
 In this paper, we show how to implement sensitivity sampling for $k$-means and $k$-median in near-linear time $\tilde O(nd)$.
 This is surprisingly fast: merely evaluating the cost of a solution to $k$-median and $k$-means requires time $O(nk)$, as for each point it takes time $O(k)$ to compute its cost in the solution. 
@@ -40,12 +40,12 @@ The theoretically best sampling distribution to construct coreset is called \tex
 It was shown in \cite{chrisESA} that another distribution, called \textit{sensitivity sampling} performs best in practice, and it is known to have essentially the same theoretical guarantees. We will therefore focus on this distribution in our experiments and the following discussion, although our theoretical results hold for group sampling as well -- and, actually, for \textit{any} coreset construction algorithm.
 
 The sensitivity of a point $p \in P$ is the maximum relative contribution $p$ can have in any solution: it is formally defined as $\sup_{\calC} \frac{\dist^z(p, \calC)}{\cost(P, \calC)}$. 
-Sensitivity sampling simply samples each point $p$ proportionate to its sensitivity $s(p)$. This is one of the key distributions to build sketches, and was used in many different contexts \cite{}.
+Sensitivity sampling simply samples each point $p$ proportionate to its sensitivity $s(p)$. This is one of the key distributions to build sketches, and was used in many different contexts \cite{FeldmanL11, CohenP15}.
 
-Computing the sensitivities exactly is often NP-hard: thankfully, having an upper-bound on them is enough to build coreset \cite{}. Furthermore, to compute such an upper-bound, it is enough to compute a bi-criteria approximation, namely a solution that can have $O(k)$ many centers (instead of exactly $k$) and cost $O(\opt)$, where $\opt$ is the optimal cost when using exactly $k$ centers. 
+Computing the sensitivities exactly is often NP-hard: thankfully, having an upper-bound on them is enough to build coreset \cite{varadarajan12}. Furthermore, to compute such an upper-bound, it is enough to compute a bi-criteria approximation, namely a solution that can have $O(k)$ many centers (instead of exactly $k$) and cost $O(\opt)$, where $\opt$ is the optimal cost when using exactly $k$ centers. 
 
 Using those results, the computation time for computing coreset is essentially the time to build this bi-criteria approximation. 
-Up until recently, the best running time to do so was $O(nkd)$ \cite{}, using $k$-means++ \cite{}. This running time was recently improved to $O(nd + nk)$ \cite{}. 
+Up until recently, the best running time to do so was $O(nkd)$ (see e.g. \cite{HuangV20, stoc21}, using $k$-means++ \cite{ArV07}. This running time was very recently improved to $O(nd + nk)$ \cite{deng2022nearly}. 
 To do so, one can first reduce the dimension to $\tilde d = O(\log k)$ and then use a $O(n \tilde d k)$ algorithms. 
 
 \subsection{Our Results.}
@@ -64,9 +64,12 @@ We also show how to reduce the dependency in the aspect ratio, by presenting an 
 
 \subsection{Related Work.}
 
-Coreset algorithms have recently attracted a lot of attention, with a long line of work trying to get the smallest coreset possible in many different metric spaces. The most prominent example is for Euclidean space \cite{}. In this case, the group sampling algorithm developed in \cite{stoc21, stoc22} yields a coreset of size $\tilde O\lpar k \eps^{-z-2}\rpar$, while we know that any coreset must have size $\Omega \lpar k\eps^{-2}\rpar$ \cite{stoc22}.
-Small size coresets also exist in doubling metrics \cite{}, discrete metrics \cite{}, metrics induced by minor-free graphs \cite{} or graphs with bounded treewidth \cite{}. 
-In general metric, running time $\Omega(nk)$ is required to compute any approximation to $k$-median or $k$-means \cite{}. We therefore focus on Euclidean space, where the lower bound does not hold.
+Coreset algorithms have recently attracted a lot of attention, with a long line of work trying to get the smallest coreset possible in many different metric spaces. The most prominent example is for Euclidean space \cite{BadoiuHI02, HaM04, Chen09, HuangV20, stoc22}. 
+In this case, the group sampling algorithm developed in \cite{stoc21, stoc22} yields a coreset of size $\tilde O\lpar k \eps^{-z-2}\rpar$, while we know that any coreset must have size $\Omega \lpar k\eps^{-2}\rpar$ \cite{stoc22}.
+Small size coresets for $k$-median and $k$-means also exist in doubling metrics \cite{huang2018varepsilon}, discrete metrics \cite{FeldmanL11}, metrics induced by minor-free graphs \cite{BravermanJKW21} or graphs with bounded treewidth \cite{baker2020coresets}. 
+All those results where recently improved by the group sampling algorithm of \cite{stoc21}. 
+In general metric, running time $\Omega(nk)$ is required to compute any approximation to $k$-median or $k$-means \cite{mettu2004optimal}. 
+We therefore focus on Euclidean space, where the lower bound does not hold.
 
 
 All efficient coreset constructions are probabilistic. This comes with a disadvantage: it is co-NP-hard to check whether a set is an $\eps$-coreset \cite{chrisESA}. Therefore, although the algorithm succeed with some high probability, it is impossible to check whether they are actually good are not. 
@@ -74,6 +77,6 @@ In particular, it is not obvious how to experimentally check the quality of a co
 A recent work proposed a pipeline for doing so, and showed that sensitivity sampling algorithm slightly outperforms the theoretically best group sampling \cite{chrisESA}. 
 We will use this pipeline to evaluate the quality of the coreset produced with our method.
 
-Besides clustering, the use of coreset have spread to other context, as for instance compression of neural nets \cite{} or speeding up computation of quadratic regression \cite{}.
+Besides clustering, the use of coreset have spread to other context, as for instance compression of neural nets \cite{BaykalLGFR19} or speeding up computation of quadratic regression \cite{MaaloufJF19}.
 This last one is particularly representative of the potential usage of coreset: processing a computation on a coreset rather than on the full input allows for faster algorithm while preserving great accuracy.
 For that however, one needs to compute the coreset fast: this is our goal in the present paper.

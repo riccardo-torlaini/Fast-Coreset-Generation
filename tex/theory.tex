@@ -1,6 +1,6 @@
 \section{The algorithm, and proof of \cref{thm:main}}
 
-In this section, we present our algorithm and a very clean proof of \cref{thm:main}. Those are based on the following observation, about the coreset construction algorithms based on group sampling \cite{stoc21} or sensitivity sampling \cite{}. 
+In this section, we present our algorithm and a very clean proof of \cref{thm:main}. Those are based on the following observation, about the coreset construction algorithms based on group sampling \cite{stoc21} or sensitivity sampling \cite{FeldmanL11}. 
 
 Both start by computing a solution $\calA$. When $\calA$ is a $c$-approximation, those algorithms compute a $c \eps$-coreset of size $\tilde O\lpar k \eps^{-z-2}\rpar$ and $\tilde O\lpar k \eps^{-2z -2}\rpar$, respectively. Hence, by rescaling, they provide $\eps$-coreset with size $\tilde O\lpar k (\eps/c)^{-z-2}\rpar$ and $\tilde O\lpar k (\eps/c)^{-2z-2}\rpar$. 
 
@@ -37,7 +37,7 @@ We formalize the proof of \cref{thm:main}, using the previous algorithm.
 Performing the Johnson-Lindenstrauss embedding takes time $\tilde O(nd)$, and allows to consider $\tilde d=O(\log k)$ with only a constant-factor loss in the approximation quality  \cite{makarychev2019performance}. 
 On the projected dataset, the algorithm \fkmeans runs in time $\tilde O\lpar n \log \Delta\rpar$, and the solution it computes has cost $O(\log^3 k)$. 
 
-Therefore, sampling according to the sensitivities $s(p)$ defined in \cref{alg:main} provides a coreset with size $O \lpar k \eps^{-2z -2}\polylog(k) \rpar$  and takes time $O(n)$ \david{has it been shown somewhere that standard sensitivity sampling gives that guarantee? Or combined with dimension reduction? The Huang Vishnoi paper has a different algorithm, so I think I am missing something}
+Furthermore, the values $s(p)$ defined in \cref{alg:main} are upper-bounds on the sensitivity: \cite{FeldmanL11} showed that sampling according to those yield a coreset with size $\tilde O \lpar k d \eps^{-2z}\rpar$, improved by \cite{HuangV20} to$\tilde O \lpar k \eps^{-2z -2} \rpar$.
 \end{proof}
 
 
@@ -65,6 +65,6 @@ Therefore, our algorithm could use as a subroutine any coreset construction algo
 Second, one could compute the solution $\calA$ via a different algorithm: \cref{alg:main} only need to be provided an assignment to a solution that is a $O(\polylog k)$ approximation. 
 This initial solution may as well be an $O\lpar\polylog \lnor P \rnor_0 \rpar$ approximation: using the iterative coreset construction from \cite{BravermanJKW21}, one could then derive a near-optimal coreset size, only suffering a $O(\log^* n)$ loss in the running time.
 
-As an example, we illustrate a different approach for $k$-median. One could first embed the input into a hierarchically separated tree (HST) with expected distortion $O(\log \lnor P \rnor_0)$ \cite{}: on such tree metrics, solving $k$-median can be done in linear time, using dedicated algorithms (see e.g. \cite{}). Using the solution from the HST metric, one can compute a coreset, and iterate using the previous argument.
+As an example, we illustrate a different approach for $k$-median. One could first embed the input into a hierarchically separated tree (HST) with expected distortion $O(\log \lnor P \rnor_0)$ \cite{FakcharoenpholRT03}: on such tree metrics, solving $k$-median can be done in linear time, using dedicated algorithms (see e.g. \cite{Cohen-AddadLNSS21}). Using the solution from the HST metric, one can compute a coreset, and iterate using the previous argument.
 This embedding into HST is very similar to what is done by the \fkmeans algorithm, but can be actually performed in \emph{any} metric space, not only Euclidean. 
 As an example, in a metric described by a graph with $m$ edges, the running time of this construction would be near linear-time $\tilde O(m)$.
