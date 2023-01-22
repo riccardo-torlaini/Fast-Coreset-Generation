@@ -5,7 +5,17 @@ import matplotlib.pyplot as plt
 ALG_DICT = {
     '1': 'medians', '2': 'means'
 }
-COLORS = ['red', 'blue', 'yellow', 'green', 'pink', 'cyan', 'magenta', 'orange']
+COLORS = [
+    'red',
+    'blue',
+    'yellow',
+    'green',
+    'pink',
+    'cyan',
+    'magenta',
+    'orange',
+    'olive'
+]
 
 def update_results_dict(results_dict, directory, metrics):
     path = directory.split('/')
@@ -153,7 +163,7 @@ def make_scores_over_datasets_plot(results, methods, datasets, param, norm, valu
                 metrics[dataset][method][param_value][0] = scores['acc']
                 metrics[dataset][method][param_value][1] = scores['time']
 
-    fig, axes = plt.subplots(int(len(methods) / 2), 2)
+    fig, axes = plt.subplots(1, len(methods))
     plt.rcParams.update({'font.size': 10, 'text.usetex': True})
     fig.set_figheight(8)
     fig.set_figwidth(12)
@@ -169,12 +179,10 @@ def make_scores_over_datasets_plot(results, methods, datasets, param, norm, valu
     color_labels = {dataset: COLORS[i] for i, dataset in enumerate(datasets)}
 
     for i, method in enumerate(methods):
-        x_index = i % 2
-        y_index = int(i / 2)
         for j, dataset in enumerate(datasets):
             horizontal_shift = j * (len(value_list))
             print(metrics[dataset][method])
-            axes[x_index, y_index].bar(
+            axes[i].bar(
                 [loc_dict[value] + horizontal_shift for value in value_list],
                 [metrics[dataset][method][value][0] for value in value_list],
                 width=1,
@@ -182,19 +190,19 @@ def make_scores_over_datasets_plot(results, methods, datasets, param, norm, valu
                 edgecolor='black',
                 hatch=[pattern_dict[value] for value in value_list]
                 )
-        axes[x_index, y_index].set_ylabel('Coreset accuracy')
-        axes[x_index, y_index].set_ylim([1, 2])
-        axes[x_index, y_index].set_title(method)
-        axes[x_index, y_index].tick_params(
+        axes[i].set_ylabel('Coreset accuracy')
+        axes[i].set_ylim([1, 5])
+        axes[i].set_title(method)
+        axes[i].tick_params(
             axis='x',
             which='both',
             bottom=False,
             top=False,
             labelbottom=False
         )
-    color_legend = axes[0, 1].legend(color_handles, color_labels, loc='upper right')
-    ax = axes[0, 1].add_artist(color_legend)
-    pattern_legend = axes[0, 0].legend(pattern_handles, value_list, loc='upper left')
+    color_legend = axes[-1].legend(color_handles, color_labels, loc='upper right')
+    ax = axes[-1].add_artist(color_legend)
+    pattern_legend = axes[0].legend(pattern_handles, value_list, loc='upper left')
     plt.show()
 
     fig, axes = plt.subplots(int(len(methods) / 2), 2)
@@ -262,7 +270,6 @@ def make_scores_over_methods_plot(results, methods, datasets, param, norm, value
     for i, dataset in enumerate(datasets):
         for j, method in enumerate(methods):
             horizontal_shift = j * (len(value_list))
-            print(dataset, method)
             axes[i].bar(
                 [loc_dict[value] + horizontal_shift for value in value_list],
                 [metrics[dataset][method][value][0] for value in value_list],
@@ -390,16 +397,7 @@ if __name__ == '__main__':
         'song',
         'cover_type'
     ]
-    # make_scores_over_datasets_plot(
-    #     results,
-    #     methods,
-    #     datasets,
-    #     'm_scalar',
-    #     norm,
-    #     m_scalar_values,
-    #     m_scalar_pattern_dict
-    # )
-    make_scores_over_methods_plot(
+    make_scores_over_datasets_plot(
         results,
         methods,
         datasets,
@@ -408,3 +406,12 @@ if __name__ == '__main__':
         m_scalar_values,
         m_scalar_pattern_dict
     )
+    # make_scores_over_methods_plot(
+    #     results,
+    #     methods,
+    #     datasets,
+    #     'm_scalar',
+    #     norm,
+    #     m_scalar_values,
+    #     m_scalar_pattern_dict
+    # )
