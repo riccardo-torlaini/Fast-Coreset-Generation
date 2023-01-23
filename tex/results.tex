@@ -35,7 +35,7 @@ Second, we incorporate the lightweight coreset construction discussed in \cite{l
 per-point sensitivity values that are proportional to $1/|P| + cost(p, \mu) / cost(P, \mu)$. The first term encourages uniform sampling while the second
 encourages sampling proportionate to the distance from the mean.
 
-The next two algorithms are the $k$-means++ and Fast-$k$-means++ sensitivity sampling solutions, where we solve obtain an approximate $k$-means solution and
+The next two algorithms are the $k$-means++ and \fkmeans sensitivity sampling solutions, where we solve obtain an approximate $k$-means solution and
 compute sensitivities using these preliminary centers.
 
 We note that lightweight coresets are simply solving $1$-means to obtain sensitivity values whereas sensitivity sampling is solving the $k$-means problem.  As
@@ -84,7 +84,7 @@ cells.
 \subsection{Algorithm Comparisons}
 \label{ssec:alg_qualities}
 
-We first verify the fact that coreset quality is independent of whether we used $k$-means++ or Fast-$k$-means++ to obtain the preliminary solution. To this end,
+We first verify the fact that coreset quality is independent of whether we used $k$-means++ or \fkmeans to obtain the preliminary solution. To this end,
 Figure~\ref{fig:coreset_size_on_sens_quality} shows that, across datasets, the Fast-Coreset method produces coresets of consistent quality, with all distortion
 values being lower than $1.2$. Additionally, for sufficient coreset sizes ($m \approx 80 * k$), Fast-Coresets are equal in quality to those obtained through
 sensitivity sampling. Despite this, Figure~\ref{fig:k_on_runtime} shows that, while traditional sensitivity sampling runtimes grow linearly with $k$,

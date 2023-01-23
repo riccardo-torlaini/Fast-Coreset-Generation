@@ -45,17 +45,34 @@ with $z=1$ for $k$-median and $z=2$ for $k$-means.
 Taking $\coreset$ to be a uniform sample of size $S$ of $P$, each smapled point taken with multiplicity (or weight) $|P|/S$, allows to have a coreset ``in expectation": for any fixed solution $\calC$, it holds (from linearity of expectation) that $\E[\cost(P, \calC)] = \E[\cost(\Omega, \calC)]$. However, this distribution is poorly concentrated, and, in order to get good precision guarantee, one would need to sample $t = \Omega(|P|)$ many points \cite{bachem2017practical}. 
 
 
-On the other hand, we know how to compute coresets with size \textit{independent of $|P|$}. Among algorithm with this theoretical guarantee, the one which seems to perform best is called sensitivity sampling \cite{chrisESA}. 
-The sensitivity of a point $p \in P$ is the maximum relative contribution $p$ can have in any solution: it is formally defined as $\sup_{\calC} \frac{\dist^z(p, \calC)}{\cost_z(P, \calC)}$. 
-Sensitivity sampling simply samples each point $p$ proportionate to its sensitivity $s(p)$. This is one of the key distributions to build sketches, and was used in many different contexts \cite{FeldmanL11, CohenP15}.
+On the other hand, we know how to compute coresets with size \textit{independent of $|P|$}. Among algorithm with this theoretical guarantee, the one which seems
+to perform best is called sensitivity sampling \cite{chrisESA}.  The sensitivity of a point $p \in P$ is the maximum relative contribution $p$ can have in any
+solution: it is formally defined as $\sup_{\calC} \frac{\dist^z(p, \calC)}{\cost_z(P, \calC)}$.  Sensitivity sampling simply samples each point $p$
+proportionate to its sensitivity $s(p)$. This is one of the key distributions to build sketches, and was used in many different contexts \cite{FeldmanL11,
+CohenP15}.
 
-Computing the sensitivities exactly is often NP-hard: thankfully, it has been shown how to approximate them in times $O(nk+nd)$ while preserving theoretical guarantees \cite{varadarajan12,FeldmanL11}. 
-This algorithm computes an estimation of the sensitivities by computing an $O(1)$-approximation to $k$-means, and uses the relative cost in that solution as a proxy for $s(p)$.
+Computing the sensitivities exactly is often NP-hard. Thankfully, it has been shown that sensitivities can be approximated in $O(nk+nd)$ time while preserving
+theoretical guarantees \cite{varadarajan12,FeldmanL11}.  This algorithm computes an estimate of the sensitivities by computing an $O(1)$-approximation to
+$k$-means. One then obtains an upper-bound on the sensitivities with
+\[ \hat{s}(p) = \dfrac{\cost(p, \calC_i)}{\cost(P_{i}, \calC_i} + \dfrac{1}{|\calC_i|}, \]
+where $\calC_i$ is the cluster that $p$ belongs to and $P_{i}$ is the entire set of points belonging to that cluster. Thus, the $O(1)$-approximation can be used
+to obtain a proxy for the real sensitivity $s(p)$.
 
+One attempt to get a linear-time algorithm and remove the dependency in $nk$ is the \emph{lightweight coresets} from \cite{bachem2018scalable}. The idea is to
+very quickly compute a crude approximation to the sensitivities by solving the $1$-means problem and defining sensitivities as relative squared
+distances to the mean $\mu$. This sampling strategy guarantees that the cost of any solution is preserved up to an \textit{additive} $\eps
+\cost_z(P, \{m\})$.
 
-One attempt to get a linear-time algorithm and remove the dependency in $nk$ is the \emph{lightweight coresets} from \cite{bachem2018scalable}. The idea is to compute a crude approximation to the sensitivities, very fast. The idea is to merely compute the mean $m$ of the dataset, and define sensitivities as relative squared distances to $m$. This sampling strategy has the following guarantee: the cost of any solution is preserved up to an \textit{additive} $\eps \cost_z(P, \{m\})$.
+In practice, the sensitivities must be upper-bounded as discussed previously. This means that the lightweight coreset samples each point proportionate to the
+value
+\[ \hat{s}_{lc}(p) = \dfrac{\cost(p, \{\mu\})}{\cost(P, \{\mu\})} + \dfrac{1}{|P|}.\]
+Looking at this intuitively, we see that lightweight coresets sample according to a linear combination between a uniform distribution and the sensitivities for
+the $1$-means solution. This has the immediate drawback that, for any dataset that is evenly distributed around its mean, the lightweight coreset effectively
+performs uniform sampling.
 
-To summarize, the picture is the following: uniform sampling runs in time independent of the input, but has no guarantee at all. Lightweight coresets are slower -- the running time is $O(nd)$ -- and come with a potentially unbounded theoretical guarantee. Last, sensitivity sampling is slow, but its guarantee are really strong.
+To summarize, the picture is the following: uniform sampling runs in time independent of the input, but has no guarantee at all. Lightweight coresets are slower
+-- the running time is $O(nd)$ -- and come with a potentially unbounded theoretical guarantee. Lastly, sensitivity sampling is slow but is robust in both
+theoretical and practical applications.
  
 %having an upper-bound on them is enough to build coreset \cite{varadarajan12}. Furthermore, to compute such an upper-bound, it is enough to compute a bi-criteria approximation, namely a solution that can have $O(k)$ many centers (instead of exactly $k$) and cost $O(\opt)$, where $\opt$ is the optimal cost when using exactly $k$ centers. 
 %
@@ -65,7 +82,10 @@ To summarize, the picture is the following: uniform sampling runs in time indepe
 
 \subsection{Our Results.}
 
-Our main contribution is an algorithm that performs an approximate version of sensitivity sampling in near-linear time. We show that it shares the theoretical guarantees of sensitivity sampling. We also demonstrate via thorough experiments the different trade-offs between speed of computation and quality of the coreset.
+Our main contribution is an algorithm that performs an approximate version of sensitivity sampling in near-linear time. We show that it shares the theoretical
+guarantees of sensitivity sampling. We also perform a thorough experimental analysis, demonstrating the trade-offs between runtime and coreset quality that exist
+across the space of algorithms.
+
 %We show how to break the dependency in $nk$, allowing for coreset construction running in \textit{linear time}. In the following statement, $\Delta$ is the aspect-ratio (also called spread) of the input, namely the ratio $\frac{\max_{p, q \in P} \lnor p-q\rnor}{\min_{p, q \in P, p \neq q} \lnor p-q\rnor}$.\footnote{The aspect-ratio corresponds to the precision of the data points: to write in binary the coordinates of a data point, $O(\log \Delta)$ bits are required.}
 
 \begin{theorem}\label{thm:main}
@@ -73,9 +93,11 @@ There exists an algorithm running in time $\tilde O\lpar nd + n \log \Delta\rpar
 \end{theorem}
 In the previous statement, $\Delta$ is the aspect-ratio (also called spread) of the input, namely the ratio $\frac{\max_{p, q \in P} \lnor p-q\rnor}{\min_{p, q \in P, p \neq q} \lnor p-q\rnor}$.\footnote{The aspect-ratio corresponds to the precision of the data points: to write in binary the coordinates of a data point, $O(\log \Delta)$ bits are required.}
 
-The proof of this theorem is surprisingly simple: we show that it is enough to compute an $\tilde O(\log k)$ approximation to $k$-median or $k$-means in order to build a coreset, instead of a precise $O(1)$-approximation. This allows us to use linear-time algorithms to upper-bound the sensitivities.
+The proof of this theorem is surprisingly simple: we show that it is enough to compute an $\tilde O(\log k)$ approximation to $k$-median or $k$-means in order
+to build a coreset, instead of a precise $O(1)$-approximation. This allows us to use linear-time algorithms to upper-bound the sensitivities.
 
-We also show how to reduce the dependency in the aspect ratio, by presenting an algorithm running in time $\tilde O\lpar nd + n \log \Delta\rpar$. As this is only theoretical improvement, we focus on \cref{thm:main} and explain later how to improve.
+We also show how to reduce the dependency in the aspect ratio, by presenting an algorithm running in time $\tilde O\lpar nd + n \log \Delta\rpar$. As this is
+only theoretical improvement, we focus on \cref{thm:main} and explain later how to improve.
 
 \david{talk about experiments here}
 
