@@ -12,7 +12,7 @@ The hope is that sampling allows to solve faster downstream tasks, and that unif
 This is of course not always the case: uniform sampling may miss few important features of the data. 
 To cope with this issue, a different sampling distribution called \textit{sensitivity sampling} was introduced \cite{LS10}, which allows to have some guarantees \textit{with high probability} instead of mere expectation.
 This distribution have been proven successful, both for practical purposes \cite{} and to provide theoretical guarantees \cite{FeldmanL11, CohenP15}. 
-The downside is the computation time required: for instance, for $k$-means, the best known algorithms run in time $O(nk+nd)$, which is prohibitive for really large datasets.
+The downside is the computation time required: for instance, when sensitivity sampling is tailored to work for the $k$-means problem, the best known algorithms run in time $O(nk+nd)$, which is prohibitive for really large datasets.
 
 In this paper, our goal is to compare different compression strategies, and to evaluate in terms of speed but also in terms of guarantee offered. We focus more specifically on guarantees for $k$-means clustering problems: the quality of a compression strategy is then how well it preserves the cost of each possible clustering.
 
