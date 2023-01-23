@@ -1,21 +1,26 @@
 \section{The algorithm, and proof of \cref{thm:main}}
 
-In this section, we present our algorithm and a very clean proof of \cref{thm:main}. Those are based on the following observation, about the coreset construction algorithms based on group sampling \cite{stoc21} or sensitivity sampling \cite{FeldmanL11}. 
+In this section, we present our algorithm and a very clean proof of \cref{thm:main}. Those are based on the following observations about the group
+sampling \cite{stoc21} and sensitivity sampling \cite{FeldmanL11} coreset construction algorithms.
 
-Both start by computing a solution $\calA$. When $\calA$ is a $c$-approximation, those algorithms compute a $c \eps$-coreset of size $\tilde O\lpar k \eps^{-z-2}\rpar$ and $\tilde O\lpar k \eps^{-2z -2}\rpar$, respectively. Hence, by rescaling, they provide $\eps$-coreset with size $\tilde O\lpar k (\eps/c)^{-z-2}\rpar$ and $\tilde O\lpar k (\eps/c)^{-2z-2}\rpar$. 
+Both start by computing a solution $\calA$. When $\calA$ is a $c$-approximation, both algorithms compute a $c \eps$-coreset of size $\tilde O\lpar
+k \eps^{-z-2}\rpar$ and $\tilde O\lpar k \eps^{-2z -2}\rpar$, respectively. Hence, by rescaling, they provide $\eps$-coreset with size $\tilde O\lpar
+k (\eps/c)^{-z-2}\rpar$ and $\tilde O\lpar k (\eps/c)^{-2z-2}\rpar$. 
 
 Therefore, taking $c = O(\log k)$ merely affects the size of the computed coreset, while allowing for approximation algorithms that are way faster.
 
-We note that, as it is co-NP hard to check the quality of a coreset after its computation \cite{chrisESA}, it is important to have a theoretical proof of efficiency of the coreset algorithms. 
-Showing, as we do, that one can use $O(\log k)$-approximation (e.g., $k$-means++) while benefiting from the same guarantees as with a slow $O(1)$-approximation is thus not only an artifact, but a crucial piece of coreset's success. 
+We note that, as it is co-NP hard to check the quality of a coreset after its computation \cite{chrisESA}, it is important to have a theoretical proof of
+efficiency of the coreset algorithms.  Showing, as we do, that one can use $O(\log k)$-approximations (e.g., $k$-means++) while benefiting from the same
+guarantees as with a slow $O(1)$-approximation is thus not only an artifact, but a crucial piece of our coreset's success. 
 
 It is indeed tempting to use those large-factor approximations, especially since they seem to perform better in practice. 
 It might however have been the case that coresets constructed that way have poor quality, without being able to notice it due to the aforementioned hardness. 
 We show that this unfortunate event does not happen, and that, even with the ``worst-case" guarantee $O(\log k)$, these algorithms indeed produce coresets.
 
-
-Our algorithm is based on the \fkmeans algorithm from \cite{cohen2020fast}: it allows to embed points in a very simple metric,  where it is easy to compute the distance to previously opened centers. The two key properties of this algorithm are the following: it runs in $\tilde O\lpar n d \log \Delta\rpar$ time, and computes an assignment from input point to centers that is a $O\lpar d^z \log k\rpar = O\lpar\log^{z+1} k\rpar$ approximation to $k$-median ($z=1$) and $k$-means ($z=2$).
-We use it, in combination with sensitivity sampling, as follows.
+Our algorithm is based on the \fkmeans algorithm from \cite{cohen2020fast}: it allows to embed points in a very simple metric,  where it is easy to compute the
+distance to previously opened centers. The two key properties of this algorithm are the following: it runs in $\tilde O\lpar n d \log \Delta\rpar$ time, and
+computes an assignment from input point to centers that is a $O\lpar d^z \log k\rpar = O\lpar\log^{z+1} k\rpar$ approximation to $k$-median ($z=1$) and
+$k$-means ($z=2$).  We use it, in combination with sensitivity sampling, as follows.
 
 
 \begin{algorithm}[tb]

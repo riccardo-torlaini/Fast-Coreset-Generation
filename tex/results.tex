@@ -18,13 +18,11 @@ Things to show:
 
 We analyze the coreset construction methods along two metrics -- quality and construction time.  Although measuring runtime is standard, predicting coreset
 quality is a more difficult task. Specifically, it is unclear how to confirm that a subset of points satisfies the coreset property over all solutions. To this
-end, the authors in \cite{chrisESA} suggested the following procedure:
-\begin{enumerate}
-    \item Construct a sample coreset $\Omega$
-    \item Use $\Omega$ to produce a candidate solution $C$ for the clustering task
-    \item Report $\max \left( \dfrac{Cost(P, C)}{Cost(\Omega, C)}, \dfrac{Cost(\Omega, C)}{Cost(P, C)} \right)$, where $P$ is the original dataset
+end, the authors in \cite{chrisESA} suggested reporting the following metric 
+\[ \max \left( \dfrac{\cost(P, \calC_{\Omega})}{\cost(\Omega, \calC_{\Omega})}, \dfrac{\cost(\Omega, \calC_{\Omega})}{\cost(P, \calC_{\Omega})} \right),\]
+where $\calC_{\Omega}$ is a candidate solution that was computed over the coreset.
 \end{enumerate}
-We refer to this metric as the \emph{coreset distortion}. Naturally, values that are consistently close to $1$ suggest that solutions on the coreset are equally
+We refer to this metric as the \emph{coreset distortion}. Naturally, values that are consistently close to $1$ suggest that solutions on the coreset are likely
 viable on the full dataset.
 
 \input{figures/lightweight_breaks.tex}
@@ -32,7 +30,7 @@ viable on the full dataset.
 
 We analyze five different algorithms for constructing coresets. The first is standard uniform sampling, where a subset of $m \ll n$ points are sampled from $P$.
 Second, we incorporate the lightweight coreset construction discussed in \cite{lightweight_coresets}. There, we find the mean $\mu$ of the dataset and obtain
-per-point sensitivity values that are proportional to $1/|P| + cost(p, \mu) / cost(P, \mu)$. The first term encourages uniform sampling while the second
+per-point sensitivity values that are proportional to $1/|P| + \cost(p, \mu) / \cost(P, \mu)$. The first term encourages uniform sampling while the second
 encourages sampling proportionate to the distance from the mean.
 
 The next two algorithms are the $k$-means++ and \fkmeans sensitivity sampling solutions, where we solve obtain an approximate $k$-means solution and
