@@ -149,7 +149,17 @@ def make_scores_vs_param_plot(results, dataset, param, norm, value_list):
 
 
 
-def make_scores_over_datasets_plot(results, methods, datasets, param, norm, value_list, pattern_dict):
+def make_scores_over_datasets_plot(
+    results,
+    methods,
+    datasets,
+    param,
+    norm,
+    value_list,
+    pattern_dict,
+    y_lim,
+    figure_title
+):
     metrics = {}
     for dataset in datasets:
         if dataset not in metrics:
@@ -158,15 +168,16 @@ def make_scores_over_datasets_plot(results, methods, datasets, param, norm, valu
         for method in methods:
             if method not in metrics[dataset]:
                 metrics[dataset][method] = {}
+            # If we dind't run this method on this dataset, don't try to read the results
+            if dataset not in results[method]:
+                continue
             for param_value, scores in results[method][dataset][norm][param].items():
                 metrics[dataset][method][param_value] = [0, 0]
                 metrics[dataset][method][param_value][0] = scores['acc']
                 metrics[dataset][method][param_value][1] = scores['time']
 
-    fig, axes = plt.subplots(1, len(methods))
-    plt.rcParams.update({'font.size': 10, 'text.usetex': True})
-    fig.set_figheight(8)
-    fig.set_figwidth(12)
+    image_dir = os.path.join('tex', 'images')
+    os.makedirs(image_dir, exist_ok=True)
 
     loc_dict = {value: i for i, value in enumerate(value_list)}
     dataset_colors = {dataset: COLORS[i] for i, dataset in enumerate(datasets)}
@@ -178,178 +189,106 @@ def make_scores_over_datasets_plot(results, methods, datasets, param, norm, valu
     color_handles = [plt.Rectangle((0, 0), 1, 1, color=dataset_colors[dataset]) for dataset in datasets]
     color_labels = {dataset: COLORS[i] for i, dataset in enumerate(datasets)}
 
-    for i, method in enumerate(methods):
-        for j, dataset in enumerate(datasets):
-            horizontal_shift = j * (len(value_list))
-            print(metrics[dataset][method])
-            axes[i].bar(
-                [loc_dict[value] + horizontal_shift for value in value_list],
-                [metrics[dataset][method][value][0] for value in value_list],
-                width=1,
-                color=dataset_colors[dataset],
-                edgecolor='black',
-                hatch=[pattern_dict[value] for value in value_list]
-                )
-        axes[i].set_ylabel('Coreset accuracy')
-        axes[i].set_ylim([1, 5])
-        axes[i].set_title(method)
-        axes[i].tick_params(
-            axis='x',
-            which='both',
-            bottom=False,
-            top=False,
-            labelbottom=False
-        )
-    color_legend = axes[-1].legend(color_handles, color_labels, loc='upper right')
-    ax = axes[-1].add_artist(color_legend)
-    pattern_legend = axes[0].legend(pattern_handles, value_list, loc='upper left')
-    plt.show()
+    plt.rcParams.update({'font.size': 10, 'text.usetex': True, 'savefig.format': 'pdf'})
+    for index in [0, 1]:
+        fig, axes = plt.subplots(1, len(methods))
+        fig.set_figheight(6)
+        fig.set_figwidth(10)
+        if index == 0:
+            ylabel = 'Coreset distortion'
+        else:
+            ylabel = 'Coreset runtime (seconds)'
+        min_height = np.inf
+        max_height = 0
+        for i, method in enumerate(methods):
+            try:
+                axis = axes[i]
+            except TypeError:
+                # If we only have one method then there will only be one subplot
+                axis = axes
+            for j, dataset in enumerate(datasets):
+                if method not in metrics[dataset]:
+                    continue
+                horizontal_shift = j * (len(value_list))
+                for value in value_list:
+                    try:
+                        if metrics[dataset][method][value][index] < min_height and \
+                                metrics[dataset][method][value][index] > 0:
+                            min_height = metrics[dataset][method][value][index]
+                        if metrics[dataset][method][value][index] > max_height:
+                            max_height = metrics[dataset][method][value][index]
+                        axis.bar(
+                            loc_dict[value] + horizontal_shift,
+                            metrics[dataset][method][value][index],
+                            width=1,
+                            color=dataset_colors[dataset],
+                            edgecolor='black',
+                            hatch=pattern_dict[value]
+                        )
+                    except KeyError:
+                        continue
+            axis.set_ylabel(ylabel)
+            if index == 0:
+                axis.set_ylim(y_lim)
+            axis.set_yscale('log')
+            axis.set_title(method)
+            axis.tick_params(
+                axis='x',
+                which='both',
+                bottom=False,
+                top=False,
+                labelbottom=False
+            )
+            axis.tick_params(
+                axis='y',
+                which='both',
+                labelleft=False
+            )
 
-    fig, axes = plt.subplots(int(len(methods) / 2), 2)
-    plt.rcParams.update({'font.size': 10, 'text.usetex': True})
-    fig.set_figheight(8)
-    fig.set_figwidth(12)
-    for i, method in enumerate(methods):
-        x_index = i % 2
-        y_index = int(i / 2)
-        for j, dataset in enumerate(datasets):
-            horizontal_shift = j * (len(value_list))
-            print(metrics[dataset][method])
-            axes[x_index, y_index].bar(
-                [loc_dict[value] + horizontal_shift for value in value_list],
-                [metrics[dataset][method][value][1] for value in value_list],
-                width=1,
-                color=dataset_colors[dataset],
-                edgecolor='black',
-                hatch=[pattern_dict[value] for value in value_list]
-                )
-        axes[x_index, y_index].set_ylabel('Coreset runtime (seconds)')
-        axes[x_index, y_index].set_title(method)
-        axes[x_index, y_index].tick_params(
-            axis='x',
-            which='both',
-            bottom=False,
-            top=False,
-            labelbottom=False
-        )
-    color_legend = axes[0, 1].legend(color_handles, color_labels, loc='upper right')
-    ax = axes[0, 1].add_artist(color_legend)
-    pattern_legend = axes[0, 0].legend(pattern_handles, value_list, loc='upper left')
-    plt.show()
+        if index == 1:
+            if len(methods) > 1:
+                for i in range(len(methods)):
+                    axes[i].set_ylim([min_height/1.5, max_height*1.5])
+            else:
+                axes.set_ylim([min_height/1.5, max_height*1.5])
 
-
-def make_scores_over_methods_plot(results, methods, datasets, param, norm, value_list, pattern_dict):
-    metrics = {}
-    for dataset in datasets:
-        if dataset not in metrics:
-            metrics[dataset] = {}
-        # get runtimes and accuracies for k parameter on this dataset under the 1 norm
-        for method in methods:
-            if method not in metrics[dataset]:
-                metrics[dataset][method] = {}
-            for param_value, scores in results[method][dataset][norm][param].items():
-                metrics[dataset][method][param_value] = [0, 0]
-                metrics[dataset][method][param_value][0] = scores['acc']
-                metrics[dataset][method][param_value][1] = scores['time']
-
-    fig, axes = plt.subplots(1, len(datasets))
-    plt.rcParams.update({'font.size': 10, 'text.usetex': True})
-    fig.set_figheight(8)
-    fig.set_figwidth(12)
-
-    loc_dict = {value: i for i, value in enumerate(value_list)}
-    method_colors = {method: COLORS[i] for i, method in enumerate(methods)}
-
-    pattern_list = [ "/" , "x" , "+", "o", "O", ".", "*", "-" , "\\" , "|" ]
-    pattern_dict = {value: pattern_list[i] for i, value in enumerate(value_list)}
-    pattern_handles = [plt.Rectangle((0, 0), 1, 1, hatch=pattern_dict[value]) for value in value_list]
-
-    color_handles = [plt.Rectangle((0, 0), 1, 1, color=method_colors[method]) for method in methods]
-    color_labels = {method: COLORS[i] for i, method in enumerate(methods)}
-
-    for i, dataset in enumerate(datasets):
-        for j, method in enumerate(methods):
-            horizontal_shift = j * (len(value_list))
-            axes[i].bar(
-                [loc_dict[value] + horizontal_shift for value in value_list],
-                [metrics[dataset][method][value][0] for value in value_list],
-                width=1,
-                color=method_colors[method],
-                edgecolor='black',
-                hatch=[pattern_dict[value] for value in value_list]
-                )
-        axes[i].set_ylim([1, 1.4])
-        axes[i].set_title(dataset)
-        axes[i].tick_params(
-            axis='x',
-            which='both',
-            bottom=False,
-            top=False,
-            labelbottom=False
-        )
-        axes[i].tick_params(
+        if len(methods) == 1:
+            first_axis = axes
+            last_axis = axes
+        else:
+            first_axis = axes[0]
+            last_axis = axes[-1]
+        first_axis.tick_params(
             axis='y',
             which='both',
-            labelleft=False
+            left=True,
+            right=False,
+            labelleft=True
         )
-    axes[0].tick_params(
-        axis='y',
-        which='both',
-        left=True,
-        right=False,
-        labelleft=True
-    )
-    axes[0].set_ylabel('Coreset accuracy')
-    color_legend = axes[-1].legend(color_handles, color_labels, loc='upper right')
-    ax = axes[-1].add_artist(color_legend)
-    pattern_legend = axes[0].legend(pattern_handles, value_list, loc='upper left')
-    plt.show()
+        color_legend = last_axis.legend(color_handles, color_labels, loc='upper right')
+        ax = last_axis.add_artist(color_legend)
+        pattern_legend = first_axis.legend(pattern_handles, value_list, loc='upper left')
+        if index == 0:
+            save_path = 'coreset_distortion-' + figure_title
+        else:
+            save_path = 'coreset_runtime-' + figure_title
+        save_path = os.path.join('tex', 'images', save_path)
+        plt.savefig(save_path)
 
-    fig, axes = plt.subplots(int(len(methods) / 2), 2)
-    plt.rcParams.update({'font.size': 10, 'text.usetex': True})
-    fig.set_figheight(8)
-    fig.set_figwidth(12)
-    for i, dataset in enumerate(datasets):
-        x_index = i % 2
-        y_index = int(i / 2)
-        for j, method in enumerate(methods):
-            horizontal_shift = j * (len(value_list))
-            print(metrics[dataset][method])
-            axes[x_index, y_index].bar(
-                [loc_dict[value] + horizontal_shift for value in value_list],
-                [metrics[dataset][method][value][1] for value in value_list],
-                width=1,
-                color=method_colors[method],
-                edgecolor='black',
-                hatch=[pattern_dict[value] for value in value_list]
-                )
-        axes[x_index, y_index].set_ylabel('Coreset runtime (seconds)')
-        axes[x_index, y_index].set_title(method)
-        axes[x_index, y_index].tick_params(
-            axis='x',
-            which='both',
-            bottom=False,
-            top=False,
-            labelbottom=False
-        )
-    color_legend = axes[0, 1].legend(color_handles, color_labels, loc='upper right')
-    ax = axes[0, 1].add_artist(color_legend)
-    pattern_legend = axes[0, 0].legend(pattern_handles, value_list, loc='upper left')
-    plt.show()
 
 
 if __name__ == '__main__':
     # Comment out to read optimization_times for uniform_umap
+    outputs_dir = 'outputs'
     results, params = read_outputs(
-        'outputs',
+        outputs_dir,
         npy_file='metrics',
         filter_strs=['semi_uniform'],
         print_dict=True
     )
 
-    k_values = ['10', '50', '100', '200']
-    # m_scalar_values = ['20', '40', '60', '80']
-    m_scalar_values = ['40', '60', '80']
+    m_scalar_values = ['20', '40', '60', '80']
+    # m_scalar_values = ['40', '60', '80']
     allotted_time_values = ['0', '0.5', '1', '3', '5', '7', '10', '20']
     j_func_values = ['2', 'log', '10', 'sqrt', 'half']
     sample_method_values = ['sens', 'uniform']
@@ -357,16 +296,16 @@ if __name__ == '__main__':
     norm = '2'
     # List of datasets --- ['blobs', 'benchmark', 'mnist', 'artificial', 'census']
 
-    dataset = 'benchmark'
+    dataset = 'census'
     # make_scores_vs_param_plot(results, dataset, 'j_func', norm, j_func_values)
     # make_scores_vs_param_plot(results, dataset, 'sample_method', norm, sample_method_values)
 
 
+    ### LOOKING AT EFFECT OF CORESET SIZE ON CORESET QUALITY
     norm = '2'
-    # methods = ['semi_uniform', 'fast_coreset', 'sens_sampling', 'uniform_sampling']
-    methods = ['semi_uniform', 'fast_coreset']#, 'sens_sampling', 'uniform_sampling']
+    methods = ['semi_uniform', 'fast_coreset', 'uniform_sampling', 'lightweight']
     results, params = read_outputs(
-        'outputs',
+        outputs_dir,
         npy_file='metrics',
         filter_strs=methods,
         print_dict=True
@@ -379,13 +318,6 @@ if __name__ == '__main__':
         '60': 'm=60k',
         '80': 'm = 80k',
     }
-    # m_scalar_pattern_dict = {
-    #     '50': 'm=50 * k',
-    #     '100': 'm=100 * k',
-    #     '200': 'm=200 * k',
-    #     '300': 'm=300 * k',
-    # }
-    # m_scalar_values = ['50', '100', '200', '300']
     datasets = [
         'artificial',
         'geometric',
@@ -393,10 +325,11 @@ if __name__ == '__main__':
         'blobs',
         'mnist',
         'census',
-        'kdd_cup',
+        # 'kdd_cup',
         'song',
         'cover_type'
     ]
+    # Coreset size plots
     make_scores_over_datasets_plot(
         results,
         methods,
@@ -404,14 +337,96 @@ if __name__ == '__main__':
         'm_scalar',
         norm,
         m_scalar_values,
-        m_scalar_pattern_dict
+        m_scalar_pattern_dict,
+        y_lim=[1, 10],
+        figure_title='m_scalar_across_all_algorithms'
     )
-    # make_scores_over_methods_plot(
-    #     results,
-    #     methods,
-    #     datasets,
-    #     'm_scalar',
-    #     norm,
-    #     m_scalar_values,
-    #     m_scalar_pattern_dict
-    # )
+
+
+
+
+
+    ### COMPARING FAST-KMEANS++ TO KMEANS++ SENSITIVITY SAMPLING
+    methods = ['fast_coreset', 'sens_sampling']
+    results, params = read_outputs(
+        outputs_dir,
+        npy_file='metrics',
+        filter_strs=methods,
+        print_dict=True
+    )
+    k_values = ['10', '50', '100', '200']
+    k_pattern_dict = {
+        '10': 'k=10',
+        '50': 'k=50',
+        '100': 'k=100',
+        '200': 'k=200',
+    }
+    datasets = [
+        'artificial',
+        'geometric',
+        'benchmark',
+        'blobs',
+        'mnist',
+        'census',
+    ]
+    m_scalar_values = ['40', '60', '80']
+    make_scores_over_datasets_plot(
+        results,
+        methods,
+        datasets,
+        'm_scalar',
+        norm,
+        m_scalar_values,
+        m_scalar_pattern_dict,
+        y_lim=[1, 1.3],
+        figure_title='m_scalar_for_sens_sampling'
+    )
+    make_scores_over_datasets_plot(
+        results,
+        methods,
+        datasets,
+        'k',
+        norm,
+        k_values,
+        k_pattern_dict,
+        y_lim=[1, 1.3],
+        figure_title='Effect_of_k_for_sens_sampling'
+    )
+
+
+
+    ### DOES USING 3 HST'S HELP?
+    methods = ['fast_coreset']
+    results, params = read_outputs(
+        outputs_dir,
+        npy_file='metrics',
+        filter_strs=methods,
+        print_dict=True
+    )
+    datasets = [
+        'artificial',
+        'geometric',
+        'benchmark',
+        'blobs',
+        'mnist',
+        'census',
+        'song',
+        'cover_type'
+    ]
+    hst_count_values = ['True', 'False']
+    hst_count_pattern_dict = {
+        'True': 'Norm + 1 HST\'s',
+        'False': '1 HST',
+    }
+    make_scores_over_datasets_plot(
+        results,
+        methods,
+        datasets,
+        'hst_count_from_norm',
+        norm,
+        hst_count_values,
+        hst_count_pattern_dict,
+        y_lim=[1, 1.3],
+        figure_title='3_HSTs_vs_1_HST'
+    )
+

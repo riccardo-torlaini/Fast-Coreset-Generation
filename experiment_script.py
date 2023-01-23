@@ -23,18 +23,18 @@ def get_experiment_params(default_values, norm, param, val):
 def run_sweeps():
     results = {}
     datasets = [
-        # 'artificial',
+        'artificial',
         # 'geometric',
         # 'benchmark',
         # 'blobs',
         # 'mnist',
         # 'census',
-        'kdd_cup',
+        # 'kdd_cup',
         # 'song',
         # 'cover_type'
     ]
     # methods = ['fast_coreset', 'semi_uniform', 'uniform_sampling', 'sens_sampling']
-    methods = ['fast_coreset']
+    methods = ['lightweight']
 
     # Only apply for Gaussian mixture model dataset
     n_points = 25000
@@ -76,8 +76,8 @@ def run_sweeps():
         # 'k': [100, 200, 400],
         # 'j_func': ['2', '10', 'log', 'sqrt'],
         # 'sample_method': ['sens', 'uniform'],
-        # 'm_scalar': [20, 40, 60, 80],
-        'm_scalar': [40],
+        'm_scalar': [20, 40, 60, 80],
+        # 'm_scalar': [40],
         # 'allotted_time': [60, 120, 360],
         # 'hst_count_from_norm': [True, False], # Only applies to fast_coreset algorithm
     }
