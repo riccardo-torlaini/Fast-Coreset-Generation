@@ -161,7 +161,6 @@ def lightweight_coreset(
     m,
     norm,
     allotted_time=np.inf,
-    sample_method='sens',
     **kwargs
 ):
     weights = np.ones(len(points))
@@ -169,16 +168,9 @@ def lightweight_coreset(
     labels = np.ones(len(points))
     costs = np.sum(np.square(points - center), axis=-1)
 
-    if sample_method == 'sens':
-        sensitivities = bound_sensitivities([1], labels, costs)
-        r_points, r_weights, r_labels = get_coreset(sensitivities, m, points, labels, weights=weights)
-    else:
-        assert sample_method == 'uniform'
-        r_points = points[np.random.choice(n, m - j)]
-        r_points = np.concatenate([centers, r_points])
-        r_weights = np.ones(m) * float(n) / m
-        r_labels = np.ones(m)
-        
+    sensitivities = bound_sensitivities([1], labels, costs, alpha=1)
+    r_points, r_weights, r_labels = get_coreset(sensitivities, m, points, labels, weights=weights)
+
     return r_points, r_weights, r_labels
 
 
