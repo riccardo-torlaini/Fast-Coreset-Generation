@@ -33,8 +33,8 @@ def run_sweeps():
         # 'song',
         # 'cover_type'
     ]
-    # methods = ['fast_coreset', 'semi_uniform', 'uniform_sampling', 'sens_sampling']
-    methods = ['fast_coreset']
+    # methods = ['fast_coreset', 'semi_uniform', 'uniform_sampling', 'sens_sampling', 'lightweight']
+    methods = ['lightweight']
 
     # Only apply for Gaussian mixture model dataset
     n_points = 50000

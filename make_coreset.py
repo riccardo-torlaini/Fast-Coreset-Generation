@@ -218,9 +218,10 @@ def evaluate_coreset(points, k, coreset, weights):
 
 if __name__ == '__main__':
     g_norm = 1
-    g_k = 400
-    g_points, _ = get_dataset('geometric', n_points=10000, D=50, k=g_k)
-    g_m_scalar = 60
+    g_k = 10
+    g_points, g_labels = get_dataset('blobs', n_points=100000, D=50, num_centers=10, k=g_k, class_imbalance=7)
+    print(np.unique(g_labels, return_counts=True)[1])
+    g_m_scalar = 20
     g_allotted_time = 600
     g_hst_count_from_norm = True
     g_kmeans_alg = cluster_pp_slow
@@ -277,7 +278,31 @@ if __name__ == '__main__':
     print(end - start)
     print('Coreset cost ratio:', evaluate_coreset(g_points, g_k, q_points, q_weights))
 
+    fast_points, fast_weights, fast_labels = fast_coreset(
+        g_points,
+        g_k,
+        g_k * g_m_scalar,
+        g_norm,
+        kmeans_alg=g_kmeans_alg,
+        weights=g_weights,
+        allotted_time=g_allotted_time
+    )
+
     # Visualize
-    # embedding = PCA(n_components=2).fit_transform(q_points)
-    # plt.scatter(embedding[:, 0], embedding[:, 1], c=q_labels)
-    # plt.show()
+    model = PCA(n_components=2)
+    g_embedding = model.fit_transform(g_points)
+    q_embedding = model.transform(q_points)
+    fast_embedding = model.transform(fast_points)
+    fig, axes = plt.subplots(1, 3)
+
+    axes[0].scatter(g_embedding[:, 0], g_embedding[:, 1], c=g_labels, alpha=0.5, s=5)
+    axes[1].scatter(q_embedding[:, 0], q_embedding[:, 1], c=q_labels, alpha=0.5, s=5)
+    axes[2].scatter(fast_embedding[:, 0], fast_embedding[:, 1], c=fast_labels, alpha=0.5, s=5)
+
+    axes[0].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+    axes[1].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+    axes[2].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+    axes[0].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+    axes[1].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+    axes[2].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+    plt.show()

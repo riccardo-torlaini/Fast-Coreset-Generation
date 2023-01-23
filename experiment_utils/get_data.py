@@ -7,9 +7,11 @@ import numpy as np
 from sklearn.datasets import make_blobs
 from mnist import MNIST
 
-def get_dataset(dataset_type, n_points=1000, D=50, num_centers=10, k=50):
+def get_dataset(dataset_type, n_points=1000, D=50, num_centers=10, k=50, class_imbalance=5.0):
     if dataset_type == 'blobs':
         return get_blobs_dataset(n_points, D, num_centers)
+    if dataset_type == 'smooth_blobs':
+        return get_smooth_blobs_dataset(n_points, D, num_centers, class_imbalance)
     elif dataset_type == 'single_blob':
         return make_blobs(n_points, D, centers=1)
     elif dataset_type == 'artificial':
@@ -31,7 +33,8 @@ def get_dataset(dataset_type, n_points=1000, D=50, num_centers=10, k=50):
     else:
         raise ValueError('Dataset not implemented')
 
-def get_blobs_dataset(n_points, D, num_centers, scalar=100, class_imbalance=5.0):
+
+def get_blobs_dataset(n_points, D, num_centers, scalar=1000, class_imbalance=5.0, var=5000):
     # 1) Get random sizes for each cluster
     points_remaining = n_points
     cluster_sizes = np.zeros(num_centers)
@@ -42,13 +45,16 @@ def get_blobs_dataset(n_points, D, num_centers, scalar=100, class_imbalance=5.0)
         cluster_sizes[i] = min(cluster_size, points_remaining)
         points_remaining = n_points - np.sum(cluster_sizes)
 
-    print(cluster_sizes)
     # 2) Put each cluster at a random position on the unit hypersphere
     points = []
     labels = []
     for i in range(num_centers):
-        cluster_vector = np.random.rand(1, D)
-        cluster_vector /= np.linalg.norm(cluster_vector[0])
+        cluster_vector = np.random.multivariate_normal(
+            mean=np.zeros(D),
+            cov=np.eye(D),
+            size=(1)
+        )
+        # cluster_vector /= np.linalg.norm(cluster_vector[0])
         points.append(np.ones((int(cluster_sizes[i]), D)) * cluster_vector)
         labels.append(np.ones(int(cluster_sizes[i])) * i)
     points = np.concatenate(points, axis=0)
@@ -59,7 +65,11 @@ def get_blobs_dataset(n_points, D, num_centers, scalar=100, class_imbalance=5.0)
 
     # 4) Scale the dataset
     points *= scalar
-    points += np.random.rand(len(points), D) / 1000
+    points += np.random.multivariate_normal(
+        mean=np.zeros(D),
+        cov=np.eye(D) * var,
+        size=(len(points))
+    )
     return points, labels
 
 

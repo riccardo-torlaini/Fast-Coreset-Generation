@@ -24,8 +24,10 @@ end, the authors in \cite{chrisESA} suggested the following procedure:
     \item Use $\Omega$ to produce a candidate solution $C$ for the clustering task
     \item Report $\max \left( \dfrac{Cost(P, C)}{Cost(\Omega, C)}, \dfrac{Cost(\Omega, C)}{Cost(P, C)} \right)$, where $P$ is the original dataset
 \end{enumerate}
-Naturally, values that are consistently close to $1$ suggest that solutions on the coreset are equally viable on the full dataset.
+We refer to this metric as the \emph{coreset distortion}. Naturally, values that are consistently close to $1$ suggest that solutions on the coreset are equally
+viable on the full dataset.
 
+\input{figures/lightweight_breaks.tex}
 \subsubsection{Algorithms}
 
 We analyze five different algorithms for constructing coresets. The first is standard uniform sampling, where a subset of $m \ll n$ points are sampled from $P$.
@@ -44,40 +46,56 @@ k$ but analyze other functions in \ref{ssec:alg_qualities}.
 
 \subsubsection{Datasets}
 
-We employ several real and artificial datasets to evaluate the quality of a coreset.
-
-The artificial datasets are constructed to showcase specific weaknesses of the various coreset construction algorithms. For example, consider that uniform
-sampling fails when each cluster has a different number of points. To this end, the \emph{$1$-outlier} dataset, consisting of $n-1$ points in a single location
-and $1$ point placed at a large distance away, incurs arbitrarily bad distortion under uniform sampling. 
+We employ several real and artificial datasets to evaluate the quality of a coreset.  The artificial datasets are constructed to showcase specific weaknesses of
+the various coreset construction algorithms. For example, consider that uniform sampling fails when each cluster has a different number of points. To this end,
+the \emph{$1$-outlier} dataset, consisting of $n-1$ points in a single location and $1$ point placed at a large distance away, incurs arbitrarily bad distortion
+under uniform sampling. 
 
 Extending this, note that the lightweight coreset sensitivities are obtained by a linear combination of a uniform distribution and each point's relative
 distance to the mean. As discussed, the uniform distribution can produce poor-quality coresets when presented with uneven class distributions. Furthermore, for
 a zero-mean dataset, the relative distance to the mean is invariant to scaling while the coreset property is not. This means that one can obtain arbitrarily
 bad lightweight coresets by taking a dataset with uneven class sizes, translating it to have zero-mean, and scaling all of the points by some $c >> 1$.
 
-We demonstrate this through a \emph{Gaussian-mixture} dataset, comprised of multivariate Gaussians of varying cardinalities arranged randomly in
-high-dimensional space. We argue that this is consistent with the kind of dataset one may see in practice but, since the classes have different sizes and the
-means of the multivariate Gaussians are normally distributed around the origin, the lightweight coreset algorithm fails to find a coreset of suitable
-quality. \textcolor{red}{Show plot or table of this}.
+We demonstrate this through a \emph{Gaussian-mixture} dataset, comprised of multivariate Gaussians with varying cardinalities arranged randomly in
+high-dimensional space. \textcolor{red}{Show plot or table of this}. We argue that this is a very realistic dataset to consider as there are many linearly
+separable real-world datasets with imbalanced classes. Nonetheless, since the classes have different sizes and the means of the multivariate Gaussians are
+normally distributed around the origin, the lightweight coreset algorithm fails to find a coreset of suitable quality. 
+
+To measure the effect that the class imbalance has on the quality of lightweight coresets, we define a class imbalance parameter $\gamma$ and obtain each
+cluster's size by $|C_i| = \frac{n}{m} \exp \left( \gamma(\rho - \frac{1}{2}) \right)$, where $\rho$ is distributed uniformly at random in the range $[0, 1]$.
+Thus, $\gamma = 0$ means that each cluster has size $\frac{n}{m}$ and the cluster sizes vary as $\gamma$ grows. We see the effect of $\gamma$ on the coreset
+distortion in Table \textcolor{red}{Table ref}, where even small values of $\gamma$ can break the lightweight coreset construction. Looking at the
+$j$-sensitivities, we see that using $(j=\sqrt(k))$-means++ solutions maintains the coreset property for higher values of $\gamma$ but is still not guaranteed
+to obtain satisfactory coresets. Despite this, sensitivity sampling consistently obtains coresets with low distortion.
 
 As a harder example, we provide a \emph{geometric-progression} dataset, consisting of $n/2$ points at $(c, 0, 0, \cdots)$, $n/4$ points at $(0, c, 0, \cdots)$,
-and so on. To see that this creates arbitrarily bad lightweight coresets as $c \rightarrow \infty$, consider that the likelihood of hitting each cluster is
-arbitrarily low if we only use a single center to estimate the sensitivities. We show furthermore that, for small values of $j$, sensitivities obtained
+and so on. To see that this creates arbitrarily bad lightweight coresets as $c \rightarrow \infty$, consider that the likelihood of hitting each cluster goes to
+zero if we only use a single center to estimate the sensitivities. We show furthermore that, for small values of $j$, sensitivities obtained
 according to solving the ($j<k$)-means problem are insufficient to create a coreset for the geometric-progression dataset.
 
 Lastly, we employ the \emph{Benchmark} dataset that was defined in \cite{chrisESA} as a particularly challenging problem for coreset constructions.  The
 benchmark dataset is devised such that all reasonable solutions are of equal quality but maximally far apart in the solution space. This naturally stress-tests
 the sensitivity sampling approach, as every candidate solution's sensitivities are particularly difficult to approximate.
 
-For our real-world datasets, we utilize the MNIST, 1999 KDD-cup, Census, Cover Type, and song datasets. \textcolor{red}{Write about the sizes}
-
-In each dataset, we add random uniform noise $\eta$ with $0 \leq \eta_i \leq 0.001$ in each dimension so that the HST may separate the points into disjoint
+For our real-world datasets, we utilize the MNIST, 1999 KDD-cup, Census, Cover Type, and song datasets \textcolor{red}{References}. \textcolor{red}{Write about the sizes}. In all real and
+artificial datasets, we add random uniform noise $\eta$ with $0 \leq \eta_i \leq 0.001$ in each dimension so that the HST may separate the points into disjoint
 cells.
 
 \subsection{Algorithm Comparisons}
 \label{ssec:alg_qualities}
 
+We first verify the fact that coreset quality is independent of whether we used $k$-means++ or Fast-$k$-means++ to obtain the preliminary solution. To this end,
+Figure~\ref{fig:coreset_size_on_sens_quality} shows that, across datasets, the Fast-Coreset method produces coresets of consistent quality, with all distortion
+values being lower than $1.2$. Additionally, for sufficient coreset sizes ($m \approx 80 * k$), Fast-Coresets are equal in quality to those obtained through
+sensitivity sampling. Despite this, Figure~\ref{fig:k_on_runtime} shows that, while traditional sensitivity sampling runtimes grow linearly with $k$,
+Fast-Coresets only grow logarithmically with the number of centers. Given this context, when reporting the sensitivity sampling results, we will be
+specifically using the Fast-Coreset algorithm, with the knowledge that traditional sensitivity sampling would obtain slightly lower distortion and significantly
+larger runtimes.
 
+We now refer the reader to Figure~\ref{fig:coreset_size_on_quality}, where we show the effect of coreset size on the distortion across datasets and methods.
+We define the coreset sizes as $|\Omega| = ck$, where $c \in [20, 40, 60, 80]$. We see that, across datasets, coresets of larger size obtain lower distortion. However
+we also see that uniform, lightweight, and $j$-means coresets all fail on the geometric-progression and Gaussian-mixture datasets. Additionally, uniform
+sampling clearly fails on the $1$-outlier dataset.
 
 \input{figures/coreset_size_on_quality.tex}
 \input{figures/coreset_size_on_sens_quality.tex}
