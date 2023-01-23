@@ -9,7 +9,7 @@ from mnist import MNIST
 
 def get_dataset(dataset_type, n_points=1000, D=50, num_centers=10, k=50):
     if dataset_type == 'blobs':
-        return make_blobs(n_points, D, centers=num_centers)
+        return get_blobs_dataset(n_points, D, num_centers)
     elif dataset_type == 'single_blob':
         return make_blobs(n_points, D, centers=1)
     elif dataset_type == 'artificial':
@@ -31,6 +31,38 @@ def get_dataset(dataset_type, n_points=1000, D=50, num_centers=10, k=50):
     else:
         raise ValueError('Dataset not implemented')
 
+def get_blobs_dataset(n_points, D, num_centers, scalar=100, class_imbalance=5.0):
+    # 1) Get random sizes for each cluster
+    points_remaining = n_points
+    cluster_sizes = np.zeros(num_centers)
+    for i in range(num_centers):
+        mean_num_points = points_remaining / (num_centers - i)
+        size_scalar = np.exp((np.random.rand() - 0.5) * class_imbalance)
+        cluster_size = mean_num_points * size_scalar
+        cluster_sizes[i] = min(cluster_size, points_remaining)
+        points_remaining = n_points - np.sum(cluster_sizes)
+
+    print(cluster_sizes)
+    # 2) Put each cluster at a random position on the unit hypersphere
+    points = []
+    labels = []
+    for i in range(num_centers):
+        cluster_vector = np.random.rand(1, D)
+        cluster_vector /= np.linalg.norm(cluster_vector[0])
+        points.append(np.ones((int(cluster_sizes[i]), D)) * cluster_vector)
+        labels.append(np.ones(int(cluster_sizes[i])) * i)
+    points = np.concatenate(points, axis=0)
+    labels = np.concatenate(labels, axis=0)
+
+    # 3) Zero-mean the dataset
+    points -= np.mean(points, axis=0, keepdims=True)
+
+    # 4) Scale the dataset
+    points *= scalar
+    points += np.random.rand(len(points), D) / 1000
+    return points, labels
+
+
 def get_geometric_dataset(k, num_rounds, size_scalar=100):
     points = []
     for i in range(num_rounds):
@@ -41,9 +73,10 @@ def get_geometric_dataset(k, num_rounds, size_scalar=100):
     points += np.random.rand(len(points), num_rounds) / 1000
     return points, np.ones(points.shape[0])
 
-def get_artificial_dataset(n_points, D):
+def get_artificial_dataset(n_points, D, num_outliers=50):
     g_points = np.ones([n_points, D])
-    g_points[0] = -1000 * np.ones(D)
+    for outlier in range(num_outliers):
+        g_points[outlier] = -1000 * np.random.rand(D)
     g_points += np.random.rand(n_points, D)
     return g_points, np.ones(n_points)
 

@@ -192,8 +192,8 @@ def make_scores_over_datasets_plot(
     plt.rcParams.update({'font.size': 10, 'text.usetex': True, 'savefig.format': 'pdf'})
     for index in [0, 1]:
         fig, axes = plt.subplots(1, len(methods))
-        fig.set_figheight(6)
-        fig.set_figwidth(10)
+        fig.set_figheight(5.5)
+        fig.set_figwidth(13)
         if index == 0:
             ylabel = 'Coreset distortion'
         else:
@@ -273,7 +273,7 @@ def make_scores_over_datasets_plot(
         else:
             save_path = 'coreset_runtime-' + figure_title
         save_path = os.path.join('tex', 'images', save_path)
-        plt.savefig(save_path)
+        plt.savefig(save_path, bbox_inches='tight', pad_inches=0.0)
 
 
 

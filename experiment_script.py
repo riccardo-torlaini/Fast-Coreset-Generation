@@ -23,10 +23,10 @@ def get_experiment_params(default_values, norm, param, val):
 def run_sweeps():
     results = {}
     datasets = [
-        'artificial',
+        # 'artificial',
         # 'geometric',
         # 'benchmark',
-        # 'blobs',
+        'blobs',
         # 'mnist',
         # 'census',
         # 'kdd_cup',
@@ -34,10 +34,10 @@ def run_sweeps():
         # 'cover_type'
     ]
     # methods = ['fast_coreset', 'semi_uniform', 'uniform_sampling', 'sens_sampling']
-    methods = ['lightweight']
+    methods = ['fast_coreset']
 
     # Only apply for Gaussian mixture model dataset
-    n_points = 25000
+    n_points = 50000
     D = 50
     num_centers = 50
 
