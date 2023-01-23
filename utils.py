@@ -28,8 +28,8 @@ def bound_sensitivities(centers, labels, costs, alpha=10):
 def jl_proj(points, k, eps):
     jl_dim = np.ceil(np.log(k) / (eps ** 2)).astype(np.int32)
     jl_model = SparseRandomProjection(jl_dim)
-    points = jl_model.fit_transform(points)
-    return points
+    proj_points = jl_model.fit_transform(points)
+    return proj_points
 
 def get_cluster_assignments(points, center_inds, center_pts):
     n, d = int(points.shape[0]), int(points.shape[1])
@@ -38,7 +38,15 @@ def get_cluster_assignments(points, center_inds, center_pts):
     all_dists = get_all_dists_to_centers(all_dists, points, center_pts)
     cluster_assignments = np.argmin(all_dists, axis=1)
     cluster_assignments = center_inds[cluster_assignments]
-    costs = np.min(all_dists, axis=1)
+
+    # FIXME -- should we get costs to the mean of the cluster?
+    costs = np.zeros(len(points))
+    for center_ind in center_inds:
+        inds_in_cluster = cluster_assignments == center_ind
+        points_in_cluster = points[inds_in_cluster]
+        mean = np.mean(points_in_cluster, axis=0, keepdims=True)
+        costs[inds_in_cluster] = np.sum(np.square(points[inds_in_cluster] - mean), axis=1)
+    # costs = np.min(all_dists, axis=1)
     return cluster_assignments, costs
 
 def get_min_dists_to_centers(points, new_center, dists):

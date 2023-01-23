@@ -11,6 +11,7 @@ from kmeans_plusplus import cluster_pp
 from experiment_utils.get_data import get_dataset
 from experiment_utils.get_algorithm import get_algorithm, get_results
 from make_coreset import sensitivity_coreset, fast_coreset, uniform_coreset
+from utils import jl_proj
 
 def get_experiment_params(default_values, norm, param, val):
     params = copy.copy(default_values)
@@ -21,29 +22,64 @@ def get_experiment_params(default_values, norm, param, val):
 
 def run_sweeps():
     results = {}
-    datasets = ['blobs', 'mnist']
-    methods = ['fast_coreset', 'uniform_sampling', 'sens_sampling']
+    datasets = [
+        # 'artificial',
+        # 'geometric',
+        # 'benchmark',
+        # 'blobs',
+        # 'mnist',
+        # 'census',
+        'kdd_cup',
+        # 'song',
+        # 'cover_type'
+    ]
+    # methods = ['fast_coreset', 'semi_uniform', 'uniform_sampling', 'sens_sampling']
+    methods = ['fast_coreset']
 
     # Only apply for Gaussian mixture model dataset
-    n_points = 100000
+    n_points = 25000
     D = 50
     num_centers = 50
 
-    # Default values for sweep parameters
-    default_values = {
+    # Default values for sweep parameters on small datasets
+    small_default_values = {
         'k': 100,
-        'm_scalar': 50,
-        'allotted_time': 600,
+        'j_func': '2', # Only applies for semi-uniform coreset
+        'sample_method': 'sens',
+        'm_scalar': 40,
+        'allotted_time': 120,
         'hst_count_from_norm': True,
     }
 
-    sweep_params = {
+    # Default values for sweep parameters on small datasets
+    large_default_values = {
+        'k': 500,
+        'j_func': '2', # Only applies for semi-uniform coreset
+        'sample_method': 'sens',
+        'm_scalar': 40,
+        'allotted_time': 360,
+        'hst_count_from_norm': True,
+    }
+
+    small_sweep_params = {
         # Params to sweep for all coreset algorithms
-        'k': [10, 40, 100],
-        'm_scalar': [2, 5, 10, 20],
-        'allotted_time': [10, 30, 60, 120, 360],
-        # Params to sweep for fast_coreset algorithm
-        'hst_count_from_norm': [True, False],
+        # 'k': [10, 50, 100, 200],
+        # 'j_func': ['2', '10', 'log', 'sqrt', 'half'],
+        # 'sample_method': ['sens', 'uniform'],
+        'm_scalar': [20, 40, 60, 80],
+        # 'allotted_time': [0, 0.5, 1, 3, 5, 7, 10, 20],
+        # 'hst_count_from_norm': [True, False], # Only applies to fast_coreset algorithm
+    }
+
+    large_sweep_params = {
+        # Params to sweep for all coreset algorithms
+        # 'k': [100, 200, 400],
+        # 'j_func': ['2', '10', 'log', 'sqrt'],
+        # 'sample_method': ['sens', 'uniform'],
+        # 'm_scalar': [20, 40, 60, 80],
+        'm_scalar': [40],
+        # 'allotted_time': [60, 120, 360],
+        # 'hst_count_from_norm': [True, False], # Only applies to fast_coreset algorithm
     }
 
     outputs_path = 'outputs'
@@ -63,18 +99,20 @@ def run_sweeps():
             points, _ = get_dataset(dataset, n_points, D, num_centers)
             n, d = points.shape # Will be different from n_points or D if dataset is real-world data
 
-            # Get solution that we will evaluate coreset against
-            uniform_weights = np.ones(n)
-            one_approx_centers, _, one_approx_costs = cluster_pp(
-                points,
-                default_values['k'],
-                uniform_weights,
-            )
+            # Get different default values and sweep parameters depending on dataset size
+            if n > 100000:
+                default_values = large_default_values
+                sweep_params = large_sweep_params
+            else:
+                default_values = small_default_values
+                sweep_params = small_sweep_params
 
             dataset_output_path = os.path.join(method_output_path, dataset)
             if not os.path.isdir(dataset_output_path):
                 os.makedirs(dataset_output_path)
-            for norm in [1, 2]:
+
+            # for norm in [1, 2]:
+            for norm in [2]:
                 print('\t\tNorm --- {}'.format(str(norm)))
                 norm_output_path = os.path.join(dataset_output_path, str(norm))
                 if not os.path.isdir(norm_output_path):
@@ -86,9 +124,6 @@ def run_sweeps():
                         os.makedirs(param_output_path)
                     for val in vals:
                         print('\t\t\t\tValue --- {}'.format(str(val)))
-                        if param == 'k':
-                            # If our parameter is k, we need to get a new kmeans++ solution to evaluate against
-                            one_approx_centers, _, one_approx_costs = cluster_pp(points, val, uniform_weights)
                         val_output_path = os.path.join(param_output_path, str(val))
                         if not os.path.isdir(val_output_path):
                             os.makedirs(val_output_path)
@@ -98,10 +133,19 @@ def run_sweeps():
                         if param in ['hst_count_from_norm'] and method != 'fast_coreset':
                             print('Boolean parameters only apply to fast coreset algorithm. Continuing...\n')
                             continue
+                        if param in ['j_func', 'sample_method'] and method != 'semi_uniform':
+                            print('{} only applies to semi-uniform algorithm. Continuing...\n'.format(param))
+                            continue
 
                         params = get_experiment_params(default_values, norm, param, val)
+
+                        if np.log(params['k']) / (0.5 ** 2) < points.shape[1]:
+                            proj_points = jl_proj(points, params['k'], 0.5)
+                        else:
+                            proj_points = points
+
                         acc, time, q_points, q_weights = get_results(
-                            points,
+                            proj_points,
                             coreset_alg,
                             params,
                         )

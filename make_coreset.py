@@ -17,7 +17,49 @@ from multi_hst import make_multi_HST
 from utils import bound_sensitivities, jl_proj, get_cluster_assignments
 from experiment_utils.get_data import get_dataset
 
+def get_coreset_with_centers(centers, sensitivities, m, points, labels, weights=None):
+    """
+    Sample coreset from sensitivity values but use first k centers as the first 
+    elements in the coreset
+    """
+    replace = False
+    if m > len(points):
+        replace = True
+    rng = np.random.default_rng()
+    k = len(centers)
+    if m <= k:
+        return points[centers[:m]], np.ones(m) / m, np.ones(m)
+    sample_coreset_inds = rng.choice(
+        np.arange(len(sensitivities)),
+        size=m-k,
+        replace=replace,
+        p=sensitivities
+    )
+
+    ### Sample coreset
+    full_coreset_inds = np.concatenate([centers, sample_coreset_inds], axis=0)
+    q_points = points[full_coreset_inds]
+    q_labels = labels[full_coreset_inds]
+
+    ### Get weights for the coreset
+    # Each center that we got will represent n/m points
+    #   - This is a rough estimate and should be improved on in the future
+    if weights is None:
+        weights = np.ones_like(labels)
+    new_weights = 1 / sensitivities[sample_coreset_inds]
+    center_weights = np.ones(k) * np.mean(new_weights)
+    new_weights = np.concatenate([center_weights, new_weights], axis=0)
+    # Want our coreset to be an unbiased estimator, so the sum of the new weights
+    #   has to equal the sum of the old weights
+    new_weights *= np.sum(weights) / np.sum(new_weights)
+    q_weights = weights[full_coreset_inds] * new_weights
+ 
+    return q_points, q_weights, q_labels
+
 def get_coreset(sensitivities, m, points, labels, weights=None):
+    """
+    Sample all m coreset elements from sensitivity values, ignoring the first k centers
+    """
     replace = False
     if m > len(points):
         replace = True
@@ -74,6 +116,72 @@ def sensitivity_coreset(
     r_points, r_weights, r_labels = get_coreset(sensitivities, m, points, labels, weights=weights)
     return r_points, r_weights, r_labels
 
+def semi_uniform_coreset(
+    points,
+    k,
+    m,
+    norm,
+    kmeans_alg=cluster_pp_slow,
+    allotted_time=np.inf,
+    j_func='2',
+    sample_method='sens',
+    **kwargs
+):
+    j_func_dict = {
+        '2': 2,
+        '10': 10,
+        'log': np.log(k),
+        'sqrt': np.sqrt(k),
+        'half': k / 2
+    }
+    j = int(j_func_dict[j_func])
+    weights = np.ones(len(points))
+    centers, labels, costs = kmeans_alg(
+        points,
+        j,
+        weights,
+        allotted_time=allotted_time
+    )
+
+    if sample_method == 'sens':
+        sensitivities = bound_sensitivities(centers, labels, costs)
+        r_points, r_weights, r_labels = get_coreset(sensitivities, m, points, labels, weights=weights)
+    else:
+        assert sample_method == 'uniform'
+        r_points = points[np.random.choice(n, m - j)]
+        r_points = np.concatenate([centers, r_points])
+        r_weights = np.ones(m) * float(n) / m
+        r_labels = np.ones(m)
+        
+    return r_points, r_weights, r_labels
+
+def lightweight_coreset(
+    points,
+    k,
+    m,
+    norm,
+    allotted_time=np.inf,
+    sample_method='sens',
+    **kwargs
+):
+    weights = np.ones(len(points))
+    center = np.mean(points, axis=0, keepdims=True)
+    labels = np.ones(len(points))
+    costs = np.sum(np.square(points - center), axis=-1)
+
+    if sample_method == 'sens':
+        sensitivities = bound_sensitivities([1], labels, costs)
+        r_points, r_weights, r_labels = get_coreset(sensitivities, m, points, labels, weights=weights)
+    else:
+        assert sample_method == 'uniform'
+        r_points = points[np.random.choice(n, m - j)]
+        r_points = np.concatenate([centers, r_points])
+        r_weights = np.ones(m) * float(n) / m
+        r_labels = np.ones(m)
+        
+    return r_points, r_weights, r_labels
+
+
 def fast_coreset(
     points,
     k,
@@ -83,11 +191,6 @@ def fast_coreset(
     allotted_time=np.inf,
     **kwargs
 ):
-    # FIXME -- I must be going crazy. Using fewer than k centers to do the clustering gives
-    #          BETTER results on the gaussian mixture model dataset.
-    #        - Using 1 center performs poorly. Using 10 centers performs better than 1.
-    #          Then using 100 centers performs poorly again!
-    # - This ALSO holds true in the standard sensitivity sampling case
     centers, labels, costs = fast_cluster_pp(
         points,
         k,
@@ -123,15 +226,17 @@ def evaluate_coreset(points, k, coreset, weights):
 
 if __name__ == '__main__':
     g_norm = 1
-    g_k = 40
-    g_points, _ = get_dataset('kdd_cup', n_points=10000, D=50, k=g_k)
-    g_m_scalar = 50
-    g_allotted_time = np.inf
+    g_k = 400
+    g_points, _ = get_dataset('geometric', n_points=10000, D=50, k=g_k)
+    g_m_scalar = 60
+    g_allotted_time = 600
     g_hst_count_from_norm = True
-    g_kmeans_alg = cluster_pp#_slow
-    # g_points = jl_proj(g_points, g_k, eps=0.5)
+    g_kmeans_alg = cluster_pp_slow
+    g_points = jl_proj(g_points, g_k, eps=0.5)
 
-    method = 'fast'
+    # method = 'fast'
+    method = 'lightweight'
+    # method = 'semi_uniform'
     # method = 'sensitivity'
     # method = 'bico'
     # method = 'uniform'
@@ -156,6 +261,21 @@ if __name__ == '__main__':
             kmeans_alg=g_kmeans_alg,
             weights=g_weights,
             allotted_time=g_allotted_time
+        )
+    elif method == 'lightweight':
+        q_points, q_weights, q_labels = lightweight_coreset(
+            g_points,
+            g_k,
+            g_k * g_m_scalar,
+            g_norm,
+        )
+    elif method == 'semi_uniform':
+        q_points, q_weights, q_labels = semi_uniform_coreset(
+            g_points,
+            g_k,
+            g_k * g_m_scalar,
+            g_norm,
+            kmeans_alg=g_kmeans_alg,
         )
     elif method == 'bico':
         q_points, q_weights, q_labels = bico_coreset(g_points, g_k, g_k * g_m_scalar, g_allotted_time)

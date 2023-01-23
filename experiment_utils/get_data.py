@@ -7,13 +7,15 @@ import numpy as np
 from sklearn.datasets import make_blobs
 from mnist import MNIST
 
-def get_dataset(dataset_type, n_points=1000, D=50, num_centers=10, k=20):
+def get_dataset(dataset_type, n_points=1000, D=50, num_centers=10, k=50):
     if dataset_type == 'blobs':
         return make_blobs(n_points, D, centers=num_centers)
     elif dataset_type == 'single_blob':
         return make_blobs(n_points, D, centers=1)
     elif dataset_type == 'artificial':
         return get_artificial_dataset(n_points, D)
+    elif dataset_type == 'geometric':
+        return get_geometric_dataset(k, num_rounds=k)
     elif dataset_type == 'mnist':
         return load_mnist()
     elif dataset_type == 'song':
@@ -29,6 +31,16 @@ def get_dataset(dataset_type, n_points=1000, D=50, num_centers=10, k=20):
     else:
         raise ValueError('Dataset not implemented')
 
+def get_geometric_dataset(k, num_rounds, size_scalar=100):
+    points = []
+    for i in range(num_rounds):
+        cluster = np.zeros((int(size_scalar * k / (2 ** i)), num_rounds))
+        cluster[:, i] = 1
+        points.append(cluster)
+    points = np.concatenate(points, axis=0)
+    points += np.random.rand(len(points), num_rounds) / 1000
+    return points, np.ones(points.shape[0])
+
 def get_artificial_dataset(n_points, D):
     g_points = np.ones([n_points, D])
     g_points[0] = -1000 * np.ones(D)
@@ -42,8 +54,8 @@ def remap_features(points, columns):
         column = points[:, c]
         _, column_remap = np.unique(column, return_inverse=True)
         column_remap = column_remap.astype(np.float32)
-        if np.max(column_remap) != 0:
-            column_remap /= np.max(column_remap)
+        # if np.max(column_remap) != 0:
+        #     column_remap /= np.max(column_remap)
         new_points[:, c] = column_remap
     return new_points
 
@@ -79,6 +91,7 @@ def load_categorical_dataset(
 
 def load_census_data():
     # Adult census data found at https://archive.ics.uci.edu/ml/datasets/census+income
+    # https://archive.ics.uci.edu/ml/datasets/US+Census+Data+(1990)
     directory = os.path.join('data', 'census')
     data_path = os.path.join(directory, 'adult.data')
     pickled_path = os.path.join(directory, 'pickled_census.npy')
@@ -210,4 +223,5 @@ def load_coreset_benchmark(k, alpha=3):
         padded_benchmarks.append(padded)
 
     padded_benchmarks = np.concatenate(padded_benchmarks, axis=0)
+    padded_benchmarks += np.random.rand(padded_benchmarks.shape[0], padded_benchmarks.shape[1]) / 100000
     return padded_benchmarks, np.ones(len(padded_benchmarks))
