@@ -23,20 +23,21 @@ def get_experiment_params(default_values, norm, param, val):
 def run_sweeps():
     results = {}
     datasets = [
-        'artificial',
-        'geometric',
-        'benchmark',
+        # 'artificial',
+        # 'geometric',
+        # 'benchmark',
         'blobs',
-        'mnist',
-        'census',
-        'kdd_cup',
-        'song',
-        'cover_type'
+        # 'mnist',
+        # 'adult',
+        # 'song',
+        # 'census',
+        # 'cover_type'
     ]
-    methods = ['fast_coreset', 'semi_uniform', 'uniform_sampling', 'sens_sampling', 'lightweight']
+    # methods = ['fast_coreset', 'semi_uniform', 'uniform_sampling', 'sens_sampling', 'lightweight', 'bico']
+    methods = ['lightweight']
 
     # Only apply for Gaussian mixture model dataset
-    n_points = 25000
+    n_points = 50000
     D = 50
     num_centers = 50
 
@@ -63,7 +64,7 @@ def run_sweeps():
     small_sweep_params = {
         # Params to sweep for all coreset algorithms
         'k': [10, 50, 100, 200],
-        'j_func': ['2', '10', 'log', 'sqrt', 'half'],
+        'j_func': ['2', '10', 'log', 'sqrt'],
         # 'sample_method': ['sens', 'uniform'],
         'm_scalar': [20, 40, 60, 80],
         # 'allotted_time': [0, 0.5, 1, 3, 5, 7, 10, 20],
@@ -73,7 +74,7 @@ def run_sweeps():
     large_sweep_params = {
         # Params to sweep for all coreset algorithms
         'k': [100, 200, 400],
-        'j_func': ['2', '10', 'log', 'sqrt', 'half'],
+        'j_func': ['2', '10', 'log', 'sqrt'],
         # 'sample_method': ['sens', 'uniform'],
         'm_scalar': [20, 40, 60, 80],
         # 'allotted_time': [60, 120, 360],

@@ -5,6 +5,7 @@
 % Recommended, but optional, packages for figures and better typesetting:
 \usepackage{microtype}
 \usepackage{graphicx}
+\usepackage{tabularx}
 \usepackage{subfigure}
 \usepackage{booktabs} % for professional tables
 
@@ -53,9 +54,6 @@
 \usepackage[textsize=tiny]{todonotes}
 
 
-% The \icmltitle you define below is probably too long as a header.
-% Therefore, a short form for the running title is supplied here:
-\icmltitlerunning{Linear-Time Construction of Coreset}
 
 
 \DeclareMathOperator{\polylog}{polylog}
@@ -91,7 +89,13 @@
  %  }
  %  \fi
  }
- 
+  \newcommand{\andrew}[1]{
+ %  \ifdraft{
+    \textsf{{\color{red} *** (Andrew) \marrow #1 ***}}
+ %  }
+ %  \fi
+ }
+
  
 %for having enumerates with (i) (ii) (iii): 
  \renewcommand{\labelenumi}{\theenumi}
@@ -99,7 +103,10 @@
 \begin{document}
 
 \twocolumn[
-\icmltitle{Linear-Time Construction of Coreset for Clustering}
+\icmltitle{Fast and Precise Coreset for Clustering, Even in Practice}
+% The \icmltitle you define below is probably too long as a header.
+% Therefore, a short form for the running title is supplied here:
+\icmltitlerunning{Fast and Precise Coreset for Clustering, Even in Practice}
 
 % It is OKAY to include author information, even for blind
 % submissions: the style file will automatically remove it for you
@@ -161,6 +168,7 @@ In particular, it is faster than any coreset algorithm with provable guarantees,
 
 \input{introduction}
 \input{theory}
+\input{results}
 
 
 

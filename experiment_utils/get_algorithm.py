@@ -6,14 +6,16 @@ from make_coreset import \
     uniform_coreset, \
     evaluate_coreset, \
     semi_uniform_coreset, \
-    lightweight_coreset
+    lightweight_coreset, \
+    bico_coreset
 
 ALG_DICT = {
     'sens_sampling': sensitivity_coreset,
     'fast_coreset': fast_coreset,
     'uniform_sampling': uniform_coreset,
     'semi_uniform': semi_uniform_coreset,
-    'lightweight': lightweight_coreset
+    'lightweight': lightweight_coreset,
+    'bico': bico_coreset
 }
 
 def get_algorithm(algorithm_type):

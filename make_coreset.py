@@ -19,7 +19,7 @@ from experiment_utils.get_data import get_dataset
 
 def get_coreset_with_centers(centers, sensitivities, m, points, labels, weights=None):
     """
-    Sample coreset from sensitivity values but use first k centers as the first 
+    Sample coreset from sensitivity values but use k centers from approximate solution as the first 
     elements in the coreset
     """
     replace = False
@@ -88,8 +88,6 @@ def bico_coreset(points, k, m, allotted_time):
     return q_points, q_weights, np.ones_like(q_weights)
 
 def uniform_coreset(points, m, **kwargs):
-    # Uniform coreset size should be the same as the other coreset sizes
-    #   to show that it is super fast but terrible quality
     n = len(points)
     q_points = points[np.random.choice(n, m)]
     q_weights = np.ones(m) * float(n) / m
@@ -143,15 +141,8 @@ def semi_uniform_coreset(
         allotted_time=allotted_time
     )
 
-    if sample_method == 'sens':
-        sensitivities = bound_sensitivities(centers, labels, costs)
-        r_points, r_weights, r_labels = get_coreset(sensitivities, m, points, labels, weights=weights)
-    else:
-        assert sample_method == 'uniform'
-        r_points = points[np.random.choice(n, m - j)]
-        r_points = np.concatenate([centers, r_points])
-        r_weights = np.ones(m) * float(n) / m
-        r_labels = np.ones(m)
+    sensitivities = bound_sensitivities(centers, labels, costs)
+    r_points, r_weights, r_labels = get_coreset(sensitivities, m, points, labels, weights=weights)
         
     return r_points, r_weights, r_labels
 
@@ -161,7 +152,6 @@ def lightweight_coreset(
     m,
     norm,
     allotted_time=np.inf,
-    sample_method='sens',
     **kwargs
 ):
     weights = np.ones(len(points))
@@ -169,16 +159,9 @@ def lightweight_coreset(
     labels = np.ones(len(points))
     costs = np.sum(np.square(points - center), axis=-1)
 
-    if sample_method == 'sens':
-        sensitivities = bound_sensitivities([1], labels, costs)
-        r_points, r_weights, r_labels = get_coreset(sensitivities, m, points, labels, weights=weights)
-    else:
-        assert sample_method == 'uniform'
-        r_points = points[np.random.choice(n, m - j)]
-        r_points = np.concatenate([centers, r_points])
-        r_weights = np.ones(m) * float(n) / m
-        r_labels = np.ones(m)
-        
+    sensitivities = bound_sensitivities([1], labels, costs, alpha=1)
+    r_points, r_weights, r_labels = get_coreset(sensitivities, m, points, labels, weights=weights)
+
     return r_points, r_weights, r_labels
 
 
@@ -285,7 +268,31 @@ if __name__ == '__main__':
     print(end - start)
     print('Coreset cost ratio:', evaluate_coreset(g_points, g_k, q_points, q_weights))
 
+    fast_points, fast_weights, fast_labels = fast_coreset(
+        g_points,
+        g_k,
+        g_k * g_m_scalar,
+        g_norm,
+        kmeans_alg=g_kmeans_alg,
+        weights=g_weights,
+        allotted_time=g_allotted_time
+    )
+
     # Visualize
-    # embedding = PCA(n_components=2).fit_transform(q_points)
-    # plt.scatter(embedding[:, 0], embedding[:, 1], c=q_labels)
-    # plt.show()
+    model = PCA(n_components=2)
+    g_embedding = model.fit_transform(g_points)
+    q_embedding = model.transform(q_points)
+    fast_embedding = model.transform(fast_points)
+    fig, axes = plt.subplots(1, 3)
+
+    axes[0].scatter(g_embedding[:, 0], g_embedding[:, 1], c=g_labels, alpha=0.5, s=5)
+    axes[1].scatter(q_embedding[:, 0], q_embedding[:, 1], c=q_labels, alpha=0.5, s=5)
+    axes[2].scatter(fast_embedding[:, 0], fast_embedding[:, 1], c=fast_labels, alpha=0.5, s=5)
+
+    axes[0].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+    axes[1].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+    axes[2].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+    axes[0].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+    axes[1].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+    axes[2].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+    plt.show()
