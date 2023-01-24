@@ -208,7 +208,7 @@ def evaluate_coreset(points, k, coreset, weights):
     return acc
 
 if __name__ == '__main__':
-    g_norm = 1
+    g_norm = 2
     g_k = 100
     g_points, g_labels = get_dataset('blobs', n_points=50000, D=50, num_centers=10, k=g_k, class_imbalance=5)
     g_m_scalar = 40

@@ -36,7 +36,7 @@ def run_sweeps():
     # methods = ['fast_coreset', 'semi_uniform', 'uniform_sampling', 'sens_sampling', 'lightweight', 'bico']
     methods = ['lightweight']
 
-    # Only apply for Gaussian mixture model dataset
+    # Only apply for Gaussian mixture and 1-outlier datasets
     n_points = 50000
     D = 50
     num_centers = 50

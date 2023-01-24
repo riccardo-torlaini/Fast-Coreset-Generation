@@ -41,8 +41,8 @@ We analyze six different algorithms for constructing coresets.
             $f(k)$-means++ coreset when discussing a coreset built with respect to a specific function of $k$. For example, the $\log k$-means++ solution.
         \item \emph{Standard sensitivity sampling}: obtain an approximate $k$-means solution with $k$-means++ and sample coreset proportionate to sensitivity upper bounds.
         \item \emph{Fast-Coreset}: obtain an approximate $k$-means solution with \fkmeans and sample coreset proportionate to sensitivity upper bounds.
-
 \end{itemize}
+All but BICO have been implemented by us in a single codebase.
 
 We take a moment here to motivate the $j$-means coreset algorithm.  Consider that lightweight coresets are simply solving $1$-means to obtain sensitivity values
 whereas sensitivity sampling is solving the $k$-means problem.  As we will show, it is easy to construct examples where lightweight coresets fail to produce
@@ -92,32 +92,33 @@ sensitivity sampling coresets can be implemented in linear time while preserving
 sensitivity sampling to further experiments, as it is too slow to run on our large datasets and does not provide better quality results than the Fast-Coreset
 method.
 
-We now refer the reader to Figure~\ref{fig:coreset_size_on_quality}, where we show the effect of coreset size on the distortion across datasets and methods.  We
-define the coreset sizes as $|\Omega| = ck$, where $c \in [20, 40, 60, 80]$. We see that, across datasets, coresets of larger size obtain lower distortion.
-However, it is also clear that uniform, lightweight, and $j$-means coresets all fail on the geometric-progression and Gaussian-mixture datasets. Additionally,
-uniform sampling expectedly fails on the $1$-outlier problem.
+\input{figures/coreset_size_on_sens_quality.tex}
 
-As discussed, the sensitivities for lightweight coresets are obtained by a linear combination of a uniform distribution and each point's relative
-distance to the mean. Since the Gaussian mixture dataset has randomly distributed clusters of varying sizes, a small cluster that is close to the mean is unlikely
-to ever be sampled. We argue that, although this is a toy dataset, one can easily imagine many datasets that have this property. As a simple solution, we see
-that the $j$-means coreset obtains satisfactory solutions on the Gaussian mixture dataset for 
+We now refer the reader to Figure~\ref{fig:coreset_size_on_quality}, where we show the effect of coreset size on the distortion across datasets and methods.  We
+define the coreset sizes as $|\Omega| = ck$, where $c \in [20, 40, 60, 80]$ and see that, as one might expect, larger coresets obtain lower distortion.
+However, it is also clear that uniform sampling expectedly fails on the $1$-outlier problem and that uniform, lightweight, and $j$-means coresets all fail on
+the Gaussian-mixture and geometric datasets.  We discuss these failure cases below.
+
+\input{figures/k_on_runtime.tex}
+
+To see why lightweight coresets fail to capture the Gaussian distribution, recall that their sensitivities are obtained by combining each point's relative
+distance to the mean with a uniform distribution. Since the Gaussian mixture dataset has randomly distributed clusters of varying sizes, a small cluster that is
+close to the mean is unlikely to ever be sampled. We argue that, although this is a toy dataset, one can easily imagine many datasets that have this property.
+As a simple solution, we see in Figure~\textcolor{red}{Ref plot that shows this} that the $j$-means coreset obtains satisfactory solutions on the Gaussian
+mixture dataset for $j = \sqrt{k}$.
 
 A similar argument can be made for the more-challenging geometric dataset, where the cluster size decreases exponentially and all clusters are equidistant.
-We show furthermore that, for small values of $j$, sensitivities obtained according to
-solving the $j$-means problem are insufficient to create a coreset for the geometric-progression dataset.
+We show furthermore that this even breaks the $j$-means coreset algorithm for $j = \sqrt{k}$, implying that the only plausible method to obtain an effective
+coreset on the geometric dataset is to estimate sensitivities with $j = O(k)$.
 
 To measure the effect that the class imbalance has on the quality of each coreset, we define a class imbalance parameter $\gamma$ and obtain each
 cluster's size by $|C_i| = \frac{n}{m} \exp \left( \gamma(\rho - \frac{1}{2}) \right)$, where $\rho$ is distributed uniformly at random in the range $[0, 1]$.
 Thus, each cluster has size $\frac{n}{m}$ when $\gamma = 0$ and the cluster size diverges exponentially as $\gamma$ grows linearly. We see the effect of $\gamma$ on the coreset
 distortion in Table \textcolor{red}{Table ref}, where even small values of $\gamma$ can break the lightweight coreset construction. Looking at the
-$j$-sensitivities, we see that using $(j=\sqrt(k))$-means++ solutions maintains the coreset property for higher values of $\gamma$ but is still not guaranteed
+$j$-sensitivities, we see that using $\sqrt{k}$-means++ maintains the coreset property for higher values of $\gamma$ but is still not guaranteed
 to obtain satisfactory coresets. Despite this, sensitivity sampling consistently obtains coresets with low distortion.
 
-As a harder example, we provide a \emph{geometric-progression} dataset, consisting of \david{Are they precisely at $(c, 0, 0, \cdots)$ or very close? if they are precisely there, scaling $c$ should not change. Maybe say $c=1$ and a tiny
-noise?}. 
-Lastly, we employ the \emph{Benchmark} dataset that  as a particularly challenging problem for coreset constructions.  The
-benchmark dataset is  This naturally stress-tests
-the sensitivity sampling approach, as every candidate solution's sensitivities are particularly difficult to approximate.
-
-\input{figures/coreset_size_on_sens_quality.tex}
-\input{figures/k_on_runtime.tex}
+Lastly, we employ the \emph{Benchmark} dataset as a particularly challenging problem for coreset constructions. Since it forces the sensitivities to effectively
+become uniform, we see that the fast-coreset quality on the benchmark is worse than on many of the real-world datasets. We attribute this to the highly varying
+density in the benchmark, which imposes a larger burden on the HST point separation. Despite this, we note that the distortions are still well within the
+$\varepsilon$ error allowance.
