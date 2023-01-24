@@ -1,7 +1,10 @@
 *.log
+*.swp
 *.pdf
 *.aux
 *.gz
 *.bbl
 *.blg
 *.out
+*.pyc
+*/__pycache__/*

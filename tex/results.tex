@@ -33,79 +33,91 @@ viable on the full dataset.
 
 We analyze six different algorithms for constructing coresets.
 \begin{itemize}
-        \item Standard uniform sampling -- choose a subset of $m \ll n$ points uniformly from $P$.
-        \item Lightweight coreset -- find the mean $\mu$ of the dataset and obtain per-point sensitivity estimates by $\hat{s}(p) = 1/|P| + \cost(p, \mu) / \cost(P, \mu)$.
+        \item \emph{Standard uniform sampling}: choose a subset of $m \ll n$ points uniformly from $P$.
+        \item \emph{Lightweight coreset}: find the mean $\mu$ of the dataset and obtain per-point sensitivity estimates by $\hat{s}(p) = 1/|P| + \cost(p, \mu) / \cost(P, \mu)$.
             The first term encourages uniform sampling while the second encourages sampling proportionate to the distance from the mean.
-        \item $j$-means coreset -- find an approximate $j$-means solution with $j = f(k)$, where $0 < f(k) < k$ for all values of $k$.
-        \item Birch using Coresets (BICO) -- create streaming coreset quickly using the BIRCH algorithm \textcolor{red}{reference}
-        \item Standard sensitivity sampling -- obtain an approximate $k$-means solution with $k$-means++ and sample coreset proportionate to sensitivity upper bounds.
-        \item Fast Coreset -- obtain an approximate $k$-means solution with \fkmeans and sample coreset proportionate to sensitivity upper bounds.
+        \item \emph{Birch using Coresets (BICO)}: use BIRCH algorithm~\cite{birch} to create streaming coreset quickly.
+        \item \emph{$j$-means++ coreset}: find an approximate $j$-means solution with $j = f(k)$ with $0 < f(k) < k$ for all $k$. We will sometimes use the notation
+            $f(k)$-means++ coreset when discussing a coreset built with respect to a specific function of $k$. For example, the $\log k$-means++ solution.
+        \item \emph{Standard sensitivity sampling}: obtain an approximate $k$-means solution with $k$-means++ and sample coreset proportionate to sensitivity upper bounds.
+        \item \emph{Fast-Coreset}: obtain an approximate $k$-means solution with \fkmeans and sample coreset proportionate to sensitivity upper bounds.
 
 \end{itemize}
 
 We take a moment here to motivate the $j$-means coreset algorithm.  Consider that lightweight coresets are simply solving $1$-means to obtain sensitivity values
 whereas sensitivity sampling is solving the $k$-means problem.  As we will show, it is easy to construct examples where lightweight coresets fail to produce
-acceptable coresets. Sensitivity-sampling, on the other hand, produces satisfactory coresets across datasets and settings. Thus, we study the $j$-means coreset
+acceptable coresets while sensitivity-sampling produces satisfactory coresets across datasets and settings. Thus, we study the $j$-means coreset
 algorithm to answer the following question: for which values of $j < k$ does an approximate $j$-means solution give a satisfactory coreset?
 
 \subsubsection{Datasets}
+\input{figures/coreset_size_on_quality.tex}
 
-We employ several real and artificial datasets to evaluate the quality of a coreset.  The artificial datasets are constructed to showcase specific weaknesses of
-the various coreset construction algorithms. For example, consider that uniform sampling fails when each cluster has a different number of points. To this end,
-the \emph{$1$-outlier} dataset, consisting of $n-1$ points in a single location and $1$ point placed at a large distance away, incurs arbitrarily bad distortion
-under uniform sampling. 
+We employ several real and artificial datasets to evaluate the quality of a coreset. We define the artificial datasets below and refer the reader to
+Table~\cref{tbl:datasets} for the real datasets.
 
-Extending this, note that the lightweight coreset sensitivities are obtained by a linear combination of a uniform distribution and each point's relative
-distance to the mean. As discussed, the uniform distribution can produce poor-quality coresets when presented with uneven class distributions. Furthermore, for
-a zero-mean dataset, the relative distance to the mean is invariant to scaling while the coreset property is not. This means that one can obtain arbitrarily
-bad lightweight coresets by taking a dataset with uneven class sizes, translating it to have zero-mean, and scaling all of the points by some $c >> 1$.
+\begin{itemize}
+    \item \emph{c-outlier}: $n-c$ points in a single location and $c$ points placed at a large distance away.
+    \item \emph{Gaussian mixture}: multivariate Gaussians with varying cardinalities arranged randomly in high-dimensional space.
+    \item \emph{Geometric}: $n/2$ points at $(c, 0, 0, \cdots)$, $n/4$ points at $(0, c, 0, \cdots)$, and so on.
+    \item \emph{Benchmark}: A specific distribution of points such that all reasonable solutions are of equal quality but are maximally far
+            apart in the solution space, as defined in \cite{chrisESA}.
+\end{itemize}
 
-We demonstrate this through a \emph{Gaussian-mixture} dataset, comprised of multivariate Gaussians with varying cardinalities arranged randomly in
-high-dimensional space. \textcolor{red}{Show plot or table of this}. We argue that this is a very realistic dataset to consider as there are many linearly
-separable real-world datasets with imbalanced classes. Nonetheless, since the classes have different sizes and the means of the multivariate Gaussians are
-normally distributed around the origin, the lightweight coreset algorithm fails to find a coreset of suitable quality. 
+\begin{table}[htbp]
+    \label{tbl:datasets}
+    \centering
+    \begin{tabular}{lrr}
+        Dataset & Points & Dim \\
+        \hline
+        \emph{MNIST} & 60\,000 & 784 \\
+        \emph{Song} & 515\,345 & 90 \\
+        \emph{Cover Type} & 581\,012 & 54 \\
+        \emph{Census} & 2\,458\,285 & 68
+    \end{tabular}
+    \caption{Description of real world datasets}
+\end{table}
 
-To measure the effect that the class imbalance has on the quality of lightweight coresets, we define a class imbalance parameter $\gamma$ and obtain each
-cluster's size by $|C_i| = \frac{n}{m} \exp \left( \gamma(\rho - \frac{1}{2}) \right)$, where $\rho$ is distributed uniformly at random in the range $[0, 1]$.
-Thus, $\gamma = 0$ means that each cluster has size $\frac{n}{m}$ and the cluster sizes vary as $\gamma$ grows. We see the effect of $\gamma$ on the coreset
-distortion in Table \textcolor{red}{Table ref}, where even small values of $\gamma$ can break the lightweight coreset construction. Looking at the
-$j$-sensitivities, we see that using $(j=\sqrt(k))$-means++ solutions maintains the coreset property for higher values of $\gamma$ but is still not guaranteed
-to obtain satisfactory coresets. Despite this, sensitivity sampling consistently obtains coresets with low distortion.
-
-As a harder example, we provide a \emph{geometric-progression} dataset, consisting of $n/2$ points at $(c, 0, 0, \cdots)$, $n/4$ points at $(0, c, 0, \cdots)$,
-and so on \david{Are they precisely at $(c, 0, 0, \cdots)$ or very close? if they are precisely there, scaling $c$ should not change. Maybe say $c=1$ and a tiny noise?}. To see that this creates arbitrarily bad lightweight coresets as $c \rightarrow \infty$, consider that the likelihood of hitting each cluster goes to
-zero if we only use a single center to estimate the sensitivities. We show furthermore that, for small values of $j$, sensitivities obtained
-according to solving the ($j<k$)-means problem are insufficient to create a coreset for the geometric-progression dataset.
-
-Lastly, we employ the \emph{Benchmark} dataset that was defined in \cite{chrisESA} as a particularly challenging problem for coreset constructions.  The
-benchmark dataset is devised such that all reasonable solutions are of equal quality but maximally far apart in the solution space. This naturally stress-tests
-the sensitivity sampling approach, as every candidate solution's sensitivities are particularly difficult to approximate.
-
-For our real-world datasets, we utilize the following datasets: MNIST \david{which version did you use?}, Song~\cite{song} ($515, 345$ points in dimension 90),
-and some dataset from the UCI librairie \cite{Dua:2019}: KDD-cup~\cite{kddcup} ($4,000,000$ points in dimension 48) \david{is it this one? Not the same as
-rejection sampling paper}, Census~\cite{census} ($2, 458, 285$ points in dimension 68), and Cover Type~\cite{covtype} ($581,012$ points in dimension $54$).  In
-all real and artificial datasets, we add random uniform noise $\eta$ with $0 \leq \eta_i \leq 0.001$ in each dimension in order to make all point unique.
+For our real-world data, we utilize the MNIST~\cite{mnist}, Song~\cite{song}, Census~\cite{census}, and Cover Type~\cite{covtype} datasets. In
+all real and artificial datasets, we add random uniform noise $\eta$ with $0 \leq \eta_i \leq 0.001$ in each dimension in order to make all points unique.
 
 \subsection{Algorithm Comparisons}
 \label{ssec:alg_qualities}
 
 We first verify the fact that coreset quality is independent of whether we used $k$-means++ or \fkmeans to obtain the preliminary solution. To this end,
 Figure~\ref{fig:coreset_size_on_sens_quality} shows that, across datasets, the Fast-Coreset method produces coresets of consistent quality, with all distortion
-values being lower than $1.2$. Additionally, for sufficient coreset sizes ($m \approx 80\cdot k$), Fast-Coresets are equal in quality to those obtained through
-sensitivity sampling. Despite this, Figure~\ref{fig:k_on_runtime} shows that, while traditional sensitivity sampling runtimes grow linearly with $k$,
-Fast-Coreset only grow logarithmically with the number of centers.
-Therefore, our experimental findings confirm the theory predicted by \cref{thm:main}: sensitivity sampling coreset can be implemented in linear time while preserving the coreset quality.
+values being lower than $1.2$. Additionally, for sufficient coreset sizes ($m \approx 80\cdot k$), Fast-Coresets obtain similar distortion to those obtained
+through sensitivity sampling. Despite this, Figure~\ref{fig:k_on_runtime} confirms that, while traditional sensitivity sampling runtimes grow linearly with $k$,
+Fast-Coreset only grow logarithmically with the number of centers.  Therefore, our experimental findings confirm the theory predicted by \cref{thm:main}:
+sensitivity sampling coresets can be implemented in linear time while preserving the coreset property. Given this context, we will not add traditional
+sensitivity sampling to further experiments, as it is too slow to run on our large datasets and does not provide better quality results than the Fast-Coreset
+method.
 
- Given this context, we will not add traditional sensitivity sampling to further experiments, as it is too slow to run on our large datasets and does not provide better quality result than Fast-Coreset.
-% when reporting the sensitivity sampling results, we will be
-%specifically using the Fast-Coreset algorithm, with the knowledge that traditional sensitivity sampling would obtain slightly lower distortion and significantly
-%larger runtimes.
+We now refer the reader to Figure~\ref{fig:coreset_size_on_quality}, where we show the effect of coreset size on the distortion across datasets and methods.  We
+define the coreset sizes as $|\Omega| = ck$, where $c \in [20, 40, 60, 80]$. We see that, across datasets, coresets of larger size obtain lower distortion.
+However, it is also clear that uniform, lightweight, and $j$-means coresets all fail on the geometric-progression and Gaussian-mixture datasets. Additionally,
+uniform sampling expectedly fails on the $1$-outlier problem.
 
-We now refer the reader to Figure~\ref{fig:coreset_size_on_quality}, where we show the effect of coreset size on the distortion across datasets and methods.
-We define the coreset sizes as $|\Omega| = ck$, where $c \in [20, 40, 60, 80]$. We see that, across datasets, coresets of larger size obtain lower distortion. However
-we also see that uniform, lightweight, and $j$-means coresets all fail on the geometric-progression and Gaussian-mixture datasets. Additionally, uniform
-sampling clearly fails on the $1$-outlier dataset.
+As discussed, the sensitivities for lightweight coresets are obtained by a linear combination of a uniform distribution and each point's relative
+distance to the mean. Since the Gaussian mixture dataset has randomly distributed clusters of varying sizes, a small cluster that is close to the mean is unlikely
+to ever be sampled. We argue that, although this is a toy dataset, one can easily imagine many datasets that have this property. As a simple solution, we see
+that the $j$-means coreset obtains satisfactory solutions on the Gaussian mixture dataset for 
 
-\input{figures/coreset_size_on_quality.tex}
+A similar argument can be made for the more-challenging geometric dataset, where the cluster size decreases exponentially and all clusters are equidistant.
+We show furthermore that, for small values of $j$, sensitivities obtained according to
+solving the $j$-means problem are insufficient to create a coreset for the geometric-progression dataset.
+
+To measure the effect that the class imbalance has on the quality of each coreset, we define a class imbalance parameter $\gamma$ and obtain each
+cluster's size by $|C_i| = \frac{n}{m} \exp \left( \gamma(\rho - \frac{1}{2}) \right)$, where $\rho$ is distributed uniformly at random in the range $[0, 1]$.
+Thus, each cluster has size $\frac{n}{m}$ when $\gamma = 0$ and the cluster size diverges exponentially as $\gamma$ grows linearly. We see the effect of $\gamma$ on the coreset
+distortion in Table \textcolor{red}{Table ref}, where even small values of $\gamma$ can break the lightweight coreset construction. Looking at the
+$j$-sensitivities, we see that using $(j=\sqrt(k))$-means++ solutions maintains the coreset property for higher values of $\gamma$ but is still not guaranteed
+to obtain satisfactory coresets. Despite this, sensitivity sampling consistently obtains coresets with low distortion.
+
+As a harder example, we provide a \emph{geometric-progression} dataset, consisting of \david{Are they precisely at $(c, 0, 0, \cdots)$ or very close? if they are precisely there, scaling $c$ should not change. Maybe say $c=1$ and a tiny
+noise?}. 
+Lastly, we employ the \emph{Benchmark} dataset that  as a particularly challenging problem for coreset constructions.  The
+benchmark dataset is  This naturally stress-tests
+the sensitivity sampling approach, as every candidate solution's sensitivities are particularly difficult to approximate.
+
 \input{figures/coreset_size_on_sens_quality.tex}
 \input{figures/k_on_runtime.tex}
