@@ -10,16 +10,16 @@ from mnist import MNIST
 def get_dataset(dataset_type, n_points=1000, D=50, num_centers=10, k=50, class_imbalance=5.0):
     if dataset_type == 'blobs':
         return get_blobs_dataset(n_points, D, num_centers)
-    if dataset_type == 'smooth_blobs':
-        return get_smooth_blobs_dataset(n_points, D, num_centers, class_imbalance)
-    elif dataset_type == 'single_blob':
-        return make_blobs(n_points, D, centers=1)
     elif dataset_type == 'artificial':
         return get_artificial_dataset(n_points, D)
+    elif dataset_type == 'benchmark':
+        return load_coreset_benchmark(k)
     elif dataset_type == 'geometric':
         return get_geometric_dataset(k, num_rounds=k)
     elif dataset_type == 'mnist':
         return load_mnist()
+    elif dataset_type == 'adult':
+        return load_adult_data()
     elif dataset_type == 'song':
         return load_song()
     elif dataset_type == 'cover_type':
@@ -28,8 +28,6 @@ def get_dataset(dataset_type, n_points=1000, D=50, num_centers=10, k=50, class_i
         return load_darpa_kdd_cup()
     elif dataset_type == 'census':
         return load_census_data()
-    elif dataset_type == 'benchmark':
-        return load_coreset_benchmark(k)
     else:
         raise ValueError('Dataset not implemented')
 
@@ -111,6 +109,7 @@ def load_categorical_dataset(
     columns,
     data_type,
     start_index=0,
+    skip_first_row=False,
     end_index=None
 ):
     if os.path.exists(pickled_path):
@@ -126,6 +125,9 @@ def load_categorical_dataset(
         reader = csv.reader(f)
         for i, line in tqdm(enumerate(reader), total=rows):
             points[i] = np.array(line)[start_index:end_index]
+    if skip_first_row:
+        points = points[1:]
+        rows -= 1
 
     points = remap_features(points, columns)
     # If there are duplicate points, the HST will recur until segmentation fault
@@ -134,12 +136,11 @@ def load_categorical_dataset(
     np.save(pickled_path, {'points': points, 'labels': labels})
     return points, labels
 
-def load_census_data():
+def load_adult_data():
     # Adult census data found at https://archive.ics.uci.edu/ml/datasets/census+income
-    # https://archive.ics.uci.edu/ml/datasets/US+Census+Data+(1990)
-    directory = os.path.join('data', 'census')
+    directory = os.path.join('data', 'adult')
     data_path = os.path.join(directory, 'adult.data')
-    pickled_path = os.path.join(directory, 'pickled_census.npy')
+    pickled_path = os.path.join(directory, 'pickled_adult.npy')
     rows, columns = 48842, 14
     data_type = str
     end_index = -1
@@ -150,6 +151,22 @@ def load_census_data():
         columns,
         data_type,
         end_index=end_index
+    )
+
+def load_census_data():
+    # https://archive.ics.uci.edu/ml/datasets/US+Census+Data+(1990)
+    directory = os.path.join('data', 'census')
+    data_path = os.path.join(directory, 'USCensus1990.data.txt')
+    pickled_path = os.path.join(directory, 'pickled_census.npy')
+    rows, columns = 2458286, 68
+    data_type = str
+    return load_categorical_dataset(
+        data_path,
+        pickled_path,
+        rows,
+        columns,
+        data_type,
+        skip_first_row=True
     )
 
 def load_darpa_kdd_cup():

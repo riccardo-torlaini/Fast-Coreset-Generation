@@ -217,8 +217,8 @@ if __name__ == '__main__':
     g_kmeans_alg = cluster_pp_slow
     g_points = jl_proj(g_points, g_k, eps=0.5)
 
-    # method = 'fast'
-    method = 'lightweight'
+    method = 'fast'
+    # method = 'lightweight'
     # method = 'semi_uniform'
     # method = 'sensitivity'
     # method = 'bico'
