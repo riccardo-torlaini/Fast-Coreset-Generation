@@ -34,7 +34,9 @@ def get_dataset(dataset_type, n_points=1000, D=50, num_centers=10, k=50, class_i
         raise ValueError('Dataset not implemented')
 
 
-def get_blobs_dataset(n_points, D, num_centers, scalar=1000, class_imbalance=5.0, var=5000):
+
+
+def get_blobs_dataset(n_points, D, num_centers, scalar=1000, class_imbalance=5.0, var=5):
     # 1) Get random sizes for each cluster
     points_remaining = n_points
     cluster_sizes = np.zeros(num_centers)

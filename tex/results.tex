@@ -21,26 +21,28 @@ quality is a more difficult task. Specifically, it is unclear how to confirm tha
 end, the authors in \cite{chrisESA} suggested reporting the following metric 
 \[ \max \left( \dfrac{\cost(P, \calC_{\Omega})}{\cost(\Omega, \calC_{\Omega})}, \dfrac{\cost(\Omega, \calC_{\Omega})}{\cost(P, \calC_{\Omega})} \right),\]
 where $\calC_{\Omega}$ is a candidate solution that was computed over the coreset.
-\end{enumerate}
 We refer to this metric as the \emph{coreset distortion}. Naturally, values that are consistently close to $1$ suggest that solutions on the coreset are likely
 viable on the full dataset.
 
 \input{figures/lightweight_breaks.tex}
 \subsubsection{Algorithms}
 
-We analyze five different algorithms for constructing coresets. The first is standard uniform sampling, where a subset of $m \ll n$ points are sampled from $P$.
-Second, we incorporate the lightweight coreset construction discussed in \cite{lightweight_coresets}. There, we find the mean $\mu$ of the dataset and obtain
-per-point sensitivity values that are proportional to $1/|P| + \cost(p, \mu) / \cost(P, \mu)$. The first term encourages uniform sampling while the second
-encourages sampling proportionate to the distance from the mean.
+We analyze six different algorithms for constructing coresets.
+\begin{itemize}
+        \item Standard uniform sampling -- choose a subset of $m \ll n$ points uniformly from $P$.
+        \item Lightweight coreset -- find the mean $\mu$ of the dataset and obtain per-point sensitivity estimates by $\hat{s}(p) = 1/|P| + \cost(p, \mu) / \cost(P, \mu)$.
+            The first term encourages uniform sampling while the second encourages sampling proportionate to the distance from the mean.
+        \item $j$-means coreset -- find an approximate $j$-means solution with $j = f(k)$, where $0 < f(k) < k$ for all values of $k$.
+        \item Birch using Coresets (BICO) -- create streaming coreset quickly using the BIRCH algorithm \textcolor{red}{reference}
+        \item Standard sensitivity sampling -- obtain an approximate $k$-means solution with $k$-means++ and sample coreset proportionate to sensitivity upper bounds.
+        \item Fast Coreset -- obtain an approximate $k$-means solution with \fkmeans and sample coreset proportionate to sensitivity upper bounds.
 
-The next two algorithms are the $k$-means++ and \fkmeans sensitivity sampling solutions, where we solve obtain an approximate $k$-means solution and
-compute sensitivities using these preliminary centers.
+\end{itemize}
 
-We note that lightweight coresets are simply solving $1$-means to obtain sensitivity values whereas sensitivity sampling is solving the $k$-means problem.  As
-we will show, it is easy to construct examples where lightweight coresets fail to produce acceptable coresets. Sensitivity-sampling, on the other hand, produces
-satisfactory coresets across datasets and settings. The question then naturally arises: for what values of $j < k$ does an approximate $j$-means solution give
-a satisfactory coreset? To this end, our last algorithm runs $j$-means++ for $j = f(k)$ where $0 < f(k) < k$ for all values of $k$. We default to $f(k) = \log
-k$ but analyze other functions in \ref{ssec:alg_qualities}.
+We take a moment here to motivate the $j$-means coreset algorithm.  Consider that lightweight coresets are simply solving $1$-means to obtain sensitivity values
+whereas sensitivity sampling is solving the $k$-means problem.  As we will show, it is easy to construct examples where lightweight coresets fail to produce
+acceptable coresets. Sensitivity-sampling, on the other hand, produces satisfactory coresets across datasets and settings. Thus, we study the $j$-means coreset
+algorithm to answer the following question: for which values of $j < k$ does an approximate $j$-means solution give a satisfactory coreset?
 
 \subsubsection{Datasets}
 
@@ -75,9 +77,9 @@ Lastly, we employ the \emph{Benchmark} dataset that was defined in \cite{chrisES
 benchmark dataset is devised such that all reasonable solutions are of equal quality but maximally far apart in the solution space. This naturally stress-tests
 the sensitivity sampling approach, as every candidate solution's sensitivities are particularly difficult to approximate.
 
-For our real-world datasets, we utilize the MNIST, 1999 KDD-cup, Census, Cover Type, and song datasets \textcolor{red}{References}. \textcolor{red}{Write about the sizes}. In all real and
-artificial datasets, we add random uniform noise $\eta$ with $0 \leq \eta_i \leq 0.001$ in each dimension so that the HST may separate the points into disjoint
-cells.
+For our real-world datasets, we utilize the MNIST, 1999 KDD-cup, Census, Cover Type, and song datasets \textcolor{red}{References}. \textcolor{red}{Write about
+the sizes}. In all real and artificial datasets, we add random uniform noise $\eta$ with $0 \leq \eta_i \leq 0.001$ in each dimension so that the HST may
+separate the points into disjoint cells.
 
 \subsection{Algorithm Comparisons}
 \label{ssec:alg_qualities}
