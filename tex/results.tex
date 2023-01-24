@@ -21,12 +21,15 @@ quality is a more difficult task. Specifically, it is unclear how to confirm tha
 end, the authors in \cite{chrisESA} suggested reporting the following metric 
 \[ \max \left( \dfrac{\cost(P, \calC_{\Omega})}{\cost(\Omega, \calC_{\Omega})}, \dfrac{\cost(\Omega, \calC_{\Omega})}{\cost(P, \calC_{\Omega})} \right),\]
 where $\calC_{\Omega}$ is a candidate solution that was computed over the coreset.
-\end{enumerate}
+
 We refer to this metric as the \emph{coreset distortion}. Naturally, values that are consistently close to $1$ suggest that solutions on the coreset are likely
 viable on the full dataset.
 
 \input{figures/lightweight_breaks.tex}
+\david{the lightweight corereset is also linear time, I removed the comment about running time of fast coreset. We need to reference somewhere this figure}
+
 \subsubsection{Algorithms}
+\david{Maybe bullet points to list the algorithms, with names for the algorithm? The algorithm using $j$-means does not formally have one and is referred to in different ways afterwards}
 
 We analyze five different algorithms for constructing coresets. The first is standard uniform sampling, where a subset of $m \ll n$ points are sampled from $P$.
 Second, we incorporate the lightweight coreset construction discussed in \cite{lightweight_coresets}. There, we find the mean $\mu$ of the dataset and obtain
@@ -67,7 +70,7 @@ $j$-sensitivities, we see that using $(j=\sqrt(k))$-means++ solutions maintains 
 to obtain satisfactory coresets. Despite this, sensitivity sampling consistently obtains coresets with low distortion.
 
 As a harder example, we provide a \emph{geometric-progression} dataset, consisting of $n/2$ points at $(c, 0, 0, \cdots)$, $n/4$ points at $(0, c, 0, \cdots)$,
-and so on. To see that this creates arbitrarily bad lightweight coresets as $c \rightarrow \infty$, consider that the likelihood of hitting each cluster goes to
+and so on \david{Are they precisely at $(c, 0, 0, \cdots)$ or very close? if they are precisely there, scaling $c$ should not change. Maybe say $c=1$ and a tiny noise?}. To see that this creates arbitrarily bad lightweight coresets as $c \rightarrow \infty$, consider that the likelihood of hitting each cluster goes to
 zero if we only use a single center to estimate the sensitivities. We show furthermore that, for small values of $j$, sensitivities obtained
 according to solving the ($j<k$)-means problem are insufficient to create a coreset for the geometric-progression dataset.
 
@@ -75,20 +78,25 @@ Lastly, we employ the \emph{Benchmark} dataset that was defined in \cite{chrisES
 benchmark dataset is devised such that all reasonable solutions are of equal quality but maximally far apart in the solution space. This naturally stress-tests
 the sensitivity sampling approach, as every candidate solution's sensitivities are particularly difficult to approximate.
 
-For our real-world datasets, we utilize the MNIST, 1999 KDD-cup, Census, Cover Type, and song datasets \textcolor{red}{References}. \textcolor{red}{Write about the sizes}. In all real and
-artificial datasets, we add random uniform noise $\eta$ with $0 \leq \eta_i \leq 0.001$ in each dimension so that the HST may separate the points into disjoint
-cells.
+For our real-world datasets, we utilize the following datasets: MNIST \david{which version did you use?}, Song~\cite{song} ($515, 345$ points in dimension 90), and some dataset from the UCI librairie \cite{Dua:2019}: KDD-cup~\cite{kddcup} ($4,000,000$ points in dimension 48) \david{is it this one? Not the same as rejection sampling paper}, Census~\cite{census} ($2, 458, 285$ points in dimension 68), and Cover Type~\cite{covtype} ($581,012$ points in dimension $54$). 
+In all real and
+artificial datasets, we add random uniform noise $\eta$ with $0 \leq \eta_i \leq 0.001$ in each dimension in order to make all point unique.
+%so that the HST may separate the points into disjoint cells.
 
 \subsection{Algorithm Comparisons}
 \label{ssec:alg_qualities}
 
 We first verify the fact that coreset quality is independent of whether we used $k$-means++ or \fkmeans to obtain the preliminary solution. To this end,
 Figure~\ref{fig:coreset_size_on_sens_quality} shows that, across datasets, the Fast-Coreset method produces coresets of consistent quality, with all distortion
-values being lower than $1.2$. Additionally, for sufficient coreset sizes ($m \approx 80 * k$), Fast-Coresets are equal in quality to those obtained through
+values being lower than $1.2$. Additionally, for sufficient coreset sizes ($m \approx 80\cdot k$), Fast-Coresets are equal in quality to those obtained through
 sensitivity sampling. Despite this, Figure~\ref{fig:k_on_runtime} shows that, while traditional sensitivity sampling runtimes grow linearly with $k$,
-Fast-Coresets only grow logarithmically with the number of centers. Given this context, when reporting the sensitivity sampling results, we will be
-specifically using the Fast-Coreset algorithm, with the knowledge that traditional sensitivity sampling would obtain slightly lower distortion and significantly
-larger runtimes.
+Fast-Coreset only grow logarithmically with the number of centers.
+Therefore, our experimental findings confirm the theory predicted by \cref{thm:main}: sensitivity sampling coreset can be implemented in linear time while preserving the coreset quality.
+
+ Given this context, we will not add traditional sensitivity sampling to further experiments, as it is too slow to run on our large datasets and does not provide better quality result than Fast-Coreset.
+% when reporting the sensitivity sampling results, we will be
+%specifically using the Fast-Coreset algorithm, with the knowledge that traditional sensitivity sampling would obtain slightly lower distortion and significantly
+%larger runtimes.
 
 We now refer the reader to Figure~\ref{fig:coreset_size_on_quality}, where we show the effect of coreset size on the distortion across datasets and methods.
 We define the coreset sizes as $|\Omega| = ck$, where $c \in [20, 40, 60, 80]$. We see that, across datasets, coresets of larger size obtain lower distortion. However
