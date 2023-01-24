@@ -23,18 +23,17 @@ def get_experiment_params(default_values, norm, param, val):
 def run_sweeps():
     results = {}
     datasets = [
-        # 'artificial',
-        # 'geometric',
-        # 'benchmark',
-        # 'blobs',
-        # 'mnist',
-        # 'census',
+        'artificial',
+        'geometric',
+        'benchmark',
+        'blobs',
+        'mnist',
+        'census',
         'kdd_cup',
-        # 'song',
-        # 'cover_type'
+        'song',
+        'cover_type'
     ]
-    # methods = ['fast_coreset', 'semi_uniform', 'uniform_sampling', 'sens_sampling']
-    methods = ['fast_coreset']
+    methods = ['fast_coreset', 'semi_uniform', 'uniform_sampling', 'sens_sampling', 'lightweight']
 
     # Only apply for Gaussian mixture model dataset
     n_points = 25000
@@ -45,41 +44,40 @@ def run_sweeps():
     small_default_values = {
         'k': 100,
         'j_func': '2', # Only applies for semi-uniform coreset
-        'sample_method': 'sens',
+        'sample_method': 'sens', # Only applies for semi-uniform coreset
         'm_scalar': 40,
         'allotted_time': 120,
-        'hst_count_from_norm': True,
+        'hst_count_from_norm': True, # Only applies to fast-coreset
     }
 
     # Default values for sweep parameters on small datasets
     large_default_values = {
         'k': 500,
         'j_func': '2', # Only applies for semi-uniform coreset
-        'sample_method': 'sens',
+        'sample_method': 'sens', # Only applies for semi-uniform coreset
         'm_scalar': 40,
         'allotted_time': 360,
-        'hst_count_from_norm': True,
+        'hst_count_from_norm': True, # Only applies to fast-coreset
     }
 
     small_sweep_params = {
         # Params to sweep for all coreset algorithms
-        # 'k': [10, 50, 100, 200],
-        # 'j_func': ['2', '10', 'log', 'sqrt', 'half'],
+        'k': [10, 50, 100, 200],
+        'j_func': ['2', '10', 'log', 'sqrt', 'half'],
         # 'sample_method': ['sens', 'uniform'],
         'm_scalar': [20, 40, 60, 80],
         # 'allotted_time': [0, 0.5, 1, 3, 5, 7, 10, 20],
-        # 'hst_count_from_norm': [True, False], # Only applies to fast_coreset algorithm
+        'hst_count_from_norm': [True, False], # Only applies to fast_coreset algorithm
     }
 
     large_sweep_params = {
         # Params to sweep for all coreset algorithms
-        # 'k': [100, 200, 400],
-        # 'j_func': ['2', '10', 'log', 'sqrt'],
+        'k': [100, 200, 400],
+        'j_func': ['2', '10', 'log', 'sqrt', 'half'],
         # 'sample_method': ['sens', 'uniform'],
-        # 'm_scalar': [20, 40, 60, 80],
-        'm_scalar': [40],
+        'm_scalar': [20, 40, 60, 80],
         # 'allotted_time': [60, 120, 360],
-        # 'hst_count_from_norm': [True, False], # Only applies to fast_coreset algorithm
+        'hst_count_from_norm': [True, False], # Only applies to fast_coreset algorithm
     }
 
     outputs_path = 'outputs'
@@ -99,6 +97,10 @@ def run_sweeps():
             points, _ = get_dataset(dataset, n_points, D, num_centers)
             n, d = points.shape # Will be different from n_points or D if dataset is real-world data
 
+            if n > 100000 and method == 'sens_sampling':
+                # Don't run slow sensitivity sampling on large datasets
+                continue
+
             # Get different default values and sweep parameters depending on dataset size
             if n > 100000:
                 default_values = large_default_values
@@ -111,8 +113,7 @@ def run_sweeps():
             if not os.path.isdir(dataset_output_path):
                 os.makedirs(dataset_output_path)
 
-            # for norm in [1, 2]:
-            for norm in [2]:
+            for norm in [1, 2]:
                 print('\t\tNorm --- {}'.format(str(norm)))
                 norm_output_path = os.path.join(dataset_output_path, str(norm))
                 if not os.path.isdir(norm_output_path):

@@ -227,15 +227,15 @@ def evaluate_coreset(points, k, coreset, weights):
 if __name__ == '__main__':
     g_norm = 1
     g_k = 400
-    g_points, _ = get_dataset('geometric', n_points=10000, D=50, k=g_k)
+    g_points, _ = get_dataset('census', n_points=10000, D=50, k=g_k)
     g_m_scalar = 60
     g_allotted_time = 600
     g_hst_count_from_norm = True
     g_kmeans_alg = cluster_pp_slow
     g_points = jl_proj(g_points, g_k, eps=0.5)
 
-    # method = 'fast'
-    method = 'lightweight'
+    method = 'fast'
+    # method = 'lightweight'
     # method = 'semi_uniform'
     # method = 'sensitivity'
     # method = 'bico'
