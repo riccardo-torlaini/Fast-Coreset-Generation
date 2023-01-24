@@ -19,7 +19,7 @@ from experiment_utils.get_data import get_dataset
 
 def get_coreset_with_centers(centers, sensitivities, m, points, labels, weights=None):
     """
-    Sample coreset from sensitivity values but use first k centers as the first 
+    Sample coreset from sensitivity values but use k centers from approximate solution as the first 
     elements in the coreset
     """
     replace = False
@@ -88,8 +88,6 @@ def bico_coreset(points, k, m, allotted_time):
     return q_points, q_weights, np.ones_like(q_weights)
 
 def uniform_coreset(points, m, **kwargs):
-    # Uniform coreset size should be the same as the other coreset sizes
-    #   to show that it is super fast but terrible quality
     n = len(points)
     q_points = points[np.random.choice(n, m)]
     q_weights = np.ones(m) * float(n) / m
@@ -143,15 +141,8 @@ def semi_uniform_coreset(
         allotted_time=allotted_time
     )
 
-    if sample_method == 'sens':
-        sensitivities = bound_sensitivities(centers, labels, costs)
-        r_points, r_weights, r_labels = get_coreset(sensitivities, m, points, labels, weights=weights)
-    else:
-        assert sample_method == 'uniform'
-        r_points = points[np.random.choice(n, m - j)]
-        r_points = np.concatenate([centers, r_points])
-        r_weights = np.ones(m) * float(n) / m
-        r_labels = np.ones(m)
+    sensitivities = bound_sensitivities(centers, labels, costs)
+    r_points, r_weights, r_labels = get_coreset(sensitivities, m, points, labels, weights=weights)
         
     return r_points, r_weights, r_labels
 
@@ -218,10 +209,9 @@ def evaluate_coreset(points, k, coreset, weights):
 
 if __name__ == '__main__':
     g_norm = 1
-    g_k = 10
-    g_points, g_labels = get_dataset('blobs', n_points=100000, D=50, num_centers=10, k=g_k, class_imbalance=7)
-    print(np.unique(g_labels, return_counts=True)[1])
-    g_m_scalar = 20
+    g_k = 100
+    g_points, g_labels = get_dataset('blobs', n_points=50000, D=50, num_centers=10, k=g_k, class_imbalance=5)
+    g_m_scalar = 40
     g_allotted_time = 600
     g_hst_count_from_norm = True
     g_kmeans_alg = cluster_pp_slow
