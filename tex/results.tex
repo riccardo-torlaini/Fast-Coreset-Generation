@@ -138,6 +138,7 @@ Figure~\ref{fig:lightweight_breaks}.  Our artificial dataset emphasize this effe
 of large $k$) but is very plausible.  \david{add precise comments, depending on the actual precision of the coreset, especially for lightweight. }
 \andrew{I'm not sure what to do with this paragraph. On the one hand, I agree that we should discuss it. On the other hand, I am wary of giving handwavy
 explanations without evidence to back them up. Chris, what do you think?}
+\david{Agreed on the handwaving -- although interpreting experiments is always somewhat handwavy I guess. Chris?}
 
 \paragraph*{Additional evaluation on imbalanced clusters.}
 
@@ -159,6 +160,7 @@ explanations without evidence to back them up. Chris, what do you think?}
 \david{Say what is the coreset size. Do you know why is Fast Coreset so bad as well? Would it be possible to increase it to have a good fast coreset?}
 \andrew{Are you asking why the fast coreset performs poorly in table~\ref{tbl:class-imbalance}? I think it does okay\ldots -- I can mention that this is for
 $m=20k$, which is a small coreset. I used a small one to emphasize the difference but can use a bigger one so that our scores aren't as bad.}
+\david{Ok, I didn't know the size was so small -- Yes, maybe a bigger one would be great (to be able to claim that fast coreset is consistently below 1.05 or something}
 
 As discussed, the sensitivities for lightweight coresets are obtained by a linear combination of a uniform distribution and each point's relative
 distance to the mean. Since the Gaussian mixture dataset has clusters of varying sizes, a small cluster that is close to the mean is unlikely
