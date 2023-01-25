@@ -46,24 +46,24 @@ On the projected dataset, the algorithm \fkmeans runs in time $\tilde O\lpar n \
 Furthermore, the values $s(p)$ defined in \cref{alg:main} can be used to perform the sensitivity sampling algorithm: \cite{FeldmanL11} showed that sampling according to those yield a coreset with size $\tilde O \lpar k d \eps^{-2z}\rpar$, improved by \cite{HuangV20} to $\tilde O \lpar k \eps^{-2z -2} \rpar$.
 \end{proof}
 
+\david{I removed the two-step algorithm, as I think we are not experimenting it}
+%
+%\subsection{A Two-Step Algorithm}
+%We present a different algorithm, based on the following standard transitivity property: if $\coreset_1$ is an $\eps$-coreset of $P$, and $\coreset_2$ an $\eps$-coreset of $\coreset_1$, then $\coreset_2$ is a $2\eps$-coreset of $P$.
+%
+%This property could be used as follows: computing a precise approximation for $P$ may be slow. Instead, one could spend the time budget as follows:
+%
+%\begin{enumerate}
+%\item First, compute a rough approximation and use it to build an $\eps/2$-coreset $\coreset_1$. Due to the poor quality of approximation, this coreset may be larger than the target size; but still way smaller than $P$.
+%\item  Then, compute a precise approximation on $\coreset_1$, and use it to build a smaller $\eps/2$-coreset $\coreset_2$ of $\coreset_1$. 
+%\end{enumerate}
+%By transitivity, $\coreset_2$ is therefore a small $\eps$-coreset for $P$. The bottleneck running time, to compute the precise approximation, now depends merely on $|\coreset_1|$ instead of $P$: one can therefore hope to be able to compute a much more precise estimations of the sensitivities required to sample a small coreset afterwards.
+%
+%The theoretical result does not improve compared to \cref{thm:main}, but this algorithm may be more practical. Therefore, we try it as well in our experiments.
+%
+%\david{add something depending on the results of experiments}
 
-
-\subsection{A Two-Step Algorithm}
-We present a different algorithm, based on the following standard transitivity property: if $\coreset_1$ is an $\eps$-coreset of $P$, and $\coreset_2$ an $\eps$-coreset of $\coreset_1$, then $\coreset_2$ is a $2\eps$-coreset of $P$.
-
-This property could be used as follows: computing a precise approximation for $P$ may be slow. Instead, one could spend the time budget as follows:
-
-\begin{enumerate}
-\item First, compute a rough approximation and use it to build an $\eps/2$-coreset $\coreset_1$. Due to the poor quality of approximation, this coreset may be larger than the target size; but still way smaller than $P$.
-\item  Then, compute a precise approximation on $\coreset_1$, and use it to build a smaller $\eps/2$-coreset $\coreset_2$ of $\coreset_1$. 
-\end{enumerate}
-By transitivity, $\coreset_2$ is therefore a small $\eps$-coreset for $P$. The bottleneck running time, to compute the precise approximation, now depends merely on $|\coreset_1|$ instead of $P$: one can therefore hope to be able to compute a much more precise estimations of the sensitivities required to sample a small coreset afterwards.
-
-The theoretical result does not improve compared to \cref{thm:main}, but this algorithm may be more practical. Therefore, we try it as well in our experiments.
-
-\david{add something depending on the results of experiments}
-
-\subsection{Generalizations.} 
+\subsection*{Generalizations.} 
 We conclude with a few remarks, that allow to generalize \cref{alg:main}.
 First, instead of using sensitivity sampling, one could use the group sampling procedure of \cite{stoc21}, or virtually any coreset construction: all those run in linear time, once provided with an initial solution $\calC$ and assignment $\sigma$. 
 Therefore, our algorithm could use as a subroutine any coreset construction algorithm, if one is developed that improves over sensitivity and group sampling.
