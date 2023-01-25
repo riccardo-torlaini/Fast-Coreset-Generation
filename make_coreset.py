@@ -78,7 +78,7 @@ def get_coreset(sensitivities, m, points, labels, weights=None):
  
     return q_points, q_weights, q_labels
 
-def bico_coreset(points, k, m, allotted_time):
+def bico_coreset(points, k, m, **kwargs):
     bico = BICO(points.shape[1], 100, m)
     for row in tqdm(points, total=len(points)):
         bico.insert_point(Point(row))

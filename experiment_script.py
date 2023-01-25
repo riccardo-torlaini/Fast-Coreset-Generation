@@ -24,9 +24,9 @@ def run_sweeps():
     results = {}
     datasets = [
         # 'artificial',
-        # 'geometric',
+        'geometric',
         # 'benchmark',
-        'blobs',
+        # 'blobs',
         # 'mnist',
         # 'adult',
         # 'song',

@@ -83,7 +83,7 @@ def get_geometric_dataset(k, num_rounds, size_scalar=100):
     points += np.random.rand(len(points), num_rounds) / 1000
     return points, np.ones(points.shape[0])
 
-def get_artificial_dataset(n_points, D, num_outliers=50):
+def get_artificial_dataset(n_points, D, num_outliers=5):
     g_points = np.ones([n_points, D])
     for outlier in range(num_outliers):
         g_points[outlier] = -1000 * np.random.rand(D)
