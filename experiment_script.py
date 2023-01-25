@@ -24,8 +24,8 @@ def run_sweeps():
     results = {}
     datasets = [
         # 'artificial',
-        'geometric',
-        # 'benchmark',
+        # 'geometric',
+        'benchmark',
         # 'blobs',
         # 'mnist',
         # 'adult',
@@ -34,7 +34,7 @@ def run_sweeps():
         # 'cover_type'
     ]
     # methods = ['fast_coreset', 'semi_uniform', 'uniform_sampling', 'sens_sampling', 'lightweight', 'bico']
-    methods = ['lightweight']
+    methods = ['fast_coreset']
 
     # Only apply for Gaussian mixture and 1-outlier datasets
     n_points = 50000
@@ -63,12 +63,12 @@ def run_sweeps():
 
     small_sweep_params = {
         # Params to sweep for all coreset algorithms
-        'k': [10, 50, 100, 200],
-        'j_func': ['2', '10', 'log', 'sqrt'],
+        # 'k': [10, 50, 100, 200],
+        # 'j_func': ['2', '10', 'log', 'sqrt'],
         # 'sample_method': ['sens', 'uniform'],
         'm_scalar': [20, 40, 60, 80],
         # 'allotted_time': [0, 0.5, 1, 3, 5, 7, 10, 20],
-        'hst_count_from_norm': [True, False], # Only applies to fast_coreset algorithm
+        # 'hst_count_from_norm': [True, False], # Only applies to fast_coreset algorithm
     }
 
     large_sweep_params = {
