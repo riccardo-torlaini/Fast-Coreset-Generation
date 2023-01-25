@@ -19,7 +19,7 @@ In this paper, our goal is to compare different compression strategies, and to e
 
 One of the main selling point for sensitivity sampling for $k$-means is that it produces a small \textit{coreset}, namely, a set such that the cost of any possible $k$-means solution is the same on the coreset than on the full dataset (up to some tiny multiplicative factor).
 Therefore, any algorithm can be run on the coreset instead of the full dataset: this ensures a faster algorithm  -- the coreset may even have size independent of $n$ -- while preserving the theoretical guarantees of the algorithm.
-However, the bottleneck in the complexity is in the time to perform the sensitivity sampling: a running time $\Omega(nk)$ is often 	unimaginable. The coreset construction time is listed as one of the main potential drawback of coreset in \cite{Feldman20}.
+However, the bottleneck in the complexity is in the time to perform the sensitivity sampling: although lots of papers claim to have fast and practical algorithm, their running time $\Omega(nk)$ is often 	unimaginable. The coreset construction time is listed as one of the main potential drawback of coreset in \cite{Feldman20}.
 
 
 In this paper, we show how to implement sensitivity sampling for $k$-means and $k$-median in near-linear time $\tilde O(nd)$.
