@@ -15,9 +15,13 @@ Things to show:
 
 \begin{itemize}
 \item \david{Explain more precisely the construction of artifical datasets: what are the gaussian parameters, what value of $c$}
+    \andrew{done}
 \item \david{Rework on the paragraph Additional evaluation on imbalanced clusters}
+    \andrew{doing later tonight}
 \item \david{Missing plots: effect of $j$ for cut-$k$-means}
+    \andrew{Have them and just need to put them in}
 \item \david{Change the plots to have better visual precision: put blob, geometric and $c$-outlier in a different plot. Maybe also write bico on a distinct table since it is so bad.}
+    \andrew{Will do tomorrow morning}
 \end{itemize}
 
 
@@ -35,35 +39,33 @@ viable on the full dataset.
 
 
 \subsubsection{Algorithms}
+\label{ssec:algorithms}
 We compare our algorithm against 5 different benchmark algorithms. Ours is \emph{Fast-Coreset}~\ref{alg:main}, without the dimension-reduction step. The benchmarks are:
 \begin{itemize}
         \item \emph{Standard uniform sampling}: choose a subset of $m \ll n$ points uniformly from $P$.
         \item \emph{Lightweight coreset}: find the mean $\mu$ of the dataset and obtain per-point sensitivity estimates by $\hat{s}(p) = 1/|P| + \cost(p, \mu) / \cost(P, \mu)$.
             The first term encourages uniform sampling while the second encourages sampling proportionate to the distance from the mean.
         \item \emph{Birch using Coresets (BICO)}: use BIRCH algorithm~\cite{birch} to create streaming coreset quickly. \david{could you say a bit more about this? At least, what's the running time and the theoretical guarantee?}
+            \andrew{Will do later tonight.}
         \item \emph{Standard sensitivity sampling}: obtain an approximate $k$-means solution with $k$-means++ and sample a coreset proportionate to sensitivity as defined in \cref{eq:sensitivity}.
-        \item \emph{Cut-$k$-means coreset}: for a given $j \in \{1,..., k\}$, find an approximate $j$-means solution with $j$-means++ algorithm, and sample a coreset proportionate to sensitivity as defined in \cref{eq:sensitivity}. We will use $j = \log k$ in our main experiments, and show in a separate experiment the influence of $j$ \david{what $j$ did you chose? Is there the plot on effect of $j$?}
-%         $j = f(k)$ with $0 < f(k) < k$ for all $k$. We will sometimes use the notation
-%            $f(k)$-means++ coreset when discussing a coreset built with respect to a specific function of $k$. For example, the $\log k$-means++ solution.
-\end{itemize}
-All but BICO have been implemented by us in a single codebase. We use the BICO code from \cite{} \david{add ref}.
+        \item \emph{Cut-$k$-means coreset}: for a given $j \in \{1,..., k\}$, find an approximate $j$-means solution with $j$-means++ algorithm, and sample
+            a coreset proportionate to sensitivity as defined in \cref{eq:sensitivity}.\end{itemize}
+All but BICO have been implemented by us in a single codebase. We use the BICO code from \cite{bico}.
 
 We take a moment here to motivate the Cut-$k$-means coreset algorithm.  Consider that lightweight coresets are simply solving $1$-means to obtain sensitivity
-values whereas sensitivity sampling is solving the $k$-means problem.  As the lightweight coreset has the advantage of being fast, while sensitivity sampling is
-more precise, one could hope to interpolate in order to get the best of the two worlds: computing an approximate $j$-means solution may allow to obtain a more
-precise sampling distribution than that of lightweight-coresets, while being faster than sensitivity sampling.
-
-% As we will show, it is easy to construct examples where lightweight coresets fail to produce
-%acceptable coresets while sensitivity-sampling produces satisfactory coresets across datasets and settings. Thus, we study the $j$-means coreset
-%algorithm to answer the following question: for which values of $j < k$ does an approximate $j$-means solution give a satisfactory coreset?
+values whereas sensitivity sampling is solving the $k$-means problem. Since the lightweight coreset has the advantage of being fast while sensitivity sampling
+is more precise, one could hope to interpolate in order to get the best of the two worlds: computing an approximate $j$-means solution may allow to obtain
+a more precise sampling distribution than that of lightweight-coresets, while being faster than sensitivity sampling. We analyze the different choices of $j$ in
+Table~\ref{tbl:class-imbalance} and default to $j = \log k$ in the other experiments.
 
 \subsubsection{Datasets}
 \input{figures/coreset_size_on_quality.tex}
 
 We employ several real and artificial datasets to evaluate the quality of a coreset. 
 
-For our real-world data, we utilize the Adult~\cite{Dua:2019}, MNIST~\cite{mnist}, Song~\cite{song}, Census~\cite{census}, and Cover Type~\cite{covtype} datasets, whose characteristics are summarized in 
-Table~\cref{tbl:datasets} below.
+For our real-world data, we utilize the Adult~\cite{Dua:2019}, MNIST~\cite{mnist}, Song~\cite{song}, Census~\cite{census}, and Cover Type~\cite{covtype}
+datasets, whose characteristics are summarized in Table~\cref{tbl:datasets} below.
+
 \begin{table}[htbp]
     \label{tbl:datasets}
     \centering
@@ -81,50 +83,61 @@ Table~\cref{tbl:datasets} below.
 
 To complement those, we use several artificial datasets:
 \begin{itemize}
-    \item \emph{c-outlier}: $n-c$ points in a single location and $c$ points placed at a large distance away, for some constant $c$.
-    \item \emph{Gaussian mixture}: multivariate Gaussians with varying cardinalities arranged randomly in high-dimensional space. \david{I think we should specify precisely what dimension, how many gaussians, with what covariance matrix}
-    \item \emph{Geometric}: $n/2$ points at $(1, 0, 0, \cdots)$, $n/4$ points at $(0, 1, 0, \cdots)$, and so on. \david{I put the constant equal to $1$. What did you actually use?}
+    \item \emph{c-outlier}: $n-c$ points in a single location and $c$ points placed at a large distance away, for some constant $c$. We default to $n=50\,000$,
+        $d=50$, and $c=5$.
+    \item \emph{Gaussian mixture}: multivariate Gaussians with varying cardinalities arranged randomly in high-dimensional space. 
+        The datasets consist of $n=50\,000$ points in $d=50$ dimensions. Each cluster has a center sampled from a multivariate normal with mean $0$ and
+        variance $1\,000$. The clusters are all then standard multivariate normal distributions around this mean.
+    \item \emph{Geometric}: $n/2$ points at $(1, 0, 0, \cdots)$, $n/4$ points at $(0, 1, 0, \cdots)$, and so on.
     \item \emph{Benchmark}: A specific distribution of points introduced in \cite{chrisESA} as a good testbed for coreset algorithms. 
-    It has the property that all reasonable solutions are of equal quality but are maximally far
-            apart in the solution space.
+    It has the property that all reasonable solutions are of equal quality but are maximally far apart in the solution space. When creating the benchmark, we
+    follow the advice in \cite{chrisESA} and produce three benchmarks of varying size before applying random offsets to each so that they may be separated.
 \end{itemize}
 
 In all real and artificial datasets, we add random uniform noise $\eta$ with $0 \leq \eta_i \leq 0.001$ in each dimension in order to make all points unique.
+Unless specifically varying these parameters, we default all algorithms in~\ref{ssec:algorithms} to $k=100$ for the Adult, MNIST, and artificial datasets and
+$k=500$ for the Song, Cover Type, and Census datasets. Our default coreset size is then $m = 40k$. We refer to the coreset size scalar as the \emph{$m$-scalar}.
 
 \subsection{Algorithm Comparisons}
 \label{ssec:alg_qualities}
 
+\input{figures/coreset_size_on_sens_quality.tex}
+
 \paragraph*{Comparison with standard sensitivity sampling.}
-We first compare Fast-Coreset with standard sensitivity sampling, both in terms of quality and runtime. 
-%verify the fact that coreset quality is independent of whether we used $k$-means++ or \fkmeans to obtain the preliminary solution. 
-To this end,
-Figure~\ref{fig:coreset_size_on_sens_quality} shows that, across datasets, the Fast-Coreset method produces coresets of consistent quality, with all distortion
-values being lower than $1.2$ and consistently below $1.05$. \david{put the right value, for the best on each datset it should be lower}
-Additionally, for sufficient coreset sizes ($m \approx 80\cdot k$), Fast-Coresets obtain similar distortion to those obtained
-through sensitivity sampling. 
-Despite this, Figure~\ref{fig:k_on_runtime} confirms that, while traditional sensitivity sampling runtime grows linearly with $k$,
-Fast-Coreset only grow logarithmically with the number of centers. 
-\david{question about this plot: what are $k$ and coreset size? It seems the legends says the first bar is for coreset size of $10k$, second one $50k$ etc. I think you told me that it is not what you did?}
 
- Therefore, our experimental findings confirm the theory predicted by \cref{thm:main}:
-sensitivity sampling coresets can be implemented in linear time while preserving the coreset property. Given this context, we will not add traditional
-sensitivity sampling to further experiments, as it is too slow to run on our large datasets and does not provide better quality results than the Fast-Coreset
-method.
+We first compare the Fast-Coreset algorithm with standard sensitivity sampling in terms of both quality and runtime.  To this end,
+Figure~\ref{fig:coreset_size_on_sens_quality} shows that, across datasets, the Fast-Coreset method produces coresets of consistent quality. Specifically, we
+vary the $m$-scalar parameter and see that all distortion values are below $1.2$. Furthermore, choosing a sufficient coreset size ($m$-scalar$=80$) gives
+distortion below $1.03$ for both Fast-Coresets and traditional sensitivity sampling. Despite this, we see in Figure~\ref{fig:k_on_runtime} that varying $k$ from
+$50$ to $200$ causes a linear slowdown in sensitivity sampling but only a logarithmic one for the Fast-Coreset method.
 
-\paragraph*{Comparison with the other benchmark.}
-We now refer the reader to Figure~\ref{fig:coreset_size_on_quality}, where we show the effect of coreset size on the distortion across datasets and methods.  We
-define the coreset sizes as $|\Omega| = ck$, where $c \in [20, 40, 60, 80]$. We see that, across datasets, coresets of larger size obtain lower distortion.
-First, we note that BICO performs poorly on all datasets -- even worse than uniform sampling. 
-Second, uniform sampling works very poorly on the artifical datasets, and does not provide a quality below $1.15$ and the real world ones \david{add the right value}. 
+We take a moment to discuss the Fast-Coreset algorithm's results on the particularly challenging benchmark and geometric datasets.  First, consider that these
+datasets are specifically constructed to be difficult to compress, as the sensitivities are awkward to approximate and the clusters have unequal numbers of points.
+Furthermore, the nature of the constructions leads to highly varying densities across the dataset, imposing an extra challenge on the HST metric-embeddings.
+Despite these obstacles, we see that the Fast-Coreset method manages to find a low-distortion compression for reasonable coreset sizes ($m$-scalar$=80$).
 
-We now comment on the more involved coreset constructions, lightweight and Cut-$k$-means. 
-The Cut-$k$-means coreset surprisingly does not perform better than lightweight. Our tentative explanation for this lies in the reason why lightweight performs greatly on some dataset: those are rather uniform instances, well spread around their means, with clusters of equivalent sizes. \david{not sure it is true}
-Sampling according to distance to the mean makes therefore sense, while sampling according to a $j$-means solution (for small $j$) actually introduces bias against points close to the centers of that solution.
- Furthermore, lightweight coreset performs bad when there are $k$ unbalanced clusters, as illustrated in the gaussian-mixture dataset, as in Figure~\ref{fig:lightweight_breaks}.
-Our artificial dataset emphasize this effect, which does not appear in the real-world dataset (probably due to our choice of large $k$) but is very plausible.
-\david{add precise comments, depending on the actual precision of the coreset, especially for lightweight. }
+This analysis confirms the theory predicted by \cref{thm:main}: sensitivity sampling coresets can be
+implemented without a linear dependency on $k$ while still preserving the coreset property. Given this context, we will not add traditional sensitivity sampling
+to further experiments, as it is too slow to run on our large datasets and does not provide better quality results than the Fast-Coreset method.
 
-%However, it is also clear that uniform, lightweight, and Cut-$k$-means coresets (with $j=\log k$) \david{Is this the right value of $j$?} all fail on the geometric-progression and Gaussian-mixture datasets. Additionally, uniform sampling expectedly fails on the $1$-outlier problem.
+\paragraph*{Comparison with other coreset methods.}
+We now refer the reader to Figure~\ref{fig:coreset_size_on_quality}, where we show the effect of coreset size on the distortion across datasets and methods by
+sweeping over $m$-scalar values in $[20, 40, 60, 80]$. 
+First, we note that BICO performs poorly on all datasets -- even worse than uniform sampling.
+Second, uniform sampling fails catastrophically on the artifical datasets while providing reasonable quality coresets on the better-distributed real datasets.
+This is likely due to the real datasets being reasonably well distributed, with consistently sized clusters and without extreme outliers.
+Lastly, we see that, as expected, coresets of larger size obtain lower distortion across datasets.
+\input{figures/k_on_runtime.tex}
+
+We now comment on the more involved coreset constructions, lightweight and Cut-$k$-means. The Cut-$k$-means coreset surprisingly does not perform better than
+lightweight coresets. Our tentative explanation for this lies in the reason why lightweight performs well on some dataset: those are rather uniform instances, well
+spread around their means, with clusters of equivalent sizes. \david{not sure it is true} Sampling according to distance to the mean makes therefore sense,
+while sampling according to a $j$-means solution (for small $j$) actually introduces bias against points close to the centers of that solution.  Furthermore,
+lightweight coreset performs bad when there are $k$ unbalanced clusters, as illustrated in the gaussian-mixture dataset, as in
+Figure~\ref{fig:lightweight_breaks}.  Our artificial dataset emphasize this effect, which does not appear in the real-world dataset (probably due to our choice
+of large $k$) but is very plausible.  \david{add precise comments, depending on the actual precision of the coreset, especially for lightweight. }
+\andrew{I'm not sure what to do with this paragraph. On the one hand, I agree that we should discuss it. On the other hand, I am wary of giving handwavy
+explanations without evidence to back them up. Chris, what do you think?}
 
 \paragraph*{Additional evaluation on imbalanced clusters.}
 
@@ -144,32 +157,37 @@ Our artificial dataset emphasize this effect, which does not appear in the real-
     Each generation had 50\,000 points in 50 dimensions, with 10 Gaussian clusters and coresets of size 2\,000. We set $k=100$.}
 \end{table}
 \david{Say what is the coreset size. Do you know why is Fast Coreset so bad as well? Would it be possible to increase it to have a good fast coreset?}
+\andrew{Are you asking why the fast coreset performs poorly in table~\ref{tbl:class-imbalance}? I think it does okay\ldots -- I can mention that this is for
+$m=20k$, which is a small coreset. I used a small one to emphasize the difference but can use a bigger one so that our scores aren't as bad.}
 
 As discussed, the sensitivities for lightweight coresets are obtained by a linear combination of a uniform distribution and each point's relative
-distance to the mean. Since the Gaussian mixture dataset has randomly distributed clusters of varying sizes, a small cluster that is close to the mean is unlikely
+distance to the mean. Since the Gaussian mixture dataset has clusters of varying sizes, a small cluster that is close to the mean is unlikely
 to ever be sampled. We argue that, although this is a toy dataset, one can easily imagine real-world datasets that have this property. 
-As a simple solution, we see
-that the Cut-$k$-means coreset obtains satisfactory solutions on the Gaussian mixture dataset for 
+As a simple solution, we see that the Cut-$k$-means coreset obtains satisfactory solutions on the Gaussian mixture dataset for 
 \david{I don't know what you meant unfortunately}
+\andrew{I have not gotten to changing this paragraph, but it will basically say that the table of class imbalance shows that, as class imbalance grows, it is
+better to have $j>1$. I intend to add other values of $\gamma$ to that table.}
 
 A similar argument can be made for the more-challenging geometric dataset, where the cluster size decreases exponentially and all clusters are equidistant.
 We show furthermore that, for small values of $j$, sensitivities obtained according to
 solutions for $j$-means are insufficient to create a coreset for the geometric-progression dataset.
 
-To measure further the effect that the class imbalance has on the quality of each coreset, we define a class imbalance parameter $\gamma$ and obtain each
-cluster's size by $|C_i| = \frac{n}{m} \exp \left( \gamma(\rho - \frac{1}{2}) \right)$, where $\rho$ is distributed uniformly at random in the range $[0, 1]$. \david{is it $\rho_i$ rather?}
-Thus, each cluster has size $\frac{n}{m}$ when $\gamma = 0$ and the cluster sizes diverge exponentially as $\gamma$ grows linearly. We see the effect of $\gamma$ on the coreset
-distortion in Table~\ref{tbl:class-imbalance}, where even small values of $\gamma$ can break the lightweight coreset construction.
-\david{the sentence "cluster sizes diverge exponentially as $\gamma$ grows linearly" is not super clear to me, because of the randomness. Also, since you are only showing two values of $\gamma$, it is hard to say that "it grows linearly": would it be possible to add the ratio max size / min size for $\gamma = 5$ ? This should be something close to $\exp(10)$ which is crazy huge compared to $50000$, so maybe not the right thing to plot...}
- Looking at the
-sensitivities computed via $j$-means++, we see that using $(j>1)$ is better at maintaining the coreset property for higher values of $\gamma$ but is still not guaranteed
-to obtain satisfactory compression. Despite this, sensitivity sampling consistently obtains coresets with low distortion. 
-\david{The description of the dataset does not match the table's caption: are you sure there are 50 000 points? Also, need to be more precise: what are the mean / variance of gaussians? }
-
-Lastly, we employ the \emph{Benchmark} dataset that  as a particularly challenging problem for coreset constructions.  The
-benchmark dataset is  This naturally stress-tests
-the sensitivity sampling approach, as every candidate solution's sensitivities are particularly difficult to approximate. \david{not sure we need to say more than in section 3.1.3 and in the paragraph explaining Figure~\ref{fig:coreset_size_on_quality}}
-
-\input{figures/coreset_size_on_sens_quality.tex}
-\input{figures/k_on_runtime.tex}
+To further measure the effect that the class imbalance has on the quality of each coreset, we define a class imbalance parameter $\gamma$ and obtain each
+cluster's size by $|C_i| = \frac{n}{k} \exp \left( \gamma(\rho_i - \frac{1}{2}) \right)$, where $k$ is the number of Gaussian clusters and the $\rho_i$ values
+are distributed uniformly at random in the range $[0, 1]$.  We obtain each cluster iteratively: once we have sampled one cluster of size $|C_0|$, we repeat the
+process for the next cluster with $|C_1| = \frac{n - |C_0|}{k-1}\exp \left( \gamma(\rho_1 - \frac{1}{2}) \right)$.  Thus, each cluster has size $\frac{n}{k}$
+when $\gamma = 0$ and the cluster sizes diverge as $\gamma$ grows. 
 \input{figures/lightweight_breaks.tex}
+
+We see the effect of $\gamma$ on the coreset distortion in Table~\ref{tbl:class-imbalance}, where even
+small values of $\gamma$ can break the lightweight coreset construction.   Looking at the sensitivities computed via $j$-means++, we see that using $(j>1)$ is better at maintaining the coreset
+property for higher values of $\gamma$ but is still not guaranteed to obtain satisfactory compression. Despite this, sensitivity sampling consistently obtains
+coresets with low distortion.
+
+\david{the sentence "cluster sizes diverge exponentially as $\gamma$ grows linearly"
+is not super clear to me, because of the randomness. Also, since you are only showing two values of $\gamma$, it is hard to say that "it grows linearly": would
+it be possible to add the ratio max size / min size for $\gamma = 5$ ? This should be something close to $\exp(10)$ which is crazy huge compared to $50000$, so
+maybe not the right thing to plot...}
+\andrew{If I'm understanding correctly, you're saying that we should add a value for the largest cluster size divided by the smallest cluster size? I'm happy to
+do that. I think we could also just say what it is in expectation.}
+
