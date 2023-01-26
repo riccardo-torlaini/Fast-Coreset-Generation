@@ -28,8 +28,7 @@ We compare our method (Algorithm~\ref{alg:main}) against 5 different benchmark c
         \item \emph{Standard uniform sampling}. Uniform coresets are obtained by choosing a subset of $m \ll n$ points uniformly from $P$.
         \item \emph{Lightweight coreset}. Lightweight coresets find the mean $\mu$ of the dataset and obtain per-point sensitivity estimates by $\hat{s}(p) = 1/|P| + \cost(p, \mu) / \cost(P, \mu)$.
             The first term encourages uniform sampling while the second encourages sampling proportionate to the distance from the mean.
-        \item \emph{Birch using Coresets (BICO)}: BICO utilizes the fast hierarchical clustering algorithm BIRCH~\cite{birch} to find a coreset using the
-            triangle inequality with resepect to the centers. BICO has an exponential dependency on $d$, making it a poor candidate for high-dimensional datasets.
+        \item \emph{Birch using Coresets (BICO)}: BICO computes a clustering $\calC$ with low cost. If $\cost(P,\calC)\leq \frac{\varepsilon^2}{16} \opt$, it is a coresets. It computes this cost in a single pass over the data using data structures inspired by the fast hierarchical clustering algorithm BIRCH~\cite{birch}. Unfortunately, the number of points required by BICO to compute a coreset is of the order $O(k \varepsilon^{-d+1}\log n)$, making it a poor candidate for high-dimensional datasets.
         \item \emph{Standard sensitivity sampling}. We follow the standard approach for sensitivity sampling outlined in Section~\ref{ssec:sens_sampling}.
         \item \emph{Welterweight coreset}: This is a generalized interpolation between lightweight coresets and the `heavy-duty' sensitivity sampling coresets. For any $j
             \in \{1,..., k\}$, we compute a coreset using sensitivity sampling with respect to a candidate $j$-means++ solution. For values $j < O(\log k)$,

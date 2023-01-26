@@ -1,11 +1,12 @@
 \section{The algorithm, and proof of \cref{thm:main}}
 
-In this section, we present our algorithm and a very clean proof of \cref{thm:main}. Those are based on the following observations about the group
+In this section, we present our algorithm and a clean proof of \cref{thm:main}. Those are based on the following observations about the group
 sampling \cite{stoc21} and sensitivity sampling \cite{FeldmanL11} coreset construction algorithms.
 
 Both start by computing a solution $\calC$. When $\calC$ is a $c$-approximation, the two algorithms compute a $c \eps$-coreset of size $\tilde O\lpar
 k \eps^{-z-2}\rpar$ and $\tilde O\lpar k \eps^{-2z -2}\rpar$, respectively. Hence, by rescaling, they provide $\eps$-coreset with size $\tilde O\lpar
-k (\eps/c)^{-z-2}\rpar$ and $\tilde O\lpar k (\eps/c)^{-2z-2}\rpar$. \footnote{For group sampling, this result is not formally stated, but can be observed in Definition 1 and Lemma 12 of \cite{stoc21}: if $\calC$ is a $c$ approximation, rescaling $\eps$ by $c$ provides an approximate centroid set of the right precision, and the right error on the coreset. For sensitivity sampling, this can be seen in Lemma 15.4 of \cite{FLArxiv}, where $B$ is our $\calC$: if it is a $c$ approximation, rescaling $\eps$ by $c$ ensures an error $\eps \opt$ in the last line of the proof.} 
+k (\eps/c)^{-z-2}\rpar$ and $\tilde O\lpar k (\eps/c)^{-2z-2}\rpar$. 
+%\footnote{For group sampling, this result is not formally stated, but can be observed in Definition 1 and Lemma 12 of \cite{stoc21}: if $\calC$ is a $c$ approximation, rescaling $\eps$ by $c$ provides an approximate centroid set of the right precision, and the right error on the coreset. For sensitivity sampling, this can be seen in Lemma 15.4 of \cite{FLArxiv}, where $B$ is our $\calC$: if it is a $c$ approximation, rescaling $\eps$ by $c$ ensures an error $\eps \opt$ in the last line of the proof.} 
 
 This leads to the following fact:
 \begin{fact}\label{fact:logApprox}
@@ -28,8 +29,8 @@ Our algorithm is based on the \fkmeans algorithm from \cite{cohen2020fast}: it a
 distance to any given set of centers. The two key properties of this algorithm are the following: 
 \begin{itemize}
 \item \fkmeans runs in $\tilde O\lpar n d \log \Delta\rpar$ time, and
-\item it computes an assignment from input point to centers that is a $O\lpar d^z \log k\rpar = O\lpar\log^{z+1} k\rpar$ approximation to $k$-median ($z=1$) and
-$k$-means ($z=2$).
+\item \fkmeans computes an assignment from input point to centers that is a $O\lpar d^z \log k\rpar$ approximation to $k$-median ($z=1$) and
+$k$-means ($z=2$). Applying dimension reduction techniques \cite{MakarychevMR19}, the dependency on $d$ may be replaced by a dependency on $\log k$. This results in a $O\lpar\log^{z+1} k\rpar$ approximation.
 \end{itemize}
 
 The second property is crucial for us: the algorithm does not only compute centers, but also assignments. 
@@ -71,7 +72,6 @@ Provided the $c_i$ and the partition $\calC_i$, computing $|\calC_i|$ and $\cost
 Since the solution consisting of assigning each $p \in \calC_i$ to $c_i$ is a $O\lpar \log^{z+1} k\rpar$-approximation, the values $s(p)$ defined in \cref{alg:main} can be used to perform the coreset construction algorithm, and we conclude from \cref{fact:logApprox}.
 \end{proof}
 
-\david{I removed the two-step algorithm, as I think we are not experimenting it}
 %
 %\subsection{A Two-Step Algorithm}
 %We present a different algorithm, based on the following standard transitivity property: if $\coreset_1$ is an $\eps$-coreset of $P$, and $\coreset_2$ an $\eps$-coreset of $\coreset_1$, then $\coreset_2$ is a $2\eps$-coreset of $P$.
@@ -89,11 +89,11 @@ Since the solution consisting of assigning each $p \in \calC_i$ to $c_i$ is a $O
 %\david{add something depending on the results of experiments}
 
 \subsection*{Extensions.} 
-We conclude this theory section with a few remarks, that allow to generalize \cref{alg:main}.
-First, instead of using sensitivity sampling, one could use the group sampling procedure of \cite{stoc21}, or virtually any coreset construction: for many of those, the running time is linear, once provided with an initial solution $\calC$ and assignment $\sigma$. 
-Therefore, our algorithm could use as a subroutine any coreset construction algorithm, if one is developed that improves over sensitivity and group sampling.
+We conclude this section with a few remarks that allow us to generalize \cref{alg:main}.
+First, instead of using sensitivity sampling, one could use the group sampling procedure of \cite{stoc21}, or virtually any coreset construction. For many of those, the running time is linear, once provided with an initial solution $\calC$ and assignment $\sigma$. 
+Therefore, our algorithm could use as a subroutine any coreset construction, if in the future one is developed that improves over sensitivity and group sampling.
 
-Second, one could compute the solution $\calC$ via a different algorithm: \cref{alg:main} only need to be provided an assignment to a solution that is a $O(\polylog k)$ approximation. 
+Second, one could compute the solution $\calC$ via a different algorithm: \cref{alg:main} only needs to be provided with an assignment to a solution that is a $O(\polylog k)$ approximation. 
 This initial solution may as well be an $O\lpar\polylog \lnor P \rnor_0 \rpar$ approximation: using the iterative coreset construction from \cite{BravermanJKW21}, one could then derive a near-optimal coreset size, only suffering a $O(\log^* n)$ loss in the running time.
 
 As an example, we illustrate a different approach for $k$-median. One could first embed the input into a hierarchically separated tree (HST) with expected distortion $O(\log \lnor P \rnor_0)$ \cite{FakcharoenpholRT03}: on such tree metrics, solving $k$-median can be done in linear time, using dedicated algorithms (see e.g. \cite{Cohen-AddadLNSS21}). Using the solution from the HST metric, one can compute a coreset, and iterate using the previous argument.

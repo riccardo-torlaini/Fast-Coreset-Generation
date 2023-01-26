@@ -102,13 +102,12 @@ This posed a considerable difficulty for previous experimental evaluations, wher
 The $k$-median and $k$-means cost functions are defined as follows: 
 for a dataset $P \in \R^d$ with weights $w : P \rightarrow \R^+$, and any $k$-tuple $\calC$ in $\R^d$ (called a \emph{solution}), 
 \[\cost_z(P, \calC) := \sum_{p \in P} w(p) \dist^z(p, \calC),\]
-with $z=1$ for $k$-median and $z=2$ for $k$-means.
+with $z=1$ for $k$-median and $z=2$ for $k$-means. We use $\opt$ to denote $\min_{\calS} \cost_z(P, \calC)$.
 
 An $\eps$-coreset for a given cost function is a subset $S \subseteq P$ with weights $\tilde w$ such that
 for any solution $\calC$,
-\[\sum_{p \in S} \tilde w(p) \dist^z(p, \calC) \in (1 \pm \eps) \cost_z(P, \calC),\]
-again with $z=1$ for a $k$-median coreset and $z=2$ for a $k$-means one.
-In other terms, the coreset preserves the structure of the cost function, up to a factor $(1\pm \eps)$.
+\[\sum_{p \in S} \tilde w(p) \dist^z(p, \calC) \in (1 \pm \eps) \cost_z(P, \calC).\]
+
 
 %For the clustering tasks of $k$-median and $k$-means, sensitivity sampling offers very strong guarantee: with high probability, the sample is a \textit{coreset}.
 %Specifically, given a pointset $P \subset \mathbb{R}^{d}$
@@ -145,7 +144,7 @@ The coreset $\Omega$ merely consists of $S$ points sampled proportionate to $s$,
 %The first term corresponds to sampling proportionate to the importance in the solution $\calC$, the second one to uniform sampling.\footnote{This definition is actually an upper-bound on the real sensitivity, 
 %usually defined as $\sup_{\calC} \frac{\dist^z(p, \calC)}{\cost_z(P, \calC)}$ -- where the supremum is taken over all possible solutions $\calC$.
 % This definition is more amenable to generalizations to other problems; it is however NP-hard to compute this supremum, and $s(p)$ defined above is a mere proxy for it.}
- To perform this algorithm, the bottleneck in the running time is therefore to compute the solution $\calC$: using the standard $k$-means++ algorithm \cite{ArV07} combined with dimension reduction~\cite{NaN18}, this takes time $\tilde O(nk +nd)$. Lastly, one may use a solution $\calC$ with less than $k$ centers instead. For example \cite{BachemL018} showed that using $\calC=\{\mu\}$, i.e. the mean of the data set, it is still possible to prove weaker guarantees.
+ To perform this algorithm, the bottleneck in the running time is therefore to compute the solution $\calC$ as well as the costs of every point to its assigned center in $\calC$. Using any bicriteria approximation algorithm\footnote{For $k$-means an $(\alpha,\beta)$ bicriteria approximation is an algorithm that computes a solution $\calC$ satisfying $\cost(P\calC)\leq \alpha\cdot \opt$ and $|\calC|\leq \beta\cdot k$.} such as the standard $k$-means++ algorithm \cite{ArV07} combined with dimension reduction techniques (see for example \cite{BecchettiBC0S19,CohenEMMP15,MakarychevMR19}), this takes time $\tilde O(nk +nd)$. Lastly, one may use a solution $\calC$ with less than $k$ centers instead. For example \cite{BachemL018} showed that using $\calC=\{\mu\}$, i.e. the mean of the data set, it is still possible to prove weaker with an additive error of $\varepsilon\cdot \cost(P,\{\mu\})$.
 
 
 
