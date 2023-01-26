@@ -23,18 +23,18 @@ def get_experiment_params(default_values, norm, param, val):
 def run_sweeps():
     results = {}
     datasets = [
-        # 'artificial',
-        # 'geometric',
+        'artificial',
+        'geometric',
         'benchmark',
-        # 'blobs',
-        # 'mnist',
-        # 'adult',
+        'blobs',
+        'mnist',
+        'adult',
         # 'song',
         # 'census',
         # 'cover_type'
     ]
     # methods = ['fast_coreset', 'semi_uniform', 'uniform_sampling', 'sens_sampling', 'lightweight', 'bico']
-    methods = ['fast_coreset']
+    methods = ['fast_coreset', 'sens_sampling']
 
     # Only apply for Gaussian mixture and 1-outlier datasets
     n_points = 50000
@@ -63,10 +63,10 @@ def run_sweeps():
 
     small_sweep_params = {
         # Params to sweep for all coreset algorithms
-        # 'k': [10, 50, 100, 200],
+        'k': [50, 100, 200, 400],
         # 'j_func': ['2', '10', 'log', 'sqrt'],
         # 'sample_method': ['sens', 'uniform'],
-        'm_scalar': [20, 40, 60, 80],
+        # 'm_scalar': [20, 40, 60, 80],
         # 'allotted_time': [0, 0.5, 1, 3, 5, 7, 10, 20],
         # 'hst_count_from_norm': [True, False], # Only applies to fast_coreset algorithm
     }
@@ -114,7 +114,8 @@ def run_sweeps():
             if not os.path.isdir(dataset_output_path):
                 os.makedirs(dataset_output_path)
 
-            for norm in [1, 2]:
+            # for norm in [1, 2]:
+            for norm in [2]:
                 print('\t\tNorm --- {}'.format(str(norm)))
                 norm_output_path = os.path.join(dataset_output_path, str(norm))
                 if not os.path.isdir(norm_output_path):

@@ -24,11 +24,15 @@ Things to show:
     \andrew{Will do tomorrow morning}
 \end{itemize}
 
+We now provide an experimental analysis to assert our two principal claims. First, Fast-Coresets obtain solutions of equal quality to sensitivity sampling
+without the linear time-dependency on the number of centers $k$. Second, of the coreset methods that are sublinear in $k$, only Fast-Coresets provide guarantees
+that the resulting compression satisfies the coreset property. We proceed by introducing our experimental setup, including the metrics, datasets, and algorithms
+being analyzed, followed by a discussion of results for both of the above claims.
 
 \subsection{Experimental Setup}
 \subsubsection{Metrics}
 
-We analyze the coreset construction methods along two metrics -- quality and construction time.  Although measuring runtime is standard, predicting coreset
+We analyze the coreset construction methods along two metrics -- coreset quality and construction time.  Although measuring runtime is standard, predicting coreset
 quality is a more difficult task. Specifically, it is unclear how to confirm that a subset of points satisfies the coreset property over all solutions. To this
 end, the authors in \cite{chrisESA} suggested reporting the following metric 
 \[ \max \left( \dfrac{\cost(P, \calC_{\Omega})}{\cost(\Omega, \calC_{\Omega})}, \dfrac{\cost(\Omega, \calC_{\Omega})}{\cost(P, \calC_{\Omega})} \right),\]
@@ -43,7 +47,7 @@ viable on the full dataset.
 
 \chris{Not to say we should plagiarize, but can we write this similar to the ESA paper? In general I found the ESA paper had a lot more detail. Also, a number of the comments are wrong or misleading. BICO does not use BIRCH.}
 
-We compare our algorithm against 5 different benchmark algorithms. Ours is \emph{Fast-Coreset}~\ref{alg:main}, without the dimension-reduction step. The benchmarks are:
+We compare our method (Algorithm~\ref{alg:main}) against 5 different benchmark coreset constructions:
 \begin{itemize}
         \item \emph{Standard uniform sampling}: choose a subset of $m \ll n$ points uniformly from $P$.
         \item \emph{Lightweight coreset}: find the mean $\mu$ of the dataset and obtain per-point sensitivity estimates by $\hat{s}(p) = 1/|P| + \cost(p, \mu) / \cost(P, \mu)$.
@@ -100,6 +104,7 @@ To complement those, we use several artificial datasets:
 In all real and artificial datasets, we add random uniform noise $\eta$ with $0 \leq \eta_i \leq 0.001$ in each dimension in order to make all points unique.
 Unless specifically varying these parameters, we default all algorithms in~\ref{ssec:algorithms} to $k=100$ for the Adult, MNIST, and artificial datasets and
 $k=500$ for the Song, Cover Type, and Census datasets. Our default coreset size is then $m = 40k$. We refer to the coreset size scalar as the \emph{$m$-scalar}.
+We only run the dimension-reduction step on the MNIST dataset, as the remaining ones already have sufficiently low dimensionality.
 
 \subsection{Algorithm Comparisons}
 \label{ssec:alg_qualities}
@@ -148,18 +153,25 @@ explanations without evidence to back them up. Chris, what do you think?}
 \begin{table}[htbp]
     \label{tbl:class-imbalance}
     \centering
-    \begin{tabular}{lcr}
-        Algorithm & $\gamma = 0$ & $\gamma = 5$ \\
+    \begin{tabular}{lcccr}
+        Algorithm & $\gamma = 0$ & $\gamma = 1$ & $\gamma = 3$ & $\gamma = 5$\\
         \hline
-        Lightweight Coreset & 1.2$\pm$ 0.0 & 415.6 $\pm$ 6.8 $\times 10^5$ \\
-        Cut-$k$-means; $j=2$ & 2.2$\pm$1.2 & 3.5$\pm$5.8 \\
-        Cut-$k$-means; $j=\log k$ & 1.6$\pm$0.9 & 3.6$\pm$7.7 \\
-        Cut-$k$-means; $j=\sqrt{k}$ & 2.8$\pm$5.8 & 79.6$\pm$2.3 \\
-        Fast Coreset & 1.2$\pm$0.0 & 1.3$\pm$0.0
+        LW Coreset & 1.03 & 1.03 & 1.36 & 2.17\\
+        $j=2$ & 1.04 & 1.04 & 1.04 & 1.92\\
+        $j=\log k$ & 1.04 & 1.04 & 1.04 & 1.95\\
+        $j=\sqrt{k}$ & 1.05 & 1.06 & 1.04 & 1.18\\
+        Fast Coreset & 1.03 & 1.03 & 1.04 & 1.12
     \end{tabular}
-    \caption{The effect of $\gamma$ in the Gaussian mixture dataset on the coreset distortion. We report the means and variances over 5 random dataset generations.
-    Each generation had 50\,000 points in 50 dimensions, with 10 Gaussian clusters and coresets of size 2\,000. We set $k=100$.}
+    \caption{The effect of $\gamma$ in the Gaussian mixture dataset on the coreset distortion. We report the means over 5 random dataset generations.
+    Each generation had 50\,000 points in 50 dimensions, with 50 Gaussian clusters and coresets of size 4\,000. We set $k=100$.}
 \end{table}
+\begin{figure}[htbp]
+    \label{fig:effect-of-gamma}
+    \centering
+    \includegraphics[width=\linewidth]{images/effect_of_gamma.png}
+    \caption{Histograms of cluster sizes for different values of $\gamma$ in the Gaussian mixture dataset.}
+\end{figure}
+
 \david{Say what is the coreset size. Do you know why is Fast Coreset so bad as well? Would it be possible to increase it to have a good fast coreset?}
 \andrew{Are you asking why the fast coreset performs poorly in table~\ref{tbl:class-imbalance}? I think it does okay\ldots -- I can mention that this is for
 $m=20k$, which is a small coreset. I used a small one to emphasize the difference but can use a bigger one so that our scores aren't as bad.}

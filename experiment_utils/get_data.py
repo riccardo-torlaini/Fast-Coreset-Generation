@@ -9,7 +9,7 @@ from mnist import MNIST
 
 def get_dataset(dataset_type, n_points=1000, D=50, num_centers=10, k=50, class_imbalance=5.0):
     if dataset_type == 'blobs':
-        return get_blobs_dataset(n_points, D, num_centers)
+        return get_blobs_dataset(n_points, D, num_centers, class_imbalance=class_imbalance)
     elif dataset_type == 'artificial':
         return get_artificial_dataset(n_points, D)
     elif dataset_type == 'benchmark':
@@ -32,9 +32,7 @@ def get_dataset(dataset_type, n_points=1000, D=50, num_centers=10, k=50, class_i
         raise ValueError('Dataset not implemented')
 
 
-
-
-def get_blobs_dataset(n_points, D, num_centers, scalar=1000, class_imbalance=5.0, var=5):
+def get_blobs_dataset(n_points, D, num_centers, scalar=1000, class_imbalance=5.0, var=500):
     # 1) Get random sizes for each cluster
     points_remaining = n_points
     cluster_sizes = np.zeros(num_centers)

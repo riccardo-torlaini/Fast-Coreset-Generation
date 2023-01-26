@@ -192,7 +192,7 @@ def make_scores_over_datasets_plot(
     plt.rcParams.update({'font.size': 10, 'text.usetex': True, 'savefig.format': 'pdf'})
     for index in [0, 1]:
         fig, axes = plt.subplots(1, len(methods))
-        fig.set_figheight(5.5)
+        fig.set_figheight(5)
         fig.set_figwidth(13)
         if index == 0:
             ylabel = 'Coreset distortion'
@@ -352,7 +352,7 @@ if __name__ == '__main__':
             filter_strs=methods,
             print_dict=True
         )
-        k_values = ['10', '50', '100', '200']
+        k_values = ['50', '100', '200', '400']
         k_pattern_dict = { '10': 'k=10',
             '50': 'k=50',
             '100': 'k=100',

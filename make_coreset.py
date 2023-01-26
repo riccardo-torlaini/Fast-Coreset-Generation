@@ -188,6 +188,7 @@ def fast_coreset(
         return uniform_coreset(points, m)
 
     sensitivities = bound_sensitivities(centers, labels, costs)
+    # q_points, q_weights, q_labels = get_coreset(sensitivities, m, points, labels)
     q_points, q_weights, q_labels = get_coreset(sensitivities, m, points, labels)
     return q_points, q_weights, q_labels
 
