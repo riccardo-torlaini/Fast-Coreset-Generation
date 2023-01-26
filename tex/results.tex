@@ -106,7 +106,8 @@ We only run the dimension-reduction step on the MNIST dataset, as the remaining 
 We first compare the Fast-Coreset algorithm with standard sensitivity sampling in terms of both quality and runtime.  To this end, the top of
 Figure~\ref{fig:coreset_size_on_sens_quality} shows that, across datasets, the Fast-Coreset method produces coresets of consistent quality. Specifically, we
 vary the $m$-scalar parameter and see that all distortion values are below $1.2$. Furthermore, choosing a sufficient coreset size ($m$-scalar$=80$) gives
-distortion below $1.03$ for both Fast-Coresets and traditional sensitivity sampling. Despite this, we see in the bottom of Figure~\ref{fig:k_on_runtime} that
+distortion below $1.03$ for both Fast-Coresets and traditional sensitivity sampling. Despite this, we see in the bottom of
+Figure~\ref{fig:coreset_size_on_sens_quality} that
 varying $k$ from $50$ to $400$ causes a linear slowdown in sensitivity sampling but only a logarithmic one for the Fast-Coreset method.
 
 \andrew{Should this paragraph be here or with the artificial dataset discussion?}
@@ -138,9 +139,8 @@ struggle with unevenly distributed cluster sizes. While it is clear why this occ
 welterweight coreset constructions under this lens. Recall that lightweight coresets are sampling proportionate to the values
 \[ s_{lw}(p) = \dfrac{\cost(p, \{\mu\})}{\cost(P, \{\mu\})} + \dfrac{1}{|P|},\]
 where the first term is akin to importance sampling while the second is a uniform distribution. Since it is trivial to see that class imbalance breaks uniform
-sampling, it remains to discuss how the cluster-sizes impact the $1$-means sensitivities. As a simple example, consider the case where $k-1$ clusters have large
-cardinality and are very far from the mean while the last cluster has small cardinality and is close to the mean. As the cardinalities of the large clusters
-grow, the small one will have ever-less probability mass under the relative distances to the mean. Thus, while 
+sampling, it remains to see how the cluster-sizes impact the $1$-means sensitivities. As a simple example, consider that a small cluster close to the mean
+is unlikely to be sampled. 
 
 This is evidenced in Table~\ref{tbl:class-imbalance}. There, we vary the Gaussian mixture dataset's
 $\gamma$ parameter in order to study the effect that the class-distribution has on the coreset distortion. Since welterweight coresets are an interpolation
