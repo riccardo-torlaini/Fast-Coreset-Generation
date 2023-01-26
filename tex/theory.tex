@@ -5,7 +5,7 @@ sampling \cite{stoc21} and sensitivity sampling \cite{FeldmanL11} coreset constr
 
 Both start by computing a solution $\calC$. When $\calC$ is a $c$-approximation, the two algorithms compute a $c \eps$-coreset of size $\tilde O\lpar
 k \eps^{-z-2}\rpar$ and $\tilde O\lpar k \eps^{-2z -2}\rpar$, respectively. Hence, by rescaling, they provide $\eps$-coreset with size $\tilde O\lpar
-k (\eps/c)^{-z-2}\rpar$ and $\tilde O\lpar k (\eps/c)^{-2z-2}\rpar$. \footnote{For group sampling, this result is not formally stated, but can be observed in Definition 1 and Lemma 12 of \cite{stoc21}: if $\calC$ is a $c$ approximation, rescaling $\eps$ by $c$ provides an approximate centroid set of the right precision, and the right error on the coreset. For sensitivity sampling, this can be seen in Lemma 15.4 of \cite{FLArxiv}, where $B$ is our $\calC$: if it is a $c$ approximation, rescaling $\eps$ by $c$ ensures an error $\eps \opt$ in the last line of the proof.} \david{I suppose this footnote is too imprecise, but I don't want to redo all proofs from scratch... Should we still say it, or hide it under the carpet?}
+k (\eps/c)^{-z-2}\rpar$ and $\tilde O\lpar k (\eps/c)^{-2z-2}\rpar$. \footnote{For group sampling, this result is not formally stated, but can be observed in Definition 1 and Lemma 12 of \cite{stoc21}: if $\calC$ is a $c$ approximation, rescaling $\eps$ by $c$ provides an approximate centroid set of the right precision, and the right error on the coreset. For sensitivity sampling, this can be seen in Lemma 15.4 of \cite{FLArxiv}, where $B$ is our $\calC$: if it is a $c$ approximation, rescaling $\eps$ by $c$ ensures an error $\eps \opt$ in the last line of the proof.} 
 
 This leads to the following fact:
 \begin{fact}\label{fact:logApprox}
