@@ -8,7 +8,8 @@ Nevertheless, there are reasons for focusing on sampling based algorithms. Sampl
 When considering sampling algorithms, two ideas immediately come to mind. The first is uniform sampling. Uniform sampling always results in an unbiased estimation of the cost and is faster than any other algorithm. 
 It is also possible to execute in nearly every computational model, ranging from distributed computing to streaming settings.
 The hope is that sampling allows to solve faster downstream tasks, and that uniform sampling will preserve the main characteristic of the dataset and of the solutions.
-Unfortunately uniform sampling lacks of strong guarantees only for very constrained problem formulations. Indeed, even for $2$-means, it is easy to construct data sets where uniform sampling must sample the entire data set to obtain a constant factor approximation.
+Uniform sampling has certain provable guarantees for clustering with $k$ centers. For example, for $k=1$, it can result in very accurate results \cite{CLMPS16,CSS21b,InabaKI94} and can be used to compute good clustering under certain conditions \cite{Ben-David07,czumaj2007sublinear,meyerson2004k}.
+Unfortunately uniform sampling lacks any sort of worst guarantees for arbitrary values of $k$. Indeed, even for $2$-means, it is easy to construct data sets where uniform sampling must sample the entire data set to obtain a constant factor approximation.
 
 The second idea is to sample points non-uniformly. 
 The most commonly used algorithm is \textit{sensitivity sampling} introduced in its current form by \cite{LS10}. In this distribution, points are picked proportionally to the maximum impact that can have on any solution. 
