@@ -41,6 +41,7 @@
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{question}[theorem]{Question}
 \newtheorem{corollary}[theorem]{Corollary}
 \theoremstyle{definition}
 \newtheorem{definition}[theorem]{Definition}
@@ -92,6 +93,13 @@
   \newcommand{\andrew}[1]{
  %  \ifdraft{
     \textsf{{\color{red} *** (Andrew) \marrow #1 ***}}
+ %  }
+ %  \fi
+ }
+ 
+   \newcommand{\chris}[1]{
+ %  \ifdraft{
+    \textsf{{\color{green} *** (Chris) \marrow #1 ***}}
  %  }
  %  \fi
  }
@@ -157,10 +165,15 @@
 \printAffiliationsAndNotice{\icmlEqualContribution} % otherwise use the standard text.
 
 \begin{abstract}
-We study the ways of compressing a dataset of points in $\R^d$ while preserving some guarantee. For this problem, show how to implement the so called sensitivity sampling in near-linear time $\tilde O (nd)$. 
-This sampling distribution ensures that the sample forms a coreset for $k$-median and $k$-means, namely, it preserves the cost with respect to any $k$-median or $k$-means solution.
+We study compression algorithms for Euclidean spaces with respect to center-based clustering objectives. 
+The strongest guarantee a compression algorithm can satisfy is the coreset guarantee, which states that the cost of any candidate set of centers on coreset and original data set are equal up to $(1\pm \varepsilon)$ factors. Unfortunately, despite extensive efforts, computing coresets is an expensive undertaking.
+
+For this reason, a number of computationally simpler methods have been proposed, the simplest of which consists of uniform sampling which does not even have to read the data while still having some provable properties.
+
+In this paper, we show to construct a coreset for Euclidean $k$-median and $k$-means in near linear time $\tilde O (nd)$. Moreover, no sublinear time algorithm is possible, making this the result essentially optimal with respect to the running time, while retaining the space guarantee of any offline coreset construction.
+ 
 We implement this algorithm and illustrates its efficiency on real-life datasets. 
-In particular, it is faster than any coreset algorithm with provable guarantees, and it shows way better guarantees than uniform sampling.
+In particular, it is faster than any known coreset algorithm with provable guarantees, and its performance  significantly improves over even sublinear methods based on uniform sampling.
 %This document provides a basic paper template and submission guidelines.
 %Abstracts must be a single paragraph, ideally between 4--6 sentences long.
 %Gross violations will trigger corrections at the camera-ready phase.
