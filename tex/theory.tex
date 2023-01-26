@@ -23,6 +23,8 @@ distance to any given set of centers. The two key properties of this algorithm a
 \item it computes an assignment from input point to centers that is a $O\lpar d^z \log k\rpar = O\lpar\log^{z+1} k\rpar$ approximation to $k$-median ($z=1$) and
 $k$-means ($z=2$).
 \end{itemize}
+
+The second property is crucial for us: the algorithm does not only compute centers, but also assignments. 
   We use it, in combination with sensitivity sampling, as described in \cref{alg:main}.
 
 
@@ -31,8 +33,8 @@ $k$-means ($z=2$).
    \label{alg:main}
 \begin{algorithmic}
    \STATE {\bfseries Input:} data $P$, number of clusters $k$, precision $\eps$ and target size $S$
-   \STATE Use Johnson-Lindenstrauss embedding to reduce the dimension to $O(\log k)$.
-   \STATE Compute an approximate solution $\calC$ and an assignment $\sigma : P \rightarrow \calA$ using \fkmeans.
+   \STATE Use Johnson-Lindenstrauss embedding to compute the embedding $\tilde P$ of $P$ into $\tilde d = O(\log k)$ dimensions
+   \STATE Compute an approximate solution $\calC$ for $\tilde P$, and an assignment $\sigma : \tilde P \rightarrow \calA$ using \fkmeans.	
    \STATE For each point $p \in P$, compute $s_\calC(p)$ as in \cref{eq:sensitivity}.
    \STATE {\bfseries Output:} a set $\coreset$ of $S$ points randomly sampled from $P$ proportionate to $s$.
 \end{algorithmic}

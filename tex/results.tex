@@ -74,7 +74,6 @@ For our real-world data, we utilize the Adult~\cite{Dua:2019}, MNIST~\cite{mnist
 datasets, whose characteristics are summarized in Table~\cref{tbl:datasets} below.
 
 \begin{table}[htbp]
-    \label{tbl:datasets}
     \centering
     \begin{tabular}{lrr}
         Dataset & Points & Dim \\
@@ -86,6 +85,7 @@ datasets, whose characteristics are summarized in Table~\cref{tbl:datasets} belo
         \emph{Census} & 2\,458\,285 & 68
     \end{tabular}
     \caption{Description of real world datasets}
+        \label{tbl:datasets}
 \end{table}
 
 To complement those, we use several artificial datasets:
@@ -94,7 +94,7 @@ To complement those, we use several artificial datasets:
         $d=50$, and $c=5$.
     \item \emph{Gaussian mixture}: multivariate Gaussians with varying cardinalities arranged randomly in high-dimensional space. 
         The datasets consist of $n=50\,000$ points in $d=50$ dimensions. Each cluster has a center sampled from a multivariate normal with mean $0$ and
-        variance $1\,000$. The clusters are all then standard multivariate normal distributions around this mean.
+        variance $1\,000$. The clusters are all then standard multivariate normal distributions around this mean. \david{how many points per clusters?}
     \item \emph{Geometric}: $n/2$ points at $(1, 0, 0, \cdots)$, $n/4$ points at $(0, 1, 0, \cdots)$, and so on.
     \item \emph{Benchmark}: A specific distribution of points introduced in \cite{chrisESA} as a good testbed for coreset algorithms. 
     It has the property that all reasonable solutions are of equal quality but are maximally far apart in the solution space. When creating the benchmark, we
@@ -151,7 +151,6 @@ explanations without evidence to back them up. Chris, what do you think?}
 \paragraph*{Additional evaluation on imbalanced clusters.}
 
 \begin{table}[htbp]
-    \label{tbl:class-imbalance}
     \centering
     \begin{tabular}{lcccr}
         Algorithm & $\gamma = 0$ & $\gamma = 1$ & $\gamma = 3$ & $\gamma = 5$\\
@@ -164,12 +163,13 @@ explanations without evidence to back them up. Chris, what do you think?}
     \end{tabular}
     \caption{The effect of $\gamma$ in the Gaussian mixture dataset on the coreset distortion. We report the means over 5 random dataset generations.
     Each generation had 50\,000 points in 50 dimensions, with 50 Gaussian clusters and coresets of size 4\,000. We set $k=100$.}
+        \label{tbl:class-imbalance}
 \end{table}
 \begin{figure}[htbp]
-    \label{fig:effect-of-gamma}
     \centering
     \includegraphics[width=\linewidth]{images/effect_of_gamma.png}
     \caption{Histograms of cluster sizes for different values of $\gamma$ in the Gaussian mixture dataset.}
+        \label{fig:effect-of-gamma}
 \end{figure}
 
 \david{Say what is the coreset size. Do you know why is Fast Coreset so bad as well? Would it be possible to increase it to have a good fast coreset?}
