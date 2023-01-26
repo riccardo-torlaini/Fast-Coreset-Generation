@@ -22,8 +22,6 @@ viable on the full dataset.
 \subsubsection{Algorithms}
 \label{ssec:algorithms}
 
-\chris{Not to say we should plagiarize, but can we write this similar to the ESA paper? In general I found the ESA paper had a lot more detail. Also, a number of the comments are wrong or misleading. BICO does not use BIRCH.}
-
 We compare our method (Algorithm~\ref{alg:main}) against 5 different benchmark coreset constructions:
 \begin{itemize}
         \item \emph{Standard uniform sampling}. Uniform coresets are obtained by choosing a subset of $m \ll n$ points uniformly from $P$.
@@ -66,19 +64,22 @@ datasets, whose characteristics are summarized in Table~\ref{tbl:datasets} below
 
 To complement those, we use several artificial datasets. Unless stated otherwise, $n = 50\,000$ and $d=50$.
 \begin{itemize}
-    \item \emph{c-outlier}. Place $n-c$ points in a single location and $c$ points placed at a large distance away, for some constant $c$. We default to $c=5$.
+    \item \emph{c-outlier}. Place $n-c$ points in a single location and $c$ points placed at a large distance away, for various constants $c$. 
+	This data set constitutes an instance where we expect uniform sampling to perform poorly while all the other algorithms will do well.
 
-    \item \emph{Gaussian mixture}.  Multivariate Gaussians with varying cardinalities arranged randomly in high-dimensional space.  Each cluster has a center
-        sampled from a multivariate normal with mean $0$ and variance $1\,000$ and each cluster is then i.i.d. samples multivariate normal distribution around
+    \item \emph{Gaussian mixture}. We seed $k$ multivariate Gaussians with varying cardinalities arranged randomly in high-dimensional space.  Each cluster has a center sampled from a multivariate normal with mean $0$ and variance $1\,000$ and each cluster is then i.i.d. samples multivariate normal distribution around
         this mean. Cluster sizes are defined as the random variable $|C_i| = \frac{n}{\kappa} \exp \left( \gamma(\rho_i - \frac{1}{2}) \right)$, where $\kappa$
         is the number of Gaussian clusters, $\rho_i$ is a uniform random variable, and $\gamma$ is a chosen hyperparameter\footnote{We show the effect of
         $\gamma$ on the cluster distribution in Figure~\ref{fig:effect-of-gamma} in the appendix.}. We obtain each cluster iteratively: once we have sampled one cluster of size
         $|C_0|$, we repeat the process for the next cluster with $|C_1| = \frac{n - |C_0|}{\kappa-1}\exp \left( \gamma(\rho_1 - \frac{1}{2}) \right)$.  Thus,
         each cluster has size $\frac{n}{k}$ when $\gamma = 0$ and the cluster sizes diverge as $\gamma$ grows. We default to $\gamma = 5$.
+        
+  This instance represents a well-clusterable instance with respect to cost stability conditions, see \cite{AwS12,Cohen-AddadS17,KuK10,ORSS12}.
 
     \item \emph{Geometric}. Place $c k$ points at $(1, 0, 0, \cdots)$, $\frac{ck}{r}$ points at $(0, 1, 0, \cdots)$, $\frac{ck}{r^2}$ points
         at $(0, 0, 1, \cdots)$, and so on for $\log_r (ck)$ rounds. Thus, the data creates a high-dimensional simplex with uneven weights across the vertices. We
         default to $c = 100$ and $r=2$. 
+	This data set constitutes an instance where we expect uniform sampling and lightweight as well as welterweight coresets to perform poorly while sensitivity sampling and \fkmeans are expected to perform well.
 
     \item \emph{Benchmark}. A specific distribution of points introduced in \cite{chrisESA} as a good testbed for coreset algorithms.  It has the property that
         all reasonable $k$-means solutions are of equal quality but are maximally far apart in the solution space. Thus, the dataset is fully determined by the
@@ -93,7 +94,7 @@ Unless specifically varying these parameters, we default all algorithms in~\ref{
 $k=500$ for the Song, Cover Type, and Census datasets. Our default coreset size is then $m = 40k$. We refer to the coreset size scalar as the \emph{$m$-scalar}.
 We only run the dimension-reduction step on the MNIST dataset, as the remaining datasets already have sufficiently low dimensionality.
 
-\andrew{Add implementation details, machine specifics, etc.}
+%\andrew{Add implementation details, machine specifics, etc.}
 
 \subsection{Comparing Fast-Coresets to the State of the Art}
 \label{ssec:alg_qualities}
