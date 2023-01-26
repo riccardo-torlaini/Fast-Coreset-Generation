@@ -5,7 +5,7 @@ sampling \cite{stoc21} and sensitivity sampling \cite{FeldmanL11} coreset constr
 
 Both start by computing a solution $\calC$. When $\calC$ is a $c$-approximation, the two algorithms compute a $c \eps$-coreset of size $\tilde O\lpar
 k \eps^{-z-2}\rpar$ and $\tilde O\lpar k \eps^{-2z -2}\rpar$, respectively. Hence, by rescaling, they provide $\eps$-coreset with size $\tilde O\lpar
-k (\eps/c)^{-z-2}\rpar$ and $\tilde O\lpar k (\eps/c)^{-2z-2}\rpar$. 
+k (\eps/c)^{-z-2}\rpar$ and $\tilde O\lpar k (\eps/c)^{-2z-2}\rpar$. \footnote{For group sampling, this result is not formally stated, but can be observed in Definition 1 and Lemma 12 of \cite{stoc21}: if $\calC$ is a $c$ approximation, rescaling $\eps$ by $c$ provides an approximate centroid set of the right precision, and the right error on the coreset. For sensitivity sampling, this can be seen in Lemma 14.5 of \cite{FLArxiv}, where $B$ is our $\calC$: if it is a $c$ approximation, rescaling $\eps$ by $c$ ensures an error $\eps \opt$.} \david{I suppose this is too imprecise, but I don't want to redo all proofs from scratch... Should we still say it, or hide it under the carpet?}
 
 Therefore, taking $c = O(\log k)$ merely affects the size of the computed coreset, while allowing for approximation algorithms that are way faster.
 
@@ -17,9 +17,13 @@ It might however have been the case that coresets constructed that way have poor
 We show that this unfortunate event does not happen, and that, even with the ``worst-case" guarantee $O(\log k)$, these algorithms indeed produce coresets.
 
 Our algorithm is based on the \fkmeans algorithm from \cite{cohen2020fast}: it allows to embed points in a very simple metric,  where it is easy to compute the
-distance to any given set of centers. The two key properties of this algorithm are the following: it runs in $\tilde O\lpar n d \log \Delta\rpar$ time, and
-computes an assignment from input point to centers that is a $O\lpar d^z \log k\rpar = O\lpar\log^{z+1} k\rpar$ approximation to $k$-median ($z=1$) and
-$k$-means ($z=2$).  We use it, in combination with sensitivity sampling, as described in \cref{alg:main}.
+distance to any given set of centers. The two key properties of this algorithm are the following: 
+\begin{itemize}
+\item \fkmeans runs in $\tilde O\lpar n d \log \Delta\rpar$ time, and
+\item it computes an assignment from input point to centers that is a $O\lpar d^z \log k\rpar = O\lpar\log^{z+1} k\rpar$ approximation to $k$-median ($z=1$) and
+$k$-means ($z=2$).
+\end{itemize}
+  We use it, in combination with sensitivity sampling, as described in \cref{alg:main}.
 
 
 \begin{algorithm}[tb]
@@ -29,14 +33,13 @@ $k$-means ($z=2$).  We use it, in combination with sensitivity sampling, as desc
    \STATE {\bfseries Input:} data $P$, number of clusters $k$, precision $\eps$ and target size $S$
    \STATE Use Johnson-Lindenstrauss embedding to reduce the dimension to $O(\log k)$.
    \STATE Compute an approximate solution $\calC$ and an assignment $\sigma : P \rightarrow \calA$ using \fkmeans.
-   \STATE For each point $p \in P$, let $\calC_p := \sigma^{-1}(\sigma(p))$ be the points in the same cluster as $p$, and define 
-   $s(p) = \frac{\dist^z(p, \sigma(p))}{\sum_{p' \in \calC_p} \dist^z(p', \sigma(p'))} + \frac{1}{|\calC_p|}.$
+   \STATE For each point $p \in P$, compute $s_\calC(p)$ as in \cref{eq:sensitivity}.
    \STATE {\bfseries Output:} a set $\coreset$ of $S$ points randomly sampled from $P$ proportionate to $s$.
 \end{algorithmic}
 \end{algorithm}
 
 
-We formalize the proof of \cref{thm:main}, using the previous algorithm.
+Given this algorithm, we formalize the proof of \cref{thm:main}.
 
 \begin{proof}[Proof of \cref{thm:main}]
 Performing the Johnson-Lindenstrauss embedding takes time $\tilde O(nd)$, and allows to consider $\tilde d=O(\log k)$ with only a constant-factor loss in the approximation quality  \cite{makarychev2019performance}. 
