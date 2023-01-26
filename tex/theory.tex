@@ -44,10 +44,12 @@ The second property is crucial for us: the algorithm does not only compute cente
    \STATE Use Johnson-Lindenstrauss embedding to compute the embedding $\tilde P$ of $P$ into $\tilde d = O(\log k)$ dimensions
    \STATE Compute an approximate solution $\tilde \calC = \lbra \tilde c_1, ..., \tilde c_k\rbra $ for $\tilde P$, and an assignment $\tilde \sigma : \tilde P \rightarrow \tilde \calC$ using \fkmeans.	
    \STATE Let $\calC_i = \tilde \sigma^{-1}(c_i)$.
-   \STATE Let $c_i$ be the $1$-median (or $1$-mean) of each $\calC_i$ in $\R^d$.%, and define $\sigma(p) := c_i$ for all $p \in \calC_i$.
+   \STATE Compute the $1$-median (or $1$-mean) $c_i$ of each $\calC_i$ in $\R^d$.%, and define $\sigma(p) := c_i$ for all $p \in \calC_i$.
    \STATE For each point $p \in \calC_i$, define
    $s(p) = \frac{\dist^z(p, c_i)}{\cost(\calC_i, c_i)}+ \frac{1}{|\calC_i|}$.
-   \STATE {\bfseries Output:} a set $\coreset$ of $S$ points randomly sampled from $P$ proportionate to $s$.
+   \STATE Compute a set $\coreset$ of $S$ points randomly sampled from $P$ proportionate to $s$.
+   \STATE For each $\calC_i$, define $|\hat \calC_i|$ the estimated weight of $\calC_i$ by $\coreset$, namely $|\hat \calC_i| := \sum_{p \in \calC_i \cap \coreset} \frac{\sum_{p' \in P}s(p')}{s(p)S}$.
+   \STATE {\bfseries Output:} the coreset $\coreset$, with weights $w(p) = \frac{\sum_{p' \in P}s(p')}{s(p)S} \lpar (1+\eps)|\calC_i| - |\hat \calC_i|\rpar$
 \end{algorithmic}
 \end{algorithm}
 
