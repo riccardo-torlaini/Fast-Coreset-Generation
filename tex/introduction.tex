@@ -53,8 +53,9 @@ Finally, we remark that it is also possible to use the GroupSampling algorithm b
 %We also show how to reduce the dependency in the aspect ratio, by presenting an algorithm running in time $\tilde O\lpar nd + n \log \Delta\rpar$. As this is
 %only theoretical improvement, we focus on \cref{thm:main} and explain later how to improve.
 
-To address Question \ref{quest2}, we conduct an extensive experimental evaluation.
-We implement generic sensitivity sampling as well as our near linear time implementation, uniform sampling, the arguably fastest currently available coreset algorithm BICO \cite{bico} and hybrid sampling distributions interpolating between uniform sampling and sensitivity sampling. Popular examples include \emph{lightweight coresets} \cite{bachem2018scalable}, as well as seeding sensitivity sampling by computing a solution with $k'<k$ centers.
+To address Question \ref{quest2}, we conduct an extensive experimental evaluation.  We implement generic sensitivity sampling as well as our near linear time
+implementation, uniform sampling, and hybrid sampling distributions interpolating between uniform sampling and sensitivity sampling. Popular examples include
+\emph{lightweight coresets} \cite{bachem2018scalable}, as well as seeding sensitivity sampling by computing a solution with $k'<k$ centers.
 
 Our experiments show that the near linear time sensitivity sampling algorithm outperforms sensitivity sampling and  and consistently yields high accuracy.
 Thus it is not only theoretically optimal with respect to running time, but also a viable alternative in practice. 
