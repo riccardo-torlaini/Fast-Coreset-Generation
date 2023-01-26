@@ -1,7 +1,7 @@
 \section{Fast Coresets in Practice}
 
 We now provide an experimental analysis to verify that (1) Fast-Coresets obtain solutions of equal quality to sensitivity sampling while running significantly
-faster, and (2) no other method is both sublinear in $k$ and guaranteed to satisfy the coreset property. We proceed by first
+faster, and (2) of the linear-time algorithms, only Fast-Coresets are guaranteed to satisfy the coreset property. We proceed by first
 introducing our experimental setup, including the metrics, datasets, and algorithms being analyzed. We then follow this by a discussion of results regarding
 both of the above claims.
 
@@ -10,9 +10,10 @@ both of the above claims.
 
 We analyze the coreset construction methods along two metrics -- coreset quality and construction time.  Although measuring runtime is standard, predicting coreset
 quality is a more difficult task. Specifically, it is unclear how to confirm that a subset of points satisfies the coreset property over all solutions. To this
-end, the authors in \cite{chrisESA} suggested reporting the following metric 
+end, we use the following distortion measure
 \[ \max \left( \dfrac{\cost(P, \calC_{\Omega})}{\cost(\Omega, \calC_{\Omega})}, \dfrac{\cost(\Omega, \calC_{\Omega})}{\cost(P, \calC_{\Omega})} \right),\]
-where $\calC_{\Omega}$ is a candidate solution that was computed over the coreset.
+where $\calC_{\Omega}$ is a candidate solution that was computed over the coreset~\cite{chrisESA}. This will be within
+$1+\varepsilon$ if the coreset guarantee is satisfied but may be unbounded otherwise. 
 
 We refer to this metric as the \emph{coreset distortion}. Naturally, values that are consistently close to $1$ suggest that solutions on the coreset are likely
 viable on the full dataset.
@@ -26,12 +27,11 @@ viable on the full dataset.
 We compare our method (Algorithm~\ref{alg:main}) against 5 different benchmark coreset constructions:
 \begin{itemize}
         \item \emph{Standard uniform sampling}. Uniform coresets are obtained by choosing a subset of $m \ll n$ points uniformly from $P$.
-        \item \emph{Lightweight coreset}. Lightweight coresets find the mean $\mu$ of the dataset and obtain per-point sensitivity estimates by $\hat{s}(p) = 1/|P| + \cost(p, \mu) / \cost(P, \mu)$.
-            The first term encourages uniform sampling while the second encourages sampling proportionate to the distance from the mean.
-        \item \emph{Birch using Coresets (BICO)}: BICO computes a clustering $\calC$ with low cost. If $\cost(P,\calC)\leq \frac{\varepsilon^2}{16} \opt$, it is a coresets. It computes this cost in a single pass over the data using data structures inspired by the fast hierarchical clustering algorithm BIRCH~\cite{birch}. Unfortunately, the number of points required by BICO to compute a coreset is of the order $O(k \varepsilon^{-d+1}\log n)$, making it a poor candidate for high-dimensional datasets.
-        \item \emph{Standard sensitivity sampling}. We follow the standard approach for sensitivity sampling outlined in Section~\ref{ssec:sens_sampling}.
-        \item \emph{Welterweight coreset}: This is a generalized interpolation between lightweight coresets and the `heavy-duty' sensitivity sampling coresets. For any $j
-            \in \{1,..., k\}$, we compute a coreset using sensitivity sampling with respect to a candidate $j$-means++ solution. For values $j < O(\log k)$,
+        \item \emph{Lightweight coresets \cite{bachem2018scalable}}. Lightweight coresets find the mean $\mu$ of the dataset and obtain per-point sensitivity estimates by $\hat{s}(p) = 1/|P| + \cost(p, \mu) / \cost(P, \mu)$. The goodness of this algorithm depends on how well these scores approximate \cref{eq:sensitivity}.
+        \item \emph{Birch using Coresets (BICO) \cite{bico}}: BICO computes a clustering $\calC$ with low cost. If $\cost(P,\calC)\leq \frac{\varepsilon^2}{16} \opt$, it is a coresets. It computes this cost in a single pass over the data using data structures inspired by the fast hierarchical clustering algorithm BIRCH~\cite{birch}. Unfortunately, the number of points required by BICO to compute a coreset is of the order $O(k \varepsilon^{-d+1}\log n)$, making it a poor candidate for high-dimensional datasets.
+        \item \emph{Standard sensitivity sampling \cite{LS10}}. We follow the standard approach for sensitivity sampling outlined in Section~\ref{ssec:sens_sampling}.
+        \item \emph{Welterweight coresets}: This is a generalized interpolation between lightweight coresets and the `heavy-duty' sensitivity sampling coresets. For any $j
+            \in \{1,..., k\}$, we compute a coreset using sensitivity sampling with respect to a candidate $j$-means++ solution. For values $j \leq O(\log k)$,
             welterweight coresets share the runtime complexity of Fast-Coresets.
 \end{itemize}
 All but BICO have been implemented by us in a single codebase. We use the BICO code from \cite{bico}.
@@ -96,7 +96,7 @@ We only run the dimension-reduction step on the MNIST dataset, as the remaining 
 
 \andrew{Add implementation details, machine specifics, etc.}
 
-\subsection{Algorithm Comparisons}
+\subsection{Comparing Fast-Coresets to the State of the Art}
 \label{ssec:alg_qualities}
 
 
@@ -116,9 +116,8 @@ datasets are purposefully difficult, as the sensitivities are awkward to approxi
 Furthermore, the nature of the constructions leads to highly varying densities across the dataset, imposing an extra challenge on the HST metric-embeddings.
 Despite these obstacles, we see that the Fast-Coreset method manages to find a low-distortion compression for reasonable coreset sizes ($m$-scalar$=80$).
 
-This analysis confirms the theory predicted by \cref{thm:main}: sensitivity sampling coresets can be
-implemented without a linear dependency on $k$ while still preserving the coreset property. Given this context, we will not add traditional sensitivity sampling
-to further experiments, as its marginal improvement in coreset quality does not justify its slow runtime on large datasets.
+This analysis confirms the theory predicted by \cref{thm:main}: Fast-Coresets run with little overhead while retaining the accuracy of sensitivity sampling.
+Given this context, we did not add traditional sensitivity sampling to further experiments, as it is infeasible to run on large datasets.
 
 
 \paragraph*{Comparison with other coreset methods.}
@@ -143,6 +142,26 @@ explanations without evidence to back them up. Chris, what do you think?}
 \input{figures/coreset_size_on_quality.tex}
 
 \paragraph*{Additional evaluation on imbalanced clusters.}
+
+\begin{table*}[htbp]
+    \centering
+    \small
+    \begin{tabular}{|c|cccc|cccc|cccc|cccc|}
+        \hline
+        & \multicolumn{16}{c|}{Method} \\
+        \cline{2-17}
+        & \multicolumn{4}{c|}{Uniform Sampling} & \multicolumn{4}{c|}{Lightweight} & \multicolumn{4}{c|}{Welterweight} & \multicolumn{4}{c|}{Fast Coreset} \\
+        %\cline{2-17}
+        % & \multicolumn{4}{c|}{Coreset Size} & \multicolumn{4}{c|}{Coreset Size} & \multicolumn{4}{c|}{Coreset Size} & \multicolumn{4}{c|}{Coreset Size} \\
+        & $20k$ & $40k$ & $60k$ & $80k$ & $20k$ & $40k$ & $60k$ & $80k$ & $20k$ & $40k$ & $60k$ & $80k$ & $20k$ & $40k$ & $60k$ & $80k$ \\
+        \cline{2-17}
+        $c$-outlier & 710 & 126 & 488 & 89.4 & 1.09 & 1.04 & 34.3 & 1.02 & 1.09 & 1.04 & 21.8 & 34.3 & 1.12 & 1.05 & 1.03 & 1.02 \\
+        Gaussian Mix. & 1.09 & 1.03 & 1.03 & 1.01 & 204 & 86.1 & 84.3 & 1.01 & 617 & 16.8 & 8.18 & 13.3 & 1.22 & 1.03 & 1.02 & 1.01 \\
+        Geometric & 89.4 & 107 & 31.4 & 61.8 & 163 & 13.3 & 50.4 & 1.02 & 1.28 & 1.08 & 1.07 & 19.2 & 1.17 & 1.09 & 1.09 & 1.09 \\
+        Benchmark & 1.09 & 1.04 & 1.04 & 1.03 & 1.14 & 1.05 & 1.05 & 1.03 & 1.12 & 1.05 & 1.06 & 1.04 & 1.54 & 1.35 & 1.14 & 1.02 \\
+        \hline
+    \end{tabular}
+\end{table*}
 
 \begin{table}[htbp]
     \centering
