@@ -5,16 +5,24 @@ sampling \cite{stoc21} and sensitivity sampling \cite{FeldmanL11} coreset constr
 
 Both start by computing a solution $\calC$. When $\calC$ is a $c$-approximation, the two algorithms compute a $c \eps$-coreset of size $\tilde O\lpar
 k \eps^{-z-2}\rpar$ and $\tilde O\lpar k \eps^{-2z -2}\rpar$, respectively. Hence, by rescaling, they provide $\eps$-coreset with size $\tilde O\lpar
-k (\eps/c)^{-z-2}\rpar$ and $\tilde O\lpar k (\eps/c)^{-2z-2}\rpar$. \footnote{For group sampling, this result is not formally stated, but can be observed in Definition 1 and Lemma 12 of \cite{stoc21}: if $\calC$ is a $c$ approximation, rescaling $\eps$ by $c$ provides an approximate centroid set of the right precision, and the right error on the coreset. For sensitivity sampling, this can be seen in Lemma 14.5 of \cite{FLArxiv}, where $B$ is our $\calC$: if it is a $c$ approximation, rescaling $\eps$ by $c$ ensures an error $\eps \opt$.} \david{I suppose this footnote is too imprecise, but I don't want to redo all proofs from scratch... Should we still say it, or hide it under the carpet?}
+k (\eps/c)^{-z-2}\rpar$ and $\tilde O\lpar k (\eps/c)^{-2z-2}\rpar$. \footnote{For group sampling, this result is not formally stated, but can be observed in Definition 1 and Lemma 12 of \cite{stoc21}: if $\calC$ is a $c$ approximation, rescaling $\eps$ by $c$ provides an approximate centroid set of the right precision, and the right error on the coreset. For sensitivity sampling, this can be seen in Lemma 15.4 of \cite{FLArxiv}, where $B$ is our $\calC$: if it is a $c$ approximation, rescaling $\eps$ by $c$ ensures an error $\eps \opt$ in the last line of the proof.} \david{I suppose this footnote is too imprecise, but I don't want to redo all proofs from scratch... Should we still say it, or hide it under the carpet?}
 
-Therefore, taking $c = O(\log k)$ merely affects the size of the computed coreset, while allowing for approximation algorithms that are way faster.
+This leads to the following fact:
+\begin{fact}\label{fact:logApprox}
+Let $\calC$ be an $O\lpar \log^{O(1)} k\rpar$ approximation to $k$-median or $k$-means.
+Then, group sampling using solution $\calC$ computes a coreset of size $\tilde O\lpar
+k \eps^{-z-2}\rpar$, and sensitivity sampling one of size $\tilde O\lpar k \eps^{-2z-2}\rpar$. 
+Both runs in time $\tilde O(nd)$, provided $\calC$.
+\end{fact}
+%Therefore, taking $c = O(\log k)$ merely affects the size of the computed coreset, while allowing for approximation algorithms that are way faster.
 
-Due to the difficulty of verifying coresets, it is important to have a theoretical proof of efficiency of the coreset algorithms.  Showing, as we do, that one can use $O(\log k)$-approximations (e.g., $k$-means++) while benefiting from the same
-guarantees as with a slow $O(1)$-approximation is thus not only an artifact, but a crucial piece of coreset's success. 
-
-It is indeed tempting to use those large-factor approximations, especially since they seem to perform better in practice. 
-It might however have been the case that coresets constructed that way have poor quality, without being able to notice it due to the aforementioned hardness. 
-We show that this unfortunate event does not happen, and that, even with the ``worst-case" guarantee $O(\log k)$, these algorithms indeed produce coresets.
+%\david{remove the next two paragraphs?}
+%Due to the difficulty of verifying coresets, it is important to have a theoretical proof of efficiency of the coreset algorithms.  Showing, as we do, that one can use $O(\log k)$-approximations (e.g., $k$-means++) while benefiting from the same
+%guarantees as with a slow $O(1)$-approximation is thus not only an artifact, but a crucial piece of coreset's success. 
+%
+%It is indeed tempting to use those large-factor approximations, especially since they seem to perform better in practice. 
+%It might however have been the case that coresets constructed that way have poor quality, without being able to notice it due to the aforementioned hardness. 
+%We show that this unfortunate event does not happen, and that, even with the ``worst-case" guarantee $O(\log k)$, these algorithms indeed produce coresets.
 
 Our algorithm is based on the \fkmeans algorithm from \cite{cohen2020fast}: it allows to embed points in a very simple metric,  where it is easy to compute the
 distance to any given set of centers. The two key properties of this algorithm are the following: 
@@ -34,7 +42,7 @@ The second property is crucial for us: the algorithm does not only compute cente
 \begin{algorithmic}
    \STATE {\bfseries Input:} data $P$, number of clusters $k$, precision $\eps$ and target size $S$
    \STATE Use Johnson-Lindenstrauss embedding to compute the embedding $\tilde P$ of $P$ into $\tilde d = O(\log k)$ dimensions
-   \STATE Compute an approximate solution $\tilde \calC = \lbra \tilde c_1, ..., \tilde c_k\rbra $ for $\tilde P$, and an assignment $\tilde \sigma : \tilde P \rightarrow \tilde calC$ using \fkmeans.	
+   \STATE Compute an approximate solution $\tilde \calC = \lbra \tilde c_1, ..., \tilde c_k\rbra $ for $\tilde P$, and an assignment $\tilde \sigma : \tilde P \rightarrow \tilde \calC$ using \fkmeans.	
    \STATE Let $\calC_i = \tilde \sigma^{-1}(c_i)$.
    \STATE Let $c_i$ be the $1$-median (or $1$-mean) of each $\calC_i$ in $\R^d$.%, and define $\sigma(p) := c_i$ for all $p \in \calC_i$.
    \STATE For each point $p \in \calC_i$, define
@@ -47,11 +55,18 @@ The second property is crucial for us: the algorithm does not only compute cente
 Given this algorithm, we formalize the proof of \cref{thm:main}.
 
 \begin{proof}[Proof of \cref{thm:main}]
-Performing the Johnson-Lindenstrauss embedding takes time $\tilde O(nd)$, and allows to consider $\tilde d=O(\log k)$ with only a constant-factor loss in the approximation quality  \cite{makarychev2019performance}. 
-On the projected dataset, the algorithm \fkmeans runs in time $\tilde O\lpar n \log \Delta\rpar$, and the solution it computes has cost $O\lpar d^z \log k\rpar = O\lpar\log^{z+1} k\rpar$. 
-\chris{I think we should mention why we can get the sensitivity scores. Given any $\log k$ approximation, this step is still not trivial.}
+First, performing the Johnson-Lindenstrauss embedding takes time $\tilde O(nd)$.
 
-Furthermore, the values $s(p)$ defined in \cref{alg:main} can be used to perform the sensitivity sampling algorithm: \cite{FeldmanL11} showed that sampling according to those yield a coreset with size $\tilde O \lpar k d \eps^{-2z}\rpar$, improved by \cite{HuangV20} to $\tilde O \lpar k \eps^{-2z -2} \rpar$.
+On the projected dataset, the algorithm \fkmeans runs in time $\tilde O\lpar n \log \Delta\rpar$, and the solution it has an approximation-ratio $O\lpar \tilde{d}^z \log k\rpar = O\lpar\log^{z+1} k\rpar$ for $\tilde P$. 
+The guarantee offered by the embedding ensure that the clustering $\lbra \calC_1,...,\calC_k\rbra$ still has approximation ratio for $P$ \cite{makarychev2019performance}. 
+
+For $k$-means, computing the $1$-mean solution for each $\calC_i$ takes time $O(nd)$ (the $1$-mean is simply the mean). 
+For $k$-median, computing the $1$-median solution can be done as well in time $O(nd)$ \cite{CohenLMPS16}. 
+We note that both may be approximated to a factor $2$ in constant time, by randomly sampling few points \cite{neurips21}.
+
+Provided the $c_i$ and the partition $\calC_i$, computing $|\calC_i|$ and $\cost(\calC_i, c_i)$ for all $i$ also takes time $O(nd)$.
+
+Since the solution consisting of assigning each $p \in \calC_i$ to $c_i$ is a $O\lpar \log^{z+1} k\rpar$-approximation, the values $s(p)$ defined in \cref{alg:main} can be used to perform the coreset construction algorithm, and we conclude from \cref{fact:logApprox}.
 \end{proof}
 
 \david{I removed the two-step algorithm, as I think we are not experimenting it}
@@ -72,8 +87,8 @@ Furthermore, the values $s(p)$ defined in \cref{alg:main} can be used to perform
 %\david{add something depending on the results of experiments}
 
 \subsection*{Extensions.} 
-We conclude with a few remarks, that allow to generalize \cref{alg:main}.
-First, instead of using sensitivity sampling, one could use the group sampling procedure of \cite{stoc21}, or virtually any coreset construction: all those run in linear time, once provided with an initial solution $\calC$ and assignment $\sigma$. 
+We conclude this theory section with a few remarks, that allow to generalize \cref{alg:main}.
+First, instead of using sensitivity sampling, one could use the group sampling procedure of \cite{stoc21}, or virtually any coreset construction: for many of those, the running time is linear, once provided with an initial solution $\calC$ and assignment $\sigma$. 
 Therefore, our algorithm could use as a subroutine any coreset construction algorithm, if one is developed that improves over sensitivity and group sampling.
 
 Second, one could compute the solution $\calC$ via a different algorithm: \cref{alg:main} only need to be provided an assignment to a solution that is a $O(\polylog k)$ approximation. 
@@ -81,4 +96,4 @@ This initial solution may as well be an $O\lpar\polylog \lnor P \rnor_0 \rpar$ a
 
 As an example, we illustrate a different approach for $k$-median. One could first embed the input into a hierarchically separated tree (HST) with expected distortion $O(\log \lnor P \rnor_0)$ \cite{FakcharoenpholRT03}: on such tree metrics, solving $k$-median can be done in linear time, using dedicated algorithms (see e.g. \cite{Cohen-AddadLNSS21}). Using the solution from the HST metric, one can compute a coreset, and iterate using the previous argument.
 This embedding into HST is very similar to what is done by the \fkmeans algorithm, but can be actually performed in \emph{any} metric space, not only Euclidean. 
-As an example, in a metric described by a graph with $m$ edges, the running time of this construction would be near linear-time $\tilde O(m)$.
+As an example, in a metric described by a graph with $m$ edges, the running time of this construction would be near linear-time $\tilde O(m)$. In Euclidean space, the standard implementation runs in time $\Omega(n^2)$: we therefore omit it from our experiments.
