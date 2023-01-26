@@ -45,10 +45,10 @@ There exists an algorithm running in time $\tilde O\lpar nd + n \log \Delta\rpar
 \end{theorem}
 In the previous statement, $\Delta$ is the aspect-ratio (also called spread) of the input, namely the ratio $\frac{\max_{p, q \in P} \lnor p-q\rnor}{\min_{p, q \in P, p \neq q} \lnor p-q\rnor}$.\footnote{The aspect-ratio corresponds to the precision of the data points: to write in binary the coordinates of a data point, $O(\log \Delta)$ bits are required. It is possible to reduce $\Delta$ to $n^{O(1)}$ in time }
 
-\chris{I'm not sure I'd keep this. If you want to make a case for the simplicity of the algorithm I am all for that. I don't care particularly about the proof. Why a $O(\log k)$ approximation would be sufficient, for example, is not clear at all, so I don't find the comment particularly illuminating.}
-
-The proof of this theorem is surprisingly simple: we show that it is enough to compute an $\tilde O(\log k)$ approximation to $k$-median or $k$-means in order
-to build a coreset, instead of a precise $O(1)$-approximation. This allows us to use linear-time algorithms to compute the sensitivities.
+%\chris{I'm not sure I'd keep this. If you want to make a case for the simplicity of the algorithm I am all for that. I don't care particularly about the proof. Why a $O(\log k)$ approximation would be sufficient, for example, is not clear at all, so I don't find the comment particularly illuminating.}
+%
+%The proof of this theorem is surprisingly simple: we show that it is enough to compute an $\tilde O(\log k)$ approximation to $k$-median or $k$-means in order
+%to build a coreset, instead of a precise $O(1)$-approximation. This allows us to use linear-time algorithms to compute the sensitivities.
 
 %We also show how to reduce the dependency in the aspect ratio, by presenting an algorithm running in time $\tilde O\lpar nd + n \log \Delta\rpar$. As this is
 %only theoretical improvement, we focus on \cref{thm:main} and explain later how to improve.
@@ -59,28 +59,28 @@ We implement generic sensitivity sampling as well as our near linear time implem
 Our experiments show that the near linear time sensitivity sampling algorithm is competitive or outperforms all other sampling distributions save for uniform sampling, and consistently yields among the best accuracy.
 Thus it is not only theoretically optimal with respect to running time, but also most viable alternative in practice. 
 \chris{Agree with this?}
+\david{looks a bit exagerated to me...}
+%\david{talk about experiments here}
+%
+%\chris{I don't think the remaining section should be here. The last paragraph has value, the rest I would delete. The last paragraph in my opinion belongs somewhere in the next section. What do you guys think?}
+%\david{for what's between here and  section 1.2 I agree, it is redundant with the update you made}
+%In this paper, our goal is to compare different compression strategies, and to evaluate in terms of speed but also in terms of guarantee offered. We focus more specifically on guarantees for $k$-means clustering problems: the quality of a compression strategy is then how well it preserves the cost of each possible clustering.
+%
+%
+%One of the main selling point for sensitivity sampling for $k$-means is that it produces a small \textit{coreset}, namely, a set such that the cost of any possible $k$-means solution is the same on the coreset than on the full dataset (up to some tiny multiplicative factor).
+%Therefore, any algorithm can be run on the coreset instead of the full dataset: this ensures a faster algorithm  -- the coreset may even have size independent of $n$ -- while preserving the theoretical guarantees of the algorithm.
+%However, the bottleneck in the complexity is in the time to perform the sensitivity sampling: although lots of papers claim to have fast and practical algorithm, their running time $\Omega(nk)$ is often 	unimaginable. The coreset construction time is listed as one of the main potential drawback of coreset in \cite{Feldman20}.
+%
+%
+%In this paper, we show how to implement sensitivity sampling for $k$-means and $k$-median in near-linear time $\tilde O(nd)$.
+%This is surprisingly fast: merely evaluating the cost of a solution to $k$-median and $k$-means requires time $\Omega(nk)$, as for each point it takes time $\Omega(k)$ to compute its cost in the solution. 
+%We provide an implementation of our algorithm, and demonstrate with thorough experiments that it is the only fast and practical algorithm that works consistently well across datasets.
+%In particular, it outperforms by orders of magnitudes previous sensitivity sampling algorithms in terms of running time while constructing coreset that are as accurate. 
 
-\david{talk about experiments here}
 
-\chris{I don't think the remaining section should be here. The last paragraph has value, the rest I would delete. The last paragraph in my opinion belongs somewhere in the next section. What do you guys think?}
-\david{for what's between here and  section 1.2 I agree, it is redundant with the update you made}
-In this paper, our goal is to compare different compression strategies, and to evaluate in terms of speed but also in terms of guarantee offered. We focus more specifically on guarantees for $k$-means clustering problems: the quality of a compression strategy is then how well it preserves the cost of each possible clustering.
-
-
-One of the main selling point for sensitivity sampling for $k$-means is that it produces a small \textit{coreset}, namely, a set such that the cost of any possible $k$-means solution is the same on the coreset than on the full dataset (up to some tiny multiplicative factor).
-Therefore, any algorithm can be run on the coreset instead of the full dataset: this ensures a faster algorithm  -- the coreset may even have size independent of $n$ -- while preserving the theoretical guarantees of the algorithm.
-However, the bottleneck in the complexity is in the time to perform the sensitivity sampling: although lots of papers claim to have fast and practical algorithm, their running time $\Omega(nk)$ is often 	unimaginable. The coreset construction time is listed as one of the main potential drawback of coreset in \cite{Feldman20}.
-
-
-In this paper, we show how to implement sensitivity sampling for $k$-means and $k$-median in near-linear time $\tilde O(nd)$.
-This is surprisingly fast: merely evaluating the cost of a solution to $k$-median and $k$-means requires time $\Omega(nk)$, as for each point it takes time $\Omega(k)$ to compute its cost in the solution. 
-We provide an implementation of our algorithm, and demonstrate with thorough experiments that it is the only fast and practical algorithm that works consistently well across datasets.
-In particular, it outperforms by orders of magnitudes previous sensitivity sampling algorithms in terms of running time while constructing coreset that are as accurate. 
-
-
-%If speed is the main concern over quality, then the go-to solution is uniform sampling. Although it performs decently on many datasets, it miserably fails on others, by missing completely outliers. More precisely, if sampling $t$ points, obtaining provable guarantees require $t = \Omega(n)$ \cite{bachem2017practical}.
-
-%An attempt to get the best of those two algorithms is the \emph{lightweight coresets} from \cite{bachem2018scalable}. The idea is to compute a crude approximation to the sensitivities, very fast.
+%%If speed is the main concern over quality, then the go-to solution is uniform sampling. Although it performs decently on many datasets, it miserably fails on others, by missing completely outliers. More precisely, if sampling $t$ points, obtaining provable guarantees require $t = \Omega(n)$ \cite{bachem2017practical}.
+%
+%%An attempt to get the best of those two algorithms is the \emph{lightweight coresets} from \cite{bachem2018scalable}. The idea is to compute a crude approximation to the sensitivities, very fast.
 
 \subsection{Related Work.}
 
