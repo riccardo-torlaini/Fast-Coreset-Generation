@@ -142,10 +142,10 @@ Given a solution $\calC$ to $k$-median or $k$-means, sensitivities are defined a
 where $\calC_p$ is the cluster that $p$ belongs to.\footnote{This definition is actually an upper-bound on the real sensitivity, 
 usually defined as $\sup_{\calC} \frac{\dist^z(p, \calC)}{\cost_z(P, \calC)}$ -- where the supremum is taken over all possible solutions $\calC$.
  This definition is more amenable to generalizations to other problems; it is however NP-hard to compute this supremum, and $s(p)$ defined above is a mere proxy for it.}
-The coreset $S$ merely consists of points sampled proportionate to $s$, and weights defined as follows. First, for any sampled point $p$, define $\tilde w_1(p) := \frac{1}{\Pr[p \in S]} = \frac{\sum_{p'} s_\calC(p')}{|S| s_\calC(p)}$. For a cluster $C_i$, let $|\hat{C_i}|$ be the estimated number of point in $C_i$ via the sample. A sampled point $p$ in $C_i$ is weighted $\tilde w(p) = \tilde w_1(p) \lpar (1+\eps)|C_i| - |\hat{C_i}|\rpar$.
+The coreset $\Omega$ merely consists of $S$ points sampled proportionate to $s$, and weights defined as follows. First, for any sampled point $p$, define $\tilde w_1(p) := \frac{1}{\Pr[p \in S]} = \frac{\sum_{p'} s_\calC(p')}{|S| s_\calC(p)}$. For a cluster $C_i$, let $|\hat{C_i}|$ be the estimated number of point in $C_i$ via the sample. A sampled point $p$ in $C_i$ is weighted $\tilde w(p) = \tilde w_1(p) \lpar (1+\eps)|C_i| - |\hat{C_i}|\rpar$.
 %
 %This weighting ensure that the coreset is unbiaised, namely for any solution $\calS$ it holds that $\E[\cost_z(S, \calS)] = \E[\cost_z(P, \calS)]$.
-\cite{FeldmanL11} and subsequent works showed that, when $\calC$ is a $O(1)$-approximation, sampling $|S| = \tilde O\lpar k \eps^{-2z-2}\rpar$ many points was enough to ensure concentration, namely, $S$ is a coreset with probability at least $2/3$.
+\cite{FeldmanL11} and subsequent works showed that, when $\calC$ is a $O(1)$-approximation, sampling $S = \tilde O\lpar k \eps^{-2z-2}\rpar$ many points was enough to ensure concentration, namely, $\Omega$ is a coreset with probability at least $2/3$.
 
 %Then, points are sampled proportionate to their sensitivity $s(p)$. 
 %The first term corresponds to sampling proportionate to the importance in the solution $\calC$, the second one to uniform sampling.\footnote{This definition is actually an upper-bound on the real sensitivity, 
