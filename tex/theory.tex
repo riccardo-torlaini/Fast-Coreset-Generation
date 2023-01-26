@@ -5,7 +5,7 @@ sampling \cite{stoc21} and sensitivity sampling \cite{FeldmanL11} coreset constr
 
 Both start by computing a solution $\calC$. When $\calC$ is a $c$-approximation, the two algorithms compute a $c \eps$-coreset of size $\tilde O\lpar
 k \eps^{-z-2}\rpar$ and $\tilde O\lpar k \eps^{-2z -2}\rpar$, respectively. Hence, by rescaling, they provide $\eps$-coreset with size $\tilde O\lpar
-k (\eps/c)^{-z-2}\rpar$ and $\tilde O\lpar k (\eps/c)^{-2z-2}\rpar$. \footnote{For group sampling, this result is not formally stated, but can be observed in Definition 1 and Lemma 12 of \cite{stoc21}: if $\calC$ is a $c$ approximation, rescaling $\eps$ by $c$ provides an approximate centroid set of the right precision, and the right error on the coreset. For sensitivity sampling, this can be seen in Lemma 15.4 of \cite{FLArxiv}, where $B$ is our $\calC$: if it is a $c$ approximation, rescaling $\eps$ by $c$ ensures an error $\eps \opt$ in the last line of the proof.} \david{I suppose this footnote is too imprecise, but I don't want to redo all proofs from scratch... Should we still say it, or hide it under the carpet?}
+k (\eps/c)^{-z-2}\rpar$ and $\tilde O\lpar k (\eps/c)^{-2z-2}\rpar$. \footnote{For group sampling, this result is not formally stated, but can be observed in Definition 1 and Lemma 12 of \cite{stoc21}: if $\calC$ is a $c$ approximation, rescaling $\eps$ by $c$ provides an approximate centroid set of the right precision, and the right error on the coreset. For sensitivity sampling, this can be seen in Lemma 15.4 of \cite{FLArxiv}, where $B$ is our $\calC$: if it is a $c$ approximation, rescaling $\eps$ by $c$ ensures an error $\eps \opt$ in the last line of the proof.} 
 
 This leads to the following fact:
 \begin{fact}\label{fact:logApprox}
@@ -44,10 +44,12 @@ The second property is crucial for us: the algorithm does not only compute cente
    \STATE Use Johnson-Lindenstrauss embedding to compute the embedding $\tilde P$ of $P$ into $\tilde d = O(\log k)$ dimensions
    \STATE Compute an approximate solution $\tilde \calC = \lbra \tilde c_1, ..., \tilde c_k\rbra $ for $\tilde P$, and an assignment $\tilde \sigma : \tilde P \rightarrow \tilde \calC$ using \fkmeans.	
    \STATE Let $\calC_i = \tilde \sigma^{-1}(c_i)$.
-   \STATE Let $c_i$ be the $1$-median (or $1$-mean) of each $\calC_i$ in $\R^d$.%, and define $\sigma(p) := c_i$ for all $p \in \calC_i$.
+   \STATE Compute the $1$-median (or $1$-mean) $c_i$ of each $\calC_i$ in $\R^d$.%, and define $\sigma(p) := c_i$ for all $p \in \calC_i$.
    \STATE For each point $p \in \calC_i$, define
    $s(p) = \frac{\dist^z(p, c_i)}{\cost(\calC_i, c_i)}+ \frac{1}{|\calC_i|}$.
-   \STATE {\bfseries Output:} a set $\coreset$ of $S$ points randomly sampled from $P$ proportionate to $s$.
+   \STATE Compute a set $\coreset$ of $S$ points randomly sampled from $P$ proportionate to $s$.
+   \STATE For each $\calC_i$, define $|\hat \calC_i|$ the estimated weight of $\calC_i$ by $\coreset$, namely $|\hat \calC_i| := \sum_{p \in \calC_i \cap \coreset} \frac{\sum_{p' \in P}s(p')}{s(p)S}$.
+   \STATE {\bfseries Output:} the coreset $\coreset$, with weights $w(p) = \frac{\sum_{p' \in P}s(p')}{s(p)S} \lpar (1+\eps)|\calC_i| - |\hat \calC_i|\rpar$
 \end{algorithmic}
 \end{algorithm}
 
