@@ -20,7 +20,7 @@ def run_class_imbalance_experiments():
     m_scalar = 40
     allotted_time = 600
     n_points = 50000
-    num_centers = 10
+    num_centers = 50
     D = 50
     hst_count_from_norm = True
     kmeans_alg = cluster_pp

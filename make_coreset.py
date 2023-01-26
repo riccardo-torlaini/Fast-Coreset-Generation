@@ -155,9 +155,20 @@ def lightweight_coreset(
     **kwargs
 ):
     weights = np.ones(len(points))
-    center = np.mean(points, axis=0, keepdims=True)
+    center = np.zeros(len(points[0]))
+    for point in points:
+        for d in range(len(point)):
+            center[d] += point[d]
+    for d in range(len(center)):
+        center[d] /= len(points)
     labels = np.ones(len(points))
-    costs = np.sum(np.square(points - center), axis=-1)
+    costs = np.zeros(len(points))
+    for i, point in enumerate(points):
+        for d in range(len(point)):
+            costs[i] += (point[d] - center[d]) ** 2
+        costs[i] = np.sqrt(costs[i])
+        costs[i] = costs[i] ** norm
+    costs = np.array(costs)
 
     sensitivities = bound_sensitivities([1], labels, costs, alpha=1)
     r_points, r_weights, r_labels = get_coreset(sensitivities, m, points, labels, weights=weights)
@@ -218,8 +229,8 @@ if __name__ == '__main__':
     g_kmeans_alg = cluster_pp_slow
     g_points = jl_proj(g_points, g_k, eps=0.5)
 
-    method = 'fast'
-    # method = 'lightweight'
+    # method = 'fast'
+    method = 'lightweight'
     # method = 'semi_uniform'
     # method = 'sensitivity'
     # method = 'bico'
