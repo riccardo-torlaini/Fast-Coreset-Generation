@@ -1,0 +1,21 @@
+Answer to Tjmw
+
+1. Cohen-Addad et al. actually provide two approximation algorithms, that they called Fastk-means++ and rejectionSampling. We use the first one, which has approximation guarantee O(d^2 \log k) and running time O(nd log(d Delta)  + n log(d Delta) log n).  
+The approximation guarantee is from Lemma 3.1 (which says the metric can be replaced by an embedding into 3 trees with distortion O(d^2)), and lemma 4.2 which says the algorithm is equivalent to k-means++ on the embedded metric -- so, a log(k) approximation for the tree metric, therefore a O(d^2 log k) approximation in total. The running time is Corollary 4.3. Using dimension reduction on top of this, d = log k.
+
+We explain in the answer to Reviewer skrT how to remove the dependency in log Delta.
+
+Reviewer 8a6o
+- Our understanding is that the result of Deng et al. can be achieved using dimension reduction before constructing the coreset. This is what we implemented for comparision in our algorithm "sensitivity sampling".
+- The paper "Near-optimal Coresets for Robust Clustering" claims wrongly near linear running time: in theorem 3.1, the precise running time claim is A(n,k,d,z) + O(nkd), where A(n,k,d,z) is the running time to compute a constant-factor approximation to k-median with outlier. 
+Our contribution (for non-robust) is precisely to remove this O(nkd) dependency, and to relax the conditions on algorithm A to be a O(polylog k) approximation instead of constant factor.
+
+- Sensitivity sampling indeed produces a coreset of size dependent in d, but it is shown for instance in Huang and Vishnoi 2020  that if Pi is a "terminal embedding", a coreset for Pi(P) is a coreset for P. The terminal embedding Pi is a dimension reduction that can be computed using a JL transform, in time O(nd). 
+We will mention this subtelty in the next version  of our paper.
+
+- We believe (although hard to be sure) that Deng et al. conjecture a running time Omega(nk) because this is the time required to compute the clustering induced by a  given a set  of centers (i.e., assign each input point to the closest center).  We break this bound using the Fastk-means++ algorithm. Essentially, it allows to compute an approximate assignment using an embedding into trees, where it is easier to compute clusters (as each cluster is a subtree). 
+
+Reviewer skrT
+- Your understanding is correct, our theoretical contribution is not revolutionnary and not the main point of our article. However, we would like to mention two things: to compute the crude initial clustering, previous work all use a O(1) approximation. We observe that starting from a O(polylog(k)) is enough.
+Furthermore, we  can remove the dependency in log Delta. We didn't find it necessary to add, as it would be mostly theoretical and our point was the experiments -- that perform great even with the log Delta in the running time. However,  we can  add it, as it seems of interest to the reviewers.
+
