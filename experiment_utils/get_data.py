@@ -31,17 +31,20 @@ def get_dataset(dataset_type, n_points=1000, D=50, num_centers=10, k=50, class_i
     else:
         raise ValueError('Dataset not implemented')
 
+def get_imbalanced_partition(n_points, num_eq_classes, class_imbalance=5.0):
+    points_remaining = n_points
+    cluster_sizes = np.zeros(num_eq_classes, dtype=np.int32)
+    for i in range(num_eq_classes):
+        mean_num_points = points_remaining / (num_eq_classes - i)
+        size_scalar = np.exp((np.random.rand() - 0.5) * class_imbalance)
+        cluster_size = mean_num_points * size_scalar
+        cluster_sizes[i] = int(min(cluster_size, points_remaining))
+        points_remaining = n_points - np.sum(cluster_sizes)
+    return cluster_sizes
 
 def get_blobs_dataset(n_points, D, num_centers, scalar=1000, class_imbalance=5.0, var=500):
     # 1) Get random sizes for each cluster
-    points_remaining = n_points
-    cluster_sizes = np.zeros(num_centers)
-    for i in range(num_centers):
-        mean_num_points = points_remaining / (num_centers - i)
-        size_scalar = np.exp((np.random.rand() - 0.5) * class_imbalance)
-        cluster_size = mean_num_points * size_scalar
-        cluster_sizes[i] = min(cluster_size, points_remaining)
-        points_remaining = n_points - np.sum(cluster_sizes)
+    cluster_sizes = get_imbalanced_partition(n_points, num_centers, class_imbalance)
 
     # 2) Put each cluster at a random position on the unit hypersphere
     points = []

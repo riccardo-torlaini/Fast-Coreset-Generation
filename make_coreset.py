@@ -222,19 +222,24 @@ def evaluate_coreset(points, k, coreset, weights):
 if __name__ == '__main__':
     g_norm = 2
     g_k = 100
-    g_points, g_labels = get_dataset('blobs', n_points=50000, D=50, num_centers=10, k=g_k, class_imbalance=5)
-    g_m_scalar = 40
+    g_points, g_labels = get_dataset('benchmark', n_points=50000, D=50, num_centers=10, k=g_k, class_imbalance=5)
+    model = PCA(n_components=2)
+    g_embedding = model.fit_transform(g_points)
+    plt.scatter(g_embedding[:, 0], g_embedding[:, 1])
+    plt.show()
+    
+    g_m_scalar = 20
     g_allotted_time = 600
     g_hst_count_from_norm = True
     g_kmeans_alg = cluster_pp_slow
     g_points = jl_proj(g_points, g_k, eps=0.5)
 
     # method = 'fast'
-    method = 'lightweight'
+    # method = 'lightweight'
     # method = 'semi_uniform'
     # method = 'sensitivity'
     # method = 'bico'
-    # method = 'uniform'
+    method = 'uniform'
 
     start = time()
     g_weights = np.ones((len(g_points)))

@@ -152,11 +152,12 @@ def multi_tree_sample(sample_tree):
         return multi_tree_sample(sample_tree.left_child)
     return multi_tree_sample(sample_tree.right_child)
 
-def fast_cluster_pp(points, k, norm=2, hst_count_from_norm=True, allotted_time=np.inf):
+def fast_cluster_pp(points, k, norm=2, hst_count_from_norm=True, allotted_time=np.inf, loud=False):
     assert norm == 1 or norm == 2
     elapsed_time = 0
     start = time()
-    print('Fitting MultiHST...')
+    if loud:
+        print('Fitting MultiHST...')
     if hst_count_from_norm:
         multi_hst = make_multi_HST(points, k, num_trees=norm+1)
     else:
@@ -170,7 +171,8 @@ def fast_cluster_pp(points, k, norm=2, hst_count_from_norm=True, allotted_time=n
     st_ptc_dict = {i: -1 for i in np.arange(n)}
     sample_tree = create_sample_tree(points, np.arange(n), st_ptc_dict)
     labels = np.ones((n)) * -1
-    print('Running Fast-Kmeans++...')
+    if loud:
+        print('Running Fast-Kmeans++...')
     for i in tqdm(range(k), total=k):
         if len(centers) == 0:
             c = np.random.choice(n)

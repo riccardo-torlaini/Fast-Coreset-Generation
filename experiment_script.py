@@ -34,7 +34,8 @@ def run_sweeps():
         # 'cover_type'
     ]
     # methods = ['fast_coreset', 'semi_uniform', 'uniform_sampling', 'sens_sampling', 'lightweight', 'bico']
-    methods = ['fast_coreset', 'sens_sampling']
+    # methods = ['fast_coreset', 'sens_sampling']
+    methods = ['uniform_sampling', 'lightweight', 'semi_uniform']
 
     # Only apply for Gaussian mixture and 1-outlier datasets
     n_points = 50000
@@ -47,6 +48,7 @@ def run_sweeps():
         'j_func': '2', # Only applies for semi-uniform coreset
         'sample_method': 'sens', # Only applies for semi-uniform coreset
         'm_scalar': 40,
+        'composition': False,
         'allotted_time': 120,
         'hst_count_from_norm': True, # Only applies to fast-coreset
     }
@@ -56,6 +58,7 @@ def run_sweeps():
         'k': 500,
         'j_func': '2', # Only applies for semi-uniform coreset
         'sample_method': 'sens', # Only applies for semi-uniform coreset
+        'composition': False,
         'm_scalar': 40,
         'allotted_time': 360,
         'hst_count_from_norm': True, # Only applies to fast-coreset
@@ -63,7 +66,8 @@ def run_sweeps():
 
     small_sweep_params = {
         # Params to sweep for all coreset algorithms
-        'k': [50, 100, 200, 400],
+        # 'k': [50, 100, 200, 400],
+        'composition': [False, True],
         # 'j_func': ['2', '10', 'log', 'sqrt'],
         # 'sample_method': ['sens', 'uniform'],
         # 'm_scalar': [20, 40, 60, 80],
@@ -147,14 +151,13 @@ def run_sweeps():
                         else:
                             proj_points = points
 
-                        acc, time, q_points, q_weights = get_results(
+                        accuracies, times, q_points, q_weights = get_results(
                             proj_points,
                             coreset_alg,
                             params,
                         )
-                        print(acc, time)
-                        
-                        metric_results = {'acc': acc, 'time': time}
+
+                        metric_results = {'acc': accuracies, 'time': times}
                         coreset_results = {'coreset_points': q_points, 'coreset_weights': q_weights}
                         np.save(os.path.join(val_output_path, 'metrics.npy'), metric_results)
                         np.save(os.path.join(val_output_path, 'coreset.npy'), coreset_results)

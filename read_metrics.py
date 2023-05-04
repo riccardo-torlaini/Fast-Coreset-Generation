@@ -2,19 +2,38 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
+DATA_NAMES = {
+    'artificial': r'$c$-outlier',
+    'geometric': 'Geometric',
+    'benchmark': 'Benchmark',
+    'blobs': 'Gaussian',
+    'adult': 'Adult',
+    'mnist': 'MNIST',
+    'song': 'Song',
+    'cover_type': 'Cover Type',
+    'census': 'Census',
+}
+ALG_NAMES = {
+    'sens_sampling': 'Sens. Sampling',
+    'uniform_sampling': 'Uniform Sampling',
+    'lightweight': 'Lightweight',
+    'fast_coreset': 'Fast Coreset',
+    'semi_uniform': 'Welterweight',
+    'bico': 'BICO'
+}
 ALG_DICT = {
     '1': 'medians', '2': 'means'
 }
 COLORS = [
-    'red',
-    'blue',
-    'yellow',
-    'gray',
     'pink',
     'cyan',
     'magenta',
     'orange',
-    'olive'
+    'olive',
+    'red',
+    'blue',
+    'yellow',
+    'gray',
 ]
 
 def update_results_dict(results_dict, directory, metrics):
@@ -92,8 +111,8 @@ def make_scores_vs_param_plot(results, dataset, param, norm, value_list):
             if method not in metrics:
                 metrics[method] = {}
             metrics[method][param_value] = [0, 0]
-            metrics[method][param_value][0] = scores['acc']
-            metrics[method][param_value][1] = scores['time']
+            metrics[method][param_value][0] = np.mean(scores['acc'])
+            metrics[method][param_value][1] = np.mean(scores['time'])
 
     loc_dict = {value: i for i, value in enumerate(value_list)}
     colors = {
@@ -123,6 +142,7 @@ def make_scores_vs_param_plot(results, dataset, param, norm, value_list):
     plt.ylabel('Coreset accuracy')
     plt.ylim([1, 1.2])
     plt.title('Effect of {} on coreset distortion'.format(param))
+    plt.yticks(fontsize=10, rotation=90)
     plt.xticks(
         [i * (len(metrics)) for i in loc_dict.values()],
         list(loc_dict.keys())
@@ -172,9 +192,13 @@ def make_scores_over_datasets_plot(
             if dataset not in results[method]:
                 continue
             for param_value, scores in results[method][dataset][norm][param].items():
-                metrics[dataset][method][param_value] = [0, 0]
-                metrics[dataset][method][param_value][0] = scores['acc']
-                metrics[dataset][method][param_value][1] = scores['time']
+                metrics[dataset][method][param_value] = {}
+                metrics[dataset][method][param_value]['means'] = [0, 0]
+                metrics[dataset][method][param_value]['vars'] = [0, 0]
+                metrics[dataset][method][param_value]['means'][0] = np.mean(scores['acc'])
+                metrics[dataset][method][param_value]['means'][1] = np.mean(scores['time'])
+                metrics[dataset][method][param_value]['vars'][0] = np.var(scores['acc'])
+                metrics[dataset][method][param_value]['vars'][1] = np.var(scores['time'])
 
     image_dir = os.path.join('tex', 'images', norm)
     os.makedirs(image_dir, exist_ok=True)
@@ -182,14 +206,15 @@ def make_scores_over_datasets_plot(
     loc_dict = {value: i for i, value in enumerate(value_list)}
     dataset_colors = {dataset: COLORS[i] for i, dataset in enumerate(datasets)}
 
-    pattern_list = [ "/" , "x" , "+", "o", "O", ".", "*", "-" , "\\" , "|" ]
+    # pattern_list = [ "/" , "x" , "+", "o", "O", ".", "*", "-" , "\\" , "|" ]
+    pattern_list = [ " " , " " , " ", " ", " ", " ", " ", " " , " " , " " ]
     pattern_dict = {value: pattern_list[i] for i, value in enumerate(value_list)}
     pattern_handles = [plt.Rectangle((0, 0), 1, 1, hatch=pattern_dict[value]) for value in value_list]
 
     color_handles = [plt.Rectangle((0, 0), 1, 1, color=dataset_colors[dataset]) for dataset in datasets]
-    color_labels = {dataset: COLORS[i] for i, dataset in enumerate(datasets)}
+    color_labels = {DATA_NAMES[dataset]: COLORS[i] for i, dataset in enumerate(datasets)}
 
-    plt.rcParams.update({'font.size': 10, 'text.usetex': True, 'savefig.format': 'pdf'})
+    plt.rcParams.update({'font.size': 18, 'text.usetex': True, 'savefig.format': 'pdf'})
     for index in [0, 1]:
         fig, axes = plt.subplots(1, len(methods))
         fig.set_figheight(5)
@@ -212,18 +237,25 @@ def make_scores_over_datasets_plot(
                 horizontal_shift = j * (len(value_list))
                 for value in value_list:
                     try:
-                        if metrics[dataset][method][value][index] < min_height and \
-                                metrics[dataset][method][value][index] > 0:
-                            min_height = metrics[dataset][method][value][index]
-                        if metrics[dataset][method][value][index] > max_height:
-                            max_height = metrics[dataset][method][value][index]
+                        if metrics[dataset][method][value]['means'][index] < min_height and \
+                                metrics[dataset][method][value]['means'][index] > 0:
+                            min_height = metrics[dataset][method][value]['means'][index]
+                        if metrics[dataset][method][value]['means'][index] > max_height:
+                            max_height = metrics[dataset][method][value]['means'][index]
                         axis.bar(
                             loc_dict[value] + horizontal_shift,
-                            metrics[dataset][method][value][index],
+                            metrics[dataset][method][value]['means'][index],
                             width=1,
                             color=dataset_colors[dataset],
                             edgecolor='black',
                             hatch=pattern_dict[value]
+                        )
+                        axis.errorbar(
+                            loc_dict[value] + horizontal_shift,
+                            metrics[dataset][method][value]['means'][index],
+                            metrics[dataset][method][value]['vars'][index],
+                            capsize=5,
+                            color='black',
                         )
                     except KeyError:
                         continue
@@ -231,7 +263,7 @@ def make_scores_over_datasets_plot(
             if index == 0:
                 axis.set_ylim(y_lim)
             axis.set_yscale('log')
-            axis.set_title(method)
+            axis.set_title(ALG_NAMES[method])
             axis.tick_params(
                 axis='x',
                 which='both',
@@ -242,7 +274,7 @@ def make_scores_over_datasets_plot(
             axis.tick_params(
                 axis='y',
                 which='both',
-                labelleft=False
+                labelleft=False,
             )
 
         if index == 1:
@@ -263,11 +295,13 @@ def make_scores_over_datasets_plot(
             which='both',
             left=True,
             right=False,
-            labelleft=True
+            labelleft=True,
+            labelsize=10,
+            labelrotation=45
         )
         color_legend = last_axis.legend(color_handles, color_labels, loc='upper right')
         ax = last_axis.add_artist(color_legend)
-        pattern_legend = first_axis.legend(pattern_handles, value_list, loc='upper left')
+        # pattern_legend = first_axis.legend(pattern_handles, value_list, loc='upper left')
         if index == 0:
             save_path = 'coreset_distortion-' + figure_title
         else:
@@ -283,7 +317,7 @@ if __name__ == '__main__':
     results, params = read_outputs(
         outputs_dir,
         npy_file='metrics',
-        filter_strs=['semi_uniform'],
+        filter_strs=['m_scalar'],
         print_dict=True
     )
 
@@ -302,9 +336,10 @@ if __name__ == '__main__':
 
 
     ### LOOKING AT EFFECT OF CORESET SIZE ON CORESET QUALITY
-    ## Norm 2
-    for norm in ['1', '2']:
-        methods = ['semi_uniform', 'fast_coreset', 'uniform_sampling', 'lightweight', 'bico']
+    # for norm in ['1', '2']:
+    for norm in ['2']:
+        # methods = ['semi_uniform', 'fast_coreset', 'uniform_sampling', 'lightweight', 'bico']
+        methods = ['fast_coreset', 'uniform_sampling', 'semi_uniform', 'lightweight']
         results, params = read_outputs(
             outputs_dir,
             npy_file='metrics',
@@ -320,10 +355,10 @@ if __name__ == '__main__':
             '80': 'm = 80k',
         }
         datasets = [
-            'artificial',
-            'geometric',
-            'benchmark',
-            'blobs',
+            # 'artificial',
+            # 'geometric',
+            # 'benchmark',
+            # 'blobs',
             'adult',
             'mnist',
             'song',
@@ -331,21 +366,22 @@ if __name__ == '__main__':
             'census',
         ]
         # Coreset size plots
-        make_scores_over_datasets_plot(
-            results,
-            methods,
-            datasets,
-            'm_scalar',
-            norm,
-            m_scalar_values,
-            m_scalar_pattern_dict,
-            y_lim=[1, 10],
-            figure_title='m_scalar_across_all_algorithms'
-        )
+        # make_scores_over_datasets_plot(
+        #     results,
+        #     methods,
+        #     datasets,
+        #     'm_scalar',
+        #     norm,
+        #     m_scalar_values,
+        #     m_scalar_pattern_dict,
+        #     y_lim=[1, 1.35],
+        #     figure_title='m_scalar_across_all_algorithms'
+        # )
 
 
         ### COMPARING FAST-KMEANS++ TO KMEANS++ SENSITIVITY SAMPLING
-        methods = ['fast_coreset', 'sens_sampling']
+        # methods = ['fast_coreset', 'sens_sampling']
+        methods = ['fast_coreset', 'sens_sampling', 'uniform_sampling', 'lightweight', 'semi_uniform']
         results, params = read_outputs(
             'outputs',
             npy_file='metrics',
@@ -375,7 +411,7 @@ if __name__ == '__main__':
             norm,
             m_scalar_values,
             m_scalar_pattern_dict,
-            y_lim=[1, 1.3],
+            y_lim=[1, 1000],
             figure_title='m_scalar_for_sens_sampling'
         )
         make_scores_over_datasets_plot(
@@ -386,7 +422,7 @@ if __name__ == '__main__':
             norm,
             k_values,
             k_pattern_dict,
-            y_lim=[1, 1.3],
+            y_lim=[1, 1000],
             figure_title='Effect_of_k_for_sens_sampling'
         )
 
@@ -402,14 +438,14 @@ if __name__ == '__main__':
         )
         datasets = [
             'artificial',
-            'geometric',
+            # 'geometric',
             'benchmark',
-            'blobs',
-            'adult',
-            'mnist',
-            'song',
-            'cover_type',
-            'census',
+            # 'blobs',
+            # 'adult',
+            # 'mnist',
+            # 'song',
+            # 'cover_type',
+            # 'census',
         ]
         hst_count_values = ['True', 'False']
         hst_count_pattern_dict = {
