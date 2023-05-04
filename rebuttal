@@ -1,0 +1,36 @@
+Answer to Tjmw
+
+- Cohen-Addad et al. actually provide two approximation algorithms, that they called Fastk-means++ and rejectionSampling. We use the first one, which has approximation guarantee O(d^2 \log k) and running time O(nd log(d Delta)  + n log(d Delta) log n).  
+- The approximation guarantee is from Lemma 3.1 (which says the metric can be replaced by an embedding into 3 trees with distortion O(d^2)), and lemma 4.2 which says the algorithm is equivalent to k-means++ on the embedded metric -- so, a log(k) approximation for the tree metric, therefore a O(d^2 log k) approximation in total. The running time is Corollary 4.3. Using dimension reduction on top of this, d = log k.
+- We apologize for the lack of an implementation. Our implementation is in a private repository on github and we intend to release it but forgot to include it with the submission. All experiments and plots are recreated in the implementation.
+- With respect to the use of candidate solutions, we follow the suggestions in the Sheikh-Omar and Schwiegelshohn paper. In it, they suggest using kmeans++ to generate candidate solutions and report the distortions obtained on those. We perform the same procedure.
+- Speaking to the running time discussion, we agree that the running time is well-predicted by the theoretical bounds. Despite this, we thought that it would be instructive to highlight that this also occurs in practice without compromising coreset quality. In a sense, we intended to experimentally verify the theoretical discussion.
+- We explain in the answer to Reviewer skrT how to remove the dependency in log Delta.
+
+Reviewer 8a6o
+- Our understanding is that the result of Deng et al. can be achieved using dimension reduction before constructing the coreset. This is what we implemented for comparision in our algorithm "sensitivity sampling".
+- The paper "Near-optimal Coresets for Robust Clustering" claims wrongly near linear running time: in theorem 3.1, the precise running time claim is A(n,k,d,z) + O(nkd), where A(n,k,d,z) is the running time to compute a constant-factor approximation to k-median with outlier. 
+Our contribution (for non-robust) is precisely to remove this O(nkd) dependency, and to relax the conditions on algorithm A to be a O(polylog k) approximation instead of constant factor.
+- Sensitivity sampling indeed produces a coreset of size dependent in d, but it is shown for instance in Huang and Vishnoi 2020  that if Pi is a "terminal embedding", a coreset for Pi(P) is a coreset for P. The terminal embedding Pi is a dimension reduction that can be computed using a JL transform, in time O(nd). 
+We will mention this subtlety in the next version of our paper.
+- We believe (although hard to be sure) that Deng et al. conjecture a running time Omega(nk) because this is the time required to compute the clustering induced by a  given a set  of centers (i.e., assign each input point to the closest center).  We break this bound using the Fastk-means++ algorithm. Essentially, it allows to compute an approximate assignment using an embedding into trees, where it is easier to compute clusters (as each cluster is a subtree).
+- Thank you for bringing the typesetting errors to our attention. With respect to sensitivity sampling bounds in fact 3.1, we assume there that a Johnson-Lindenstrauss transform was applied but will state this formally.
+
+Reviewer skrT
+- Your understanding is correct, our theoretical contribution is not revolutionary and not the main point of our article. However, we would like to mention two things: to compute the crude initial clustering, previous work all use a O(1) approximation. We observe that starting from a O(polylog(k)) is enough.
+Furthermore, we  can replace the dependency in log Delta by log log Delta. We didn't find it necessary to add, as it would be mostly theoretical and our point was the experiments, which we find perform well even with the log Delta in the running time. However,  we can  add it, as it seems of interest to the reviewers.
+
+First, suppose we are given the value V of a poly(n) approximation  (ie V \leq poly(n) OPT). let G be a randomly shifted grid with side length n^2 V. Standard analysis ensures that two points at distance less than V are in different grid cells with probability at most 1/n^2. Note that for any good approximation, two points at distance more that V cannot be in the same cluster. Therefore, one can reduce the diameter as follows : take the set of grid cells that contain at least a point, and place them in a line, with a buffer n*V between them. Since there are at most n non-empty cells, the  diameter of this input is O(n^2 V). To bound the smallest distance, we can take a very fine grid with side length 1/poly(n) * V, and snap each input point to the closest grid point.  
+It is not too hard to argue that it is possible to convert any solution in the modified instance to a solution with almost same cost in the original instance, and reciprocally. Therefore, computing an O(1) approximation in the modified instance is enough  in the modified instance, which has Delta = poly(n).
+
+Now, we can find a poly(n) approximation in time n log log Delta as follows. First, an alpha-approximation to k-median is an n*alpha-approximation to k-means (which can be proven  using Cauchy Schwarz inequality). Second, embedding the input into a HST (also called quadtree) preserves the k-median cost up to a factor O(log n). 
+The HST embedding is described for instance in the paper of Cohen-Addad et al. Fast and Accurate k-means++ via Rejection Sampling, and is essentially as follows: for i = 1,..., log Delta, take an axis-aligned grid of side-length 2^i centered at a random point s. The distance between two points is the diameter of the smallest cell containing both.  
+In such a metric, we claim that finding the diameter of the largest level that contains at least k+1 non-empty disjoint cells is enough. 
+Indeed, if there are points in k+1 disjoint cells, then in any solution at least one cell does not contain a center, and one client needs to travel to another cell. 
+In this metric, this costs at least the diameter of the level, say D. So any solution has cost at least D. 
+Now, since at the level above all points are in at most k disjoint cells, placing a center arbitrarily in each cell yields a solution with cost n* (2D) : 2D is the distance between any two points in the same cell, therefore an upper-bound on the cost of each client.
+Therefore, the optimal solution has cost between D and 2nD: D is the value of the poly(n) approximation we are looking for.
+
+To compute the largest level that contains at least k+1 non-empty disjoint cells, one can merely do a dichotomic resarch: there are log(Delta) many levels, and counting the number of disjoint cells at a given level can be done in time O(nd).
+
+- We apologize for the lack of an implementation -- it is in a private github repository and we meant to include it with the submission but didn't due to a miscommunication.
