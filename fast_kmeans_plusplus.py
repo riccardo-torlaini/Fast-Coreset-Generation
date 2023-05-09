@@ -53,8 +53,6 @@ def create_sample_tree(points, inds, sample_tree_ptc_dict):
 
     return node
 
-
-
 def mark_nodes(node):
     node.mark()
     if node.parent is None:
@@ -65,12 +63,13 @@ def mark_nodes(node):
 
 def update_sample_tree(node, cost_update):
     """
-        If we are setting a leaf node's cost for the first time, we want to add that amount all the way up the tree.
+    If we are setting a leaf node's cost for the first time, we want to add that amount all the way up the tree.
     If instead we are updating a leaf node's cost, we want to subtract the cost differential from all of its parents.
 
-        If we are setting a non-leaf node's cost for the first time, it must be the case that the leaf node's cost
+    If we are setting a non-leaf node's cost for the first time, it must be the case that the leaf node's cost
     was also set for the first time. Thus, we will have received the full cost of that leaf node. Set our cost to that value.
-        If we are updating a non-leaf node's cost, then we will have received EITHER the leaf node's first cost (a positive value)
+
+    If we are updating a non-leaf node's cost, then we will have received EITHER the leaf node's first cost (a positive value)
     OR the leaf node's update (a negative value). In either case, we update our cost by this amount.
     """
     # If we have not set this node's cost yet, set it to the current value
@@ -110,18 +109,32 @@ def set_all_dists(
     dist=0,
     depth=0
 ):
+    """
+    Given that we have opened a new center, we need to update each point's distance to closest center
+    We start from the top unmarked node, since once we've reached a marked node we are no longer closer to its
+        already assigned center
+    For every leaf corresponding to this top unmarked node, we update the distance based on the closest common ancestor
+        of the leaf and the center
+    """
     if curr_node.is_leaf:
         curr_point = int(curr_node.points[0][0])
         sample_tree_node = st_ptc_dict[curr_point]
-        if dist < sample_tree_node.cost or sample_tree_node.cost == -1:
-            update_sample_tree(sample_tree_node, dist)
+
+        # Cost update needs to account for point weight since we may be fitting the tree to a coreset
+        cost_update = dist * curr_node.weights[0]
+        if cost_update < sample_tree_node.cost or sample_tree_node.cost == -1:
+            update_sample_tree(sample_tree_node, cost_update)
             labels[curr_point] = c
+
     for child in curr_node.children:
         new_dist = dist
+
+        # If the center and the current point are in the same subtree, update their distance
         if depth < len(center_node.cell_path) and center_node.cell_path[depth] == child.cell_path[depth]:
             new_dist = tree_dist(root.diam, depth, root.max_depth) ** norm
         if child == center_node:
             new_dist = 0
+
         set_all_dists(
             sample_tree,
             st_ptc_dict,
@@ -152,18 +165,27 @@ def multi_tree_sample(sample_tree):
         return multi_tree_sample(sample_tree.left_child)
     return multi_tree_sample(sample_tree.right_child)
 
-def fast_cluster_pp(points, k, norm=2, hst_count_from_norm=True, allotted_time=np.inf, loud=False):
+def setup_multi_HST(points, norm=2, weights=None, hst_count_from_norm=True, loud=False):
+    """
+    Value error-checking and building the multi_hst
+    This is done in a separate function so that fast_cluster_pp is more readable
+    """
     assert norm == 1 or norm == 2
-    elapsed_time = 0
-    start = time()
     if loud:
         print('Fitting MultiHST...')
+    if weights is None:
+        weights = np.ones(len(points))
     if hst_count_from_norm:
-        multi_hst = make_multi_HST(points, k, num_trees=norm+1)
+        multi_hst = make_multi_HST(points, weights, num_trees=norm+1)
     else:
-        multi_hst = make_multi_HST(points, k, num_trees=1)
-    elapsed_time = time() - start
-    if elapsed_time > allotted_time:
+        multi_hst = make_multi_HST(points, weights, num_trees=1)
+
+    return multi_hst
+
+def fast_cluster_pp(points, k, norm=2, weights=None, hst_count_from_norm=True, allotted_time=np.inf, loud=False):
+    start = time()
+    multi_hst = setup_multi_HST(points, norm, weights, hst_count_from_norm, loud)
+    if time() - start > allotted_time:
         return None, None, None
 
     centers = []
@@ -179,12 +201,12 @@ def fast_cluster_pp(points, k, norm=2, hst_count_from_norm=True, allotted_time=n
         else:
             c = multi_tree_sample(sample_tree)
         labels = multi_tree_open(multi_hst, c, sample_tree, st_ptc_dict, labels, norm)
+        # FIXME -- I'm 99% sure this can go out of the for-loop
         costs = np.array([st_ptc_dict[i].cost for i in np.arange(n)])
         centers.append(c)
-        elapsed_time = time() - start
-        if elapsed_time > allotted_time:
+        if time() - start > allotted_time:
             break
 
-    if elapsed_time > allotted_time:
+    if time() - start > allotted_time:
         print('Ran out of time! Only processed {} of {} centers'.format(len(centers), k))
     return np.array(centers), labels, costs

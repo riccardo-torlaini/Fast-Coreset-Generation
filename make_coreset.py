@@ -58,13 +58,13 @@ def get_coreset_with_centers(centers, sensitivities, m, points, labels, weights=
 
 def get_coreset(sensitivities, m, points, labels, weights=None):
     """
-    Sample all m coreset elements from sensitivity values, ignoring the first k centers
+    Sample all m coreset elements from probability distribution values, ignoring the first k centers
     """
     replace = False
     if m > len(points):
         replace = True
     rng = np.random.default_rng()
-    coreset_inds = rng.choice(np.arange(len(sensitivities)), size=m, replace=replace, p=sensitivities)
+    coreset_inds = rng.choice(np.arange(len(sensitivities)), size=m, replace=False, p=sensitivities)
 
     if weights is None:
         weights = np.ones_like(labels)
@@ -87,10 +87,15 @@ def bico_coreset(points, k, m, **kwargs):
     q_points = c[:, 1:]
     return q_points, q_weights, np.ones_like(q_weights)
 
-def uniform_coreset(points, m, **kwargs):
+def uniform_coreset(points, m, weights=None, **kwargs):
     n = len(points)
-    q_points = points[np.random.choice(n, m)]
-    q_weights = np.ones(m) * float(n) / m
+    if weights is None:
+        weights = np.ones(n)
+    weights_prob_dist = weights / np.sum(weights)
+    rng = np.random.default_rng()
+    coreset_inds = rng.choice(np.arange(n), size=m, replace=False, p=weights_prob_dist)
+    q_points = points[coreset_inds]
+    q_weights = weights[coreset_inds] * float(n) / m
     q_labels = np.ones(m)
     return q_points, q_weights, q_labels
 
@@ -123,6 +128,7 @@ def semi_uniform_coreset(
     allotted_time=np.inf,
     j_func='2',
     sample_method='sens',
+    weights=None,
     **kwargs
 ):
     j_func_dict = {
@@ -133,7 +139,8 @@ def semi_uniform_coreset(
         'half': k / 2
     }
     j = int(j_func_dict[j_func])
-    weights = np.ones(len(points))
+    if weights is None:
+        weights = np.ones(len(points))
     centers, labels, costs = kmeans_alg(
         points,
         j,
@@ -152,9 +159,11 @@ def lightweight_coreset(
     m,
     norm,
     allotted_time=np.inf,
+    weights=None,
     **kwargs
 ):
-    weights = np.ones(len(points))
+    if weights is None:
+        weights = np.ones(len(points))
     center = np.zeros(len(points[0]))
     for point in points:
         for d in range(len(point)):
@@ -169,6 +178,7 @@ def lightweight_coreset(
         costs[i] = np.sqrt(costs[i])
         costs[i] = costs[i] ** norm
     costs = np.array(costs)
+    costs *= weights
 
     sensitivities = bound_sensitivities([1], labels, costs, alpha=1)
     r_points, r_weights, r_labels = get_coreset(sensitivities, m, points, labels, weights=weights)
@@ -178,19 +188,23 @@ def lightweight_coreset(
 
 def fast_coreset(
     points,
+    weights,
     k,
     m,
     norm,
     hst_count_from_norm=True,
     allotted_time=np.inf,
+    loud=False,
     **kwargs
 ):
     centers, labels, costs = fast_cluster_pp(
         points,
         k,
         norm=norm,
+        weights=weights,
         hst_count_from_norm=hst_count_from_norm,
         allotted_time=allotted_time,
+        loud=loud
     )
     if centers is None:
         # Ran out of time building the trees so we need to randomly initialize the data
@@ -199,8 +213,7 @@ def fast_coreset(
         return uniform_coreset(points, m)
 
     sensitivities = bound_sensitivities(centers, labels, costs)
-    # q_points, q_weights, q_labels = get_coreset(sensitivities, m, points, labels)
-    q_points, q_weights, q_labels = get_coreset(sensitivities, m, points, labels)
+    q_points, q_weights, q_labels = get_coreset(sensitivities, m, points, labels, weights=weights)
     return q_points, q_weights, q_labels
 
 def evaluate_coreset(points, k, coreset, weights):
@@ -230,7 +243,7 @@ if __name__ == '__main__':
     
     g_m_scalar = 20
     g_allotted_time = 600
-    g_hst_count_from_norm = True
+    g_hst_count_from_norm = False
     g_kmeans_alg = cluster_pp_slow
     g_points = jl_proj(g_points, g_k, eps=0.5)
 
@@ -246,11 +259,13 @@ if __name__ == '__main__':
     if method == 'fast':
         q_points, q_weights, q_labels = fast_coreset(
             g_points,
+            g_weights,
             g_k,
             g_k * g_m_scalar,
             g_norm,
             hst_count_from_norm=g_hst_count_from_norm,
-            allotted_time=g_allotted_time
+            allotted_time=g_allotted_time,
+            loud=True
         )
     elif method == 'sensitivity':
         q_points, q_weights, q_labels = sensitivity_coreset(
@@ -268,6 +283,7 @@ if __name__ == '__main__':
             g_k,
             g_k * g_m_scalar,
             g_norm,
+            weights=g_weights,
         )
     elif method == 'semi_uniform':
         q_points, q_weights, q_labels = semi_uniform_coreset(
@@ -276,24 +292,27 @@ if __name__ == '__main__':
             g_k * g_m_scalar,
             g_norm,
             kmeans_alg=g_kmeans_alg,
+            weights=g_weights,
         )
     elif method == 'bico':
         q_points, q_weights, q_labels = bico_coreset(g_points, g_k, g_k * g_m_scalar, g_allotted_time)
     else:
-        q_points, q_weights, q_labels = uniform_coreset(g_points, g_k * g_m_scalar)
+        q_points, q_weights, q_labels = uniform_coreset(g_points, g_k * g_m_scalar, weights=g_weights)
     end = time()
     print(end - start)
     print('Coreset cost ratio:', evaluate_coreset(g_points, g_k, q_points, q_weights))
 
     fast_points, fast_weights, fast_labels = fast_coreset(
         g_points,
+        g_weights,
         g_k,
         g_k * g_m_scalar,
         g_norm,
         kmeans_alg=g_kmeans_alg,
-        weights=g_weights,
-        allotted_time=g_allotted_time
+        allotted_time=g_allotted_time,
+        loud=True
     )
+    print('Coreset cost ratio:', evaluate_coreset(g_points, g_k, fast_points, fast_weights))
 
     # Visualize
     model = PCA(n_components=2)

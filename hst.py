@@ -6,15 +6,18 @@ from utils import tree_dist
 
 ### HST code ###
 class CubeHST:
-    def __init__(self, points, root=True, depth=0, center=None, edge_length=None, cell_path=None):
-        """
-        Initialize Hierarchically Separated Tree
-        input:
-            P : numpy array, shape (n x d)
-        """
-        # FIXME -- There must be a better way to handle the point id's.
-        #       -- Appending them outside of the class is so ugly
+    def __init__(
+        self,
+        points,
+        weights,
+        root=True,
+        depth=0,
+        center=None,
+        edge_length=None,
+        cell_path=None
+    ):
         self.points = points
+        self.weights = weights
         self.depth = depth
         self.max_depth = 0
         self.cell_path = cell_path
@@ -39,8 +42,6 @@ class CubeHST:
         else:
             self.center = center
             self.edge_length = edge_length
-
-
 
     def mark(self):
         if self.marked:
@@ -72,9 +73,9 @@ class CubeHST:
     def __len__(self):
         return len(self.points)
 
-def fit_tree(points):
+def fit_tree(points, weights):
     point_to_cell_dict = {}
-    root = CubeHST(points)
+    root = CubeHST(points, weights)
 
     def _fit(node):
         """
@@ -83,21 +84,20 @@ def fit_tree(points):
         edge_length -- the largest length of the cell along any axis
         prev_split -- the position of the "bottom-left" corner (or high-dim equivalent) of the current cell
         """
-        if len(node.points) == 1:
+        if len(node) == 1:
             node.max_depth = node.depth
             point_to_cell_dict[node.points[0, 0]] = node
             return
 
-        center_comparison = (node.points[:, 1:] > node.center) * 2 - 1
-        # FIXME -- the np.unique does a sort over all n elements. We can instead turn the list of 0s and 1s
-        # into a binary number and do list(set()) on those?
-        #   - hmm but then we'd have to find the reverse_indices
+        center_comparison = (node.points[:, 1:] > node.center) * 2 - 1 # vector in {-1, 1}^n giving direction to next centers
         dir_from_center, point_inds = np.unique(center_comparison, axis=0, return_inverse=True)
         new_centers = node.center + dir_from_center * node.edge_length / 2
         new_cell_path = node.cell_path + [node]
         for i, new_center in enumerate(new_centers):
+            i_inds = np.where(point_inds == i)
             child = CubeHST(
-                node.points[np.where(point_inds == i)],
+                node.points[i_inds],
+                node.weights[i_inds],
                 root=False,
                 depth=node.depth + 1,
                 center=new_center,

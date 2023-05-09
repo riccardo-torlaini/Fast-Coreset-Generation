@@ -32,13 +32,15 @@ def assert_multi_hst_correctness(multi_hst, points):
     assert multi_dist_squared > true_dist_squared
     assert multi_dist_squared < 10 * true_dist_squared * int(points.shape[1]) ** norm
 
-def make_multi_HST(points, k, num_trees):
+def make_multi_HST(points, weights, num_trees, test=False):
     roots, ptc_dicts = [], []
     for i in range(num_trees):
-        root, ptc_dict = fit_tree(points)
-        # assert_hst_correctness(root, ptc_dict, points)
+        root, ptc_dict = fit_tree(points, weights)
+        if test:
+            assert_hst_correctness(root, ptc_dict, points)
         roots.append(root)
         ptc_dicts.append(ptc_dict)
     multi_hst = MultiHST(roots, ptc_dicts)
-    # assert_multi_hst_correctness(multi_hst, points)
+    if test:
+        assert_multi_hst_correctness(multi_hst, points)
     return multi_hst
