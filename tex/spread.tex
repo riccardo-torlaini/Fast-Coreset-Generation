@@ -1,0 +1,78 @@
+\section{Reducing the Impact of the Spread}
+To reduce the dependency of $\Delta$ on the running time, we proceed in two steps: first, we compute a very crude upper-bound on the cost $U$ of the optimal solution -- up to a $\poly(n)$ factor. 
+If $U$ is a $c$-approximation of the optimal cost, the natural attempt to reduce the aspect-ratio is to round all coordinates to multiples of $U/(cnà$, such that the smallest distance is $U/(cn)$; it is then enough to reduce the diameter to $\poly(n) U$. We proceed as follows: we place a grid with cell length $O(n \cdot U)$, so that two points from the same cluster in $\opt$ fall into the same cell w.h.p. That way, the distinct cells do not interact with each other in any reasonable solution. 
+Then, we compress the input by "moving" non-empty cells closer to each other.
+
+\subsection{Computing a crude upper-bound}
+As described, we start by computing a $U$ such that $U \leq \poly(n) \cdot \cost(\opt)$. For this, we start by simplifying a lot our task: our first lemma shows that it is enough focus on the $k$-median problem; we then embed the input into a tree, easier to handle than Euclidean space. In this tree, we will show that it is enough to find the first level for which the input lies in $k+1$ disjoint subtrees: the final algorithm is therefore a mere binary-search to find efficiently this level.
+
+\paragraph{Reduction to $k$-median.}
+
+\begin{lemma}
+Let $\calS$ be a $c$-approximation for $k$-median on $P$. Then, $\calS$ is a $nc^2$-approximation for $k$-means on $P$.
+\end{lemma}
+\begin{proof}
+Let $\cost_1$ (resp. $\cost_2$) be the $k$-median (resp. $k$-means) cost, $\opt_1$ (resp. $\opt_2$) be the optimal $k$-median (resp. $k$-means) solution. We have the following inequalities:
+\begin{align*}
+\cost_2(\calS) &= \sum_{p\in P} \dist(p, \calS)^2 \leq \lpar \sum_{p\in P} \dist(p, \calS)\rpar^2\\
+&\leq c^2 \cdot \lpar  \sum_{p\in P} \dist(p, \opt_1)\rpar^2\\
+&\leq c^2 \cdot \lpar  \sum_{p\in P} \dist(p, \opt_2)\rpar^2\\
+&\leq c^2 \cdot n \cdot  \sum_{p\in P} \dist(p, \opt_2)^2,
+\end{align*}
+where the last inequality stems from Cauchy-Schwarz. Therefore, $\calS$ is a $nc^2$ - approximation to $k$-means. 
+\end{proof}
+
+\paragraph{Reduction to Structured Tree.}
+\newcommand{\boxsize}{\textsc{MaxDist}}
+It is well known that, for $k$-median, embedding the input into a tree using the quadtree decomposition loses only a $O(d \log \Delta)$ factor. Building explicitely this embedding takes time $O(nd \log \Delta)$: however, we will show that we only need to build only a fraction of it, allowing for a running time $O(nd \log \log \Delta)$. 
+
+The embedding is constructed as follows. First, the algorithm finds a box enclosing all input points, centered at zero, with all side length equal to $\boxSize$.\footnote{This can be done as follows: select an arbitrary input point, and translate the dataset so that this point is at the origin. Then, compute the maximum distance from any point to the origin in time $O(nd)$, and let $\boxSize$ be that distance.} Then, a random shift $s \leq \boxsize$ is added to all coordinates of all points: the input is now in the box $[-2\boxsize, 2\boxsize]^d$ and this transformation did not change any distances, henceforth the $k$-median cost is preserved. 
+The $i$-th level of the tree (for $i \in \lbra 0, ..., \log \Delta \rbra$) is constructed as follows: a grid of side length $2^{-i} \cdot 2\boxsize$ centered at $0$ is placed, and each cell is a node in the tree.
+ The parent of a cell $c$ is simply the cell at level $i-1$ that contains $c$, and the distance between $c$ and its parent is set to $\sqrt{d}2^{-i} \cdot 2\boxsize$ (namely, the $\ell_2$ diameter of $c$).
+ 
+ This tree has $O(\log \Delta)$ levels, and it is known that for any solution $\calS$, its cost in the tree metric is within a factor $O(\sqrt d \log \Delta)$ of its cost for the original metric. Therefore, it is enough for us to find an approximation in the tree metric. For this, we let $\opt_T$ be the optimal solution in the tree metric, and have the following lemma:
+ 
+\begin{lemma}\label{lem:apxTree}
+Let $i$ be the first level of the decomposition such that at least $k+1$ cells at level $i$ contains any point. Then, $\sqrt{d}2^{-i+1} \cdot \boxsize \leq \opt_T \leq n \cdot \sqrt{d}2^{-i+4} \cdot \boxsize$.
+\end{lemma}
+\begin{proof}
+If the input is spread in $k+1$ distinct cell at level $i$, then in any solution there is at least one of those cells with no center. In the tree metric, points lying in this cell have therefore connexion cost at least $\sqrt{d}2^{-i+1} \cdot \boxsize$, and thus the left-hand-side of the inequality holds.
+
+On the other hand, if the input is contained into $k$ cells at level $i-1$, then placing arbitrarily a center in each cell yields a solution with cost at most $n \cdot \sqrt{d}2^{-i+4} \cdot \boxsize$: indeed, the distance from any point to its closest center is at most $2 \cdot \sum_{j \geq i-1} \sqrt{d}2^{-j} \cdot 2\boxsize \leq 4 \sqrt{d}2^{-i+2} \cdot \boxsize$ (summing the edge length from the point to the cell at level $i$, and then going down to the center). This concludes.
+\end{proof}
+
+A consequence of \cref{lem:apxTree} is that the first level of the tree for which at least $k+1$ cells are non empty provides an $O(n)$-approximation. 
+To count the number of non-empty cells at a given level $i$, one can merely iterate over all points, for each point identify the cell that contains it (using modulo operation), and store all those cells into a hash table to count the number of elements. This is done in time $O(nd)$.
+Using a binary search on the $O(\log \Delta)$ many levels then concludes this section with the following result:
+
+\begin{lemma}\label{lem:crudeApx}
+There is an algorithm running in time $O(nd \log \log \Delta)$ that computes an  $O(n^2 d \log \Delta)$-approximation to $k$-median or $k$-means.
+\end{lemma}
+
+\subsection{From Approximate Solution to Small Aspect-Ratio}
+Let $U$ be an upper-bound on the optimal cost that is a $c$-approximation, computed via \cref{lem:crudeApx}. We place a grid with side length $d n^2\cdot U$.
+The following folklore lemma ensures that with high probability, no cluster of the optimal solution is spread on several grid cells.
+
+\begin{lemma}
+The probability that two points $p$ and $q$ are in different grid cells is $O(\frac{\|p-q\|^2}{n^2 U}$
+\end{lemma}
+Since $U$ is larger than the distance between any input point and its center in the optimal solution, a union-bound ensures that with probability $1-1/n$, no cluster of this solution is split among different cells.
+In particular, there are at most $k$-non empty cells. We call those "boxes".
+
+From this input, we build a new one $P'$ as follows: first, identify the non empty cell (using a hash table as previously). We associate each box with its center.
+For each coordinate $i \in \lbra 1, ..., d \rbra$, sort (in time $O(k \log k)$ the centers according to their value on coordinate $i$. Then, for each $j \in \lbra 1, ..., k\rbra$, let $c^i_j$ and $c^i_{j+1}$ be the $i$-th coordinate of centers of the $j$-th and $(j+1)$-th boxes. If $c^i_{j+1} - c^i_j \geq 2d n^2\cdot U$, then for all cell $j'$ with $j' > j$, shift points  of $j'^$ by an amount $c^i_{j+1} - c^i_j - 2d n^2\cdot U$ in $i$-th coordinate.
+
+
+This can be implemented with a linear scan, and has two effects: first, the diameter of the input is now $\sqrt{d} \cdot 2d n^2\cdot U \cdot k$, as along any coordinate the maximal distance is $2d n^2\cdot U \cdot k$. Second, two boxes that were adjacents are still adjacents, and two boxes that were non-adjacents are still non-adjacent.
+
+This second property ensures that we can transform a solution $\calS'$ for $P'$ to a solution with exactly the same cost for $P$: in any (reasonable) solution, points from two non-adjacent box will not be in the same cluster in $P'$ nor in $P$. Therefore, simply adding to centers of $\calS'$ the corresponding shift allows to transform it to a solution $\calS$, such that the distance between any point and its closest center does not change. This is formalized in the next lemma.
+
+\begin{lemma}
+Let $\calS'$ be a $c'$-approximation for  $k$-median (resp. $k$-means) on $P'$, where $c' \leq nc$ and $c$ is the approximation guarantee from \cref{lem:crudeApx}. Then, one can compute a solution for $P$ for $k$-median (resp. $k$-means) on $P$, with same cost as $\calS'$ for $P'$, in time $O(nd)$.
+\end{lemma}
+\begin{proof}
+First, since distances in $P'$ are smaller than in $P$, the optimal solution for $P'$ has cost at most $U$. Therefore, two points that are in non-adjacent boxes (i.e., at distance more than $d n^2\cdot U$) are not in the same cluster of $\calS'$ -- as otherwise $\calS'$ would not be a $c'$-approximation.
+
+Let $\calS$ be the solution obtained from $\calS'$ by reversing the construction of $P'$. Since this construction preserves adjacency, for all cluster of the solution, all distances are the same in $P$ and $P'$: therefore, the cost are alike. This concludes.
+\end{proof}
+
