@@ -95,13 +95,6 @@ def run_composition_experiments(points, coreset_alg, params, num_tree_layers=4):
                 coreset_alg,
                 params
             )
-        print(evaluate_coreset(
-            np.concatenate(leaf_coresets, axis=0),
-            k=params['k'],
-            coreset=subtree_coreset,
-            weights=subtree_weights,
-            point_weights=np.concatenate(leaf_weights, axis=0),
-        ))
         composed_coresets.append(subtree_coreset)
         composed_weights.append(subtree_weights)
         handled_coresets += subtree_size

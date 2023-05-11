@@ -23,10 +23,10 @@ def get_experiment_params(default_values, norm, param, val):
 def run_sweeps():
     results = {}
     datasets = [
-        # 'artificial',
-        # 'geometric',
-        # 'benchmark',
-        # 'blobs',
+        'blobs',
+        'artificial',
+        'geometric',
+        'benchmark',
         'mnist',
         'adult',
         # 'song',
@@ -47,7 +47,7 @@ def run_sweeps():
         'k': 100,
         'j_func': '2', # Only applies for semi-uniform coreset
         'sample_method': 'sens', # Only applies for semi-uniform coreset
-        'm_scalar': 20, # FIXME -- need small samples for composition experiments!!
+        'm_scalar': 20, # FIXME -- need small samples for composition experiments?
         'composition': False,
         'allotted_time': 120,
         'hst_count_from_norm': True, # Only applies to fast-coreset
@@ -163,8 +163,6 @@ def run_sweeps():
                         )
 
                         metric_results = {'acc': accuracies, 'time': times}
-                        print(metric_results)
-                        quit()
                         coreset_results = {'coreset_points': q_points, 'coreset_weights': q_weights}
                         np.save(os.path.join(val_output_path, 'metrics.npy'), metric_results)
                         np.save(os.path.join(val_output_path, 'coreset.npy'), coreset_results)
