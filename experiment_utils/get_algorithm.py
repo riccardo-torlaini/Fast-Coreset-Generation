@@ -10,6 +10,8 @@ from make_coreset import \
     lightweight_coreset, \
     bico_coreset
 
+RANDOM_DATASETS = ['artificial', 'geometric', 'benchmark', 'blobs']
+
 ALG_DICT = {
     'sens_sampling': sensitivity_coreset,
     'fast_coreset': fast_coreset,
@@ -27,21 +29,22 @@ def call_coreset_alg(coreset_alg, points, params, weights=None):
         weights = np.ones(len(points))
     return coreset_alg(
         points,
+        weights=weights,
         k=params['k'],
         j_func=params['j_func'],
         m=params['m'],
         norm=params['norm'],
         hst_count_from_norm=params['hst_count_from_norm'],
         allotted_time=params['allotted_time'],
-        weights=weights,
     )
 
 def recursively_compose_coresets(leaf_coresets, leaf_weights, coreset_alg, params):
-    if len(leaf_coresets.shape) < 3:
-        return leaf_coresets, leaf_weights
+    if leaf_coresets.shape[0] == 1:
+        q_points, q_weights, _ = call_coreset_alg(coreset_alg, leaf_coresets[0], params, leaf_weights[0])
+        return q_points, q_weights
 
-    num_leaves = len(leaf_coresets)
-    assert num_leaves == len(leaf_weights)
+    num_leaves = int(len(leaf_coresets) / 2)
+    assert num_leaves == len(leaf_weights) / 2
     left_coreset, left_weights = recursively_compose_coresets(
         leaf_coresets[:num_leaves],
         leaf_weights[:num_leaves],
@@ -60,12 +63,7 @@ def recursively_compose_coresets(leaf_coresets, leaf_weights, coreset_alg, param
     return q_points, q_weights
 
 
-def run_composition_experiments(
-    points,
-    coreset_alg,
-    params,
-    num_tree_layers=4,
-):
+def run_composition_experiments(points, coreset_alg, params, num_tree_layers=4):
     partition_coresets = []
     partition_weights = []
     n = len(points)
@@ -74,7 +72,6 @@ def run_composition_experiments(
 
     points = points[np.random.permutation(n)]
     partition = [points[partition_size*i:partition_size*(i+1)] for i in range(num_eq_classes)]
-    start = 0
     for points_subset in partition:
         q_points, q_weights, _ = call_coreset_alg(coreset_alg, points_subset, params)
         partition_coresets.append(q_points)
@@ -87,44 +84,64 @@ def run_composition_experiments(
     composed_coresets = []
     composed_weights = []
     for subtree_size in composition_scales:
-        leaf_coresets = partition_coresets[handled_coresets:handled_coresets+subtree_size]
-        leaf_weights = partition_weights[handled_coresets:handled_coresets+subtree_size]
-        subtree_coreset, subtree_weights = recursively_compose_coresets(
-            leaf_coresets,
-            leaf_weights,
-            coreset_alg,
-            params
-        )
+        leaf_coresets = np.array(partition_coresets[handled_coresets:handled_coresets+subtree_size])
+        leaf_weights = np.array(partition_weights[handled_coresets:handled_coresets+subtree_size])
+        if len(leaf_coresets) == params['m']:
+            subtree_coreset, subtree_weights = leaf_coresets[0], leaf_weights[0]
+        else:
+            subtree_coreset, subtree_weights = recursively_compose_coresets(
+                leaf_coresets,
+                leaf_weights,
+                coreset_alg,
+                params
+            )
+        print(evaluate_coreset(
+            np.concatenate(leaf_coresets, axis=0),
+            k=params['k'],
+            coreset=subtree_coreset,
+            weights=subtree_weights,
+            point_weights=np.concatenate(leaf_weights, axis=0),
+        ))
         composed_coresets.append(subtree_coreset)
         composed_weights.append(subtree_weights)
         handled_coresets += subtree_size
 
+    composed_coresets = np.concatenate(composed_coresets, axis=0)
+    composed_weights = np.concatenate(composed_weights, axis=0)
+    q_points, q_weights, _ = call_coreset_alg(coreset_alg, composed_coresets, params, composed_weights)
+    return q_points, q_weights
+
 
 def get_results(
-    points,
     coreset_alg,
     params,
-    iterations=10
+    dataset,
+    iterations=10,
+    n_points=50000,
+    D=50,
+    num_centers=50,
 ):
     times = np.zeros(iterations)
     accuracies = np.zeros(iterations)
     print('Iteration:', end=' ')
     for i in range(iterations):
         print(i, end=' ')
-        points_copy = np.copy(points)
+        if dataset in RANDOM_DATASETS or i == 0:
+            # Load in dataset each time if it's random and once if it's not
+            points, _ = get_dataset(dataset, n_points, D, num_centers)
+        start = time()
         if params['composition']:
-            times[i], q_points, q_weights = run_composition_experiments(points, coreset_alg, params)
+            q_points, q_weights = run_composition_experiments(points, coreset_alg, params)
         else:
             start = time()
             q_points, q_weights, _ = call_coreset_alg(coreset_alg, points, params)
-            end = time()
-        assert np.allclose(points, points_copy)
-        times[i] = end - start
+        times[i] = time() - start
         acc = evaluate_coreset(
             points,
             k=params['k'],
             coreset=q_points,
             weights=q_weights,
         )
+        print(acc)
         accuracies[i] = acc
     return accuracies, times, q_points, q_weights

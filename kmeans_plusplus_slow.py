@@ -41,7 +41,7 @@ def cluster_pp_slow(points, k, weights, allotted_time=np.inf):
     sq_dists = (np.ones((len(points))) * np.inf).tolist()
     elapsed_time = 0
     start = time()
-    for i in tqdm(range(k), total=k):
+    for i in tqdm(range(2*k), total=2*k):
         center_point = points[centers[-1]]
         get_min_dists_to_centers(points, center_point, sq_dists)
         weighted_sq_dists = [sq_d * weights[i] for i, sq_d in enumerate(sq_dists)]

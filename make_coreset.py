@@ -70,11 +70,11 @@ def get_coreset(sensitivities, m, points, labels, weights=None):
         weights = np.ones_like(labels)
     q_points = points[coreset_inds]
     q_labels = labels[coreset_inds]
-    new_weights = 1 / sensitivities[coreset_inds]
+    q_weights = 1 / sensitivities[coreset_inds]
+    # q_weights = weights[coreset_inds] * new_weights
     # Want our coreset to be an unbiased estimator, so the sum of the new weights
     #   has to equal the sum of the old weights
-    new_weights *= np.sum(weights) / np.sum(new_weights)
-    q_weights = weights[coreset_inds] * new_weights
+    q_weights *= np.sum(weights) / np.sum(q_weights)
  
     return q_points, q_weights, q_labels
 
@@ -216,7 +216,9 @@ def fast_coreset(
     q_points, q_weights, q_labels = get_coreset(sensitivities, m, points, labels, weights=weights)
     return q_points, q_weights, q_labels
 
-def evaluate_coreset(points, k, coreset, weights):
+def evaluate_coreset(points, k, coreset, weights, point_weights=None):
+    if point_weights is None:
+        point_weights = np.ones(len(points))
     centers, _, _ = cluster_pp(coreset, k, weights=weights)
 
     coreset_assignments, coreset_costs = get_cluster_assignments(coreset, centers, coreset[centers])
@@ -224,6 +226,7 @@ def evaluate_coreset(points, k, coreset, weights):
     coreset_cost = np.sum(coreset_costs)
 
     dataset_assignments, dataset_costs = get_cluster_assignments(points, centers, coreset[centers])
+    dataset_costs *= point_weights
     dataset_cost = np.sum(dataset_costs)
     if coreset_cost == 0:
         acc = np.inf
@@ -234,25 +237,25 @@ def evaluate_coreset(points, k, coreset, weights):
 
 if __name__ == '__main__':
     g_norm = 2
-    g_k = 100
-    g_points, g_labels = get_dataset('benchmark', n_points=50000, D=50, num_centers=10, k=g_k, class_imbalance=5)
+    g_k = 200
+    g_points, g_labels = get_dataset('mnist', n_points=50000, D=50, num_centers=50, k=g_k, class_imbalance=5)
     model = PCA(n_components=2)
     g_embedding = model.fit_transform(g_points)
     plt.scatter(g_embedding[:, 0], g_embedding[:, 1])
     plt.show()
     
-    g_m_scalar = 20
+    g_m_scalar = 80
     g_allotted_time = 600
-    g_hst_count_from_norm = False
+    g_hst_count_from_norm = True
     g_kmeans_alg = cluster_pp_slow
     g_points = jl_proj(g_points, g_k, eps=0.5)
 
     # method = 'fast'
-    # method = 'lightweight'
+    method = 'lightweight'
     # method = 'semi_uniform'
     # method = 'sensitivity'
     # method = 'bico'
-    method = 'uniform'
+    # method = 'uniform'
 
     start = time()
     g_weights = np.ones((len(g_points)))
@@ -302,16 +305,18 @@ if __name__ == '__main__':
     print(end - start)
     print('Coreset cost ratio:', evaluate_coreset(g_points, g_k, q_points, q_weights))
 
+    start = time()
     fast_points, fast_weights, fast_labels = fast_coreset(
         g_points,
         g_weights,
         g_k,
         g_k * g_m_scalar,
         g_norm,
-        kmeans_alg=g_kmeans_alg,
+        hst_count_from_norm=g_hst_count_from_norm,
         allotted_time=g_allotted_time,
         loud=True
     )
+    print(time() - start)
     print('Coreset cost ratio:', evaluate_coreset(g_points, g_k, fast_points, fast_weights))
 
     # Visualize

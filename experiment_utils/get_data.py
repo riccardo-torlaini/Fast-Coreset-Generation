@@ -286,5 +286,5 @@ def load_coreset_benchmark(k, alpha=3):
         padded_benchmarks.append(padded)
 
     padded_benchmarks = np.concatenate(padded_benchmarks, axis=0)
-    padded_benchmarks += np.random.rand(padded_benchmarks.shape[0], padded_benchmarks.shape[1]) / 100000
-    return padded_benchmarks, np.ones(len(padded_benchmarks))
+    padded_benchmarks += np.random.rand(padded_benchmarks.shape[0], padded_benchmarks.shape[1]) / 1000
+    return padded_benchmarks.astype(np.float32), np.ones(len(padded_benchmarks))

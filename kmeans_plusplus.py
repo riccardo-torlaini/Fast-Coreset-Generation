@@ -9,7 +9,7 @@ def cluster_pp(points, k, weights, allotted_time=np.inf):
     sq_dists = None
     start = time()
     elapsed_time = 0
-    for i in tqdm(range(k), total=k):
+    for i in tqdm(range(2*k), total=2*k):
         sq_dists = get_min_dists_to_centers(points, points[np.array(centers)[-1]], sq_dists)
         weighted_sq_dists = sq_dists * weights
         if np.sum(weighted_sq_dists) > 0:

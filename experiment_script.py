@@ -23,10 +23,10 @@ def get_experiment_params(default_values, norm, param, val):
 def run_sweeps():
     results = {}
     datasets = [
-        'artificial',
-        'geometric',
-        'benchmark',
-        'blobs',
+        # 'artificial',
+        # 'geometric',
+        # 'benchmark',
+        # 'blobs',
         'mnist',
         'adult',
         # 'song',
@@ -34,11 +34,11 @@ def run_sweeps():
         # 'cover_type'
     ]
     # methods = ['fast_coreset', 'semi_uniform', 'uniform_sampling', 'sens_sampling', 'lightweight', 'bico']
-    # methods = ['fast_coreset', 'sens_sampling']
-    methods = ['uniform_sampling', 'lightweight', 'semi_uniform']
+    # methods = ['sens_sampling']
+    methods = ['fast_coreset', 'uniform_sampling']
 
     # Only apply for Gaussian mixture and 1-outlier datasets
-    n_points = 50000
+    n_points = 100000
     D = 50
     num_centers = 50
 
@@ -47,7 +47,7 @@ def run_sweeps():
         'k': 100,
         'j_func': '2', # Only applies for semi-uniform coreset
         'sample_method': 'sens', # Only applies for semi-uniform coreset
-        'm_scalar': 40,
+        'm_scalar': 20, # FIXME -- need small samples for composition experiments!!
         'composition': False,
         'allotted_time': 120,
         'hst_count_from_norm': True, # Only applies to fast-coreset
@@ -67,7 +67,7 @@ def run_sweeps():
     small_sweep_params = {
         # Params to sweep for all coreset algorithms
         # 'k': [50, 100, 200, 400],
-        'composition': [False, True],
+        'composition': [True, False],
         # 'j_func': ['2', '10', 'log', 'sqrt'],
         # 'sample_method': ['sens', 'uniform'],
         # 'm_scalar': [20, 40, 60, 80],
@@ -99,6 +99,7 @@ def run_sweeps():
             os.makedirs(method_output_path)
         for dataset in datasets:
             print('\tDataset --- {}'.format(dataset))
+            # Load dataset once to set up dataset-dependent vars and logic
             points, _ = get_dataset(dataset, n_points, D, num_centers)
             n, d = points.shape # Will be different from n_points or D if dataset is real-world data
 
@@ -152,12 +153,18 @@ def run_sweeps():
                             proj_points = points
 
                         accuracies, times, q_points, q_weights = get_results(
-                            proj_points,
                             coreset_alg,
                             params,
+                            dataset=dataset,
+                            n_points=n_points,
+                            D=D,
+                            num_centers=num_centers,
+
                         )
 
                         metric_results = {'acc': accuracies, 'time': times}
+                        print(metric_results)
+                        quit()
                         coreset_results = {'coreset_points': q_points, 'coreset_weights': q_weights}
                         np.save(os.path.join(val_output_path, 'metrics.npy'), metric_results)
                         np.save(os.path.join(val_output_path, 'coreset.npy'), coreset_results)

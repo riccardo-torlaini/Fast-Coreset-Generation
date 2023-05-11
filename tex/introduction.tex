@@ -1,189 +1,41 @@
 \section{Introduction}
 
-In the age of ``big data", developing efficient and fast ways of compressing dataset is a key concern. Indeed, storing hundreds billion points dataset is indeed not realistic and processing them without care can render algorithms that we might consider efficient on small data sets utterly infeasible. 
-Therefore, a compression step, also called \textit{sketching}, is often used in preprocessing. Common techniques in this line of work are (random) projections on low dimensional subspaces or sampling algorithms and it is common for the two approaches to be combined \cite{ClarksonDMMMW16, CohenEMMP15, MahoneyDMW12}. 
-Random projections are well understood and can be performed in near linear time \cite{AilonC09,ClarksonW13,NelsonN13}.
-Nevertheless, there are reasons for focusing on sampling based algorithms. Sampling preserves input sparsity, making subsequent algorithms more efficient, it picks input points and input features, rather than linear combinations thereof, which can make results easier to interpret, and for certain problems such as clustering random projections do not have similarly strong guarantees.
+In the age of ``big data", storing datasets with hundreds of billions of points can render even seemingly efficient algorithms intractible. Thus, it has become
+increasingly necessary to devise compression methods that are both theoretically sound and practically effective across diverse sets of data. The perspectives
+of theoretical soundness and practical efficacy are, however, slightly at odds with one another. On the one hand, theoretical guarantees provide assurance that
+the algorithm will obtain valid solutions without unlucky inputs affecting their runtime or accuracy. On the other hand, it is sometimes difficult to convince
+oneself to implement the theoretically optimal algorithm when there are cruder methods that are faster to get running and perform well in practice.
 
-When considering sampling algorithms, two ideas immediately come to mind. The first is uniform sampling. Uniform sampling always results in an unbiased estimation of the cost and is faster than any other algorithm. 
-It is also possible to execute in nearly every computational model, ranging from distributed computing to streaming settings.
-The hope is that sampling allows to solve faster downstream tasks, and that uniform sampling will preserve the main characteristic of the dataset and of the solutions.
-Uniform sampling has certain provable guarantees for clustering with $k$ centers. For example, for $k=1$, it can result in very accurate results \cite{CLMPS16,CSS21b,InabaKI94} and can be used to compute good clustering under certain conditions \cite{Ben-David07,czumaj2007sublinear,meyerson2004k}.
-Unfortunately uniform sampling lacks any sort of worst guarantees for arbitrary values of $k$. Indeed, even for $2$-means, it is easy to construct data sets where uniform sampling must sample the entire data set to obtain a constant factor approximation.
+In this light, we consider both the theoretical and experimental limits of compression under the $k$-median and $k$-means tasks by studying coresets\ldots %FIXME
 
-The second idea is to sample points non-uniformly. 
-The most commonly used algorithm is \textit{sensitivity sampling} introduced in its current form by \cite{LS10}. In this distribution, points are picked proportionally to the maximum impact that can have on any solution. 
-This technique has had enormous impact, both for practical purposes and to provide theoretical guarantees \cite{FeldmanL11, CohenP15,RajMM20}. Indeed, for many problems, sensitivity sampling yields a coreset. A coreset $B$ for a data set $A$ satsifies, for any candidate solution $\mathcal{S}$ and any desired precision $\varepsilon>0$
-$$\cost(B,\mathcal{S}) = (1\pm \varepsilon)\cdot \cost(A,\mathcal{S}).$$
-Using the sensitivity sampling framework, coresets now exist for many foundational machine learning tasks such as linear regression \cite{BoutsidisDM13,CohenLMMPS15,HuangSV20,TukanMF20}, principal components and low rank approximation \cite{CohenEMMP15,maalouf2019fast}, logisitic regression \cite{HugginsCB16,MunteanuSSW18}, Gaussian mixtures~\cite{LucicFKF17}, neural nets \cite{BaykalLGFR19}, decision trees \cite{JSNF21}, and indeed clustering.
+From the theoretical perspective, [reference] conjectured that an $O(nd + nk)$ running time is necessary to obtain $k$-median and $k$-means coresets with all of
+the corresponding guarantees. It is clear that $O(nd)$ time is necessary, as one must read the full dataset before making any claims about one's performance on
+it.  Thus, the question is whether there exists a linear-time coreset construction that preserves correctness across the entire space of datasets and solutions.
+We first respond to the conjecture by showing that there is a way to make $k$-clustering coresets that remove the $O(nk)$ time dependency.  However, this in
+itself is not sufficient to guarantee linear time as it relies on subdividing the space into a tree to avoid the dependency on $k$ and, subsequently, the
+maximum depth of this tree depends linearly on the bit-precision of the input. That is, since the tree has a depth equal to the ratio of the largest value over
+the smallest value in the input, any algorithm that builds the full tree now has a linear time-dependency on $\log \Delta$, where $\Delta$ is the maximum
+such ratio attainable. To this end, we show that even this linear-time dependency can be avoided by doing x, y, z. Thus, we affirm that there is an
+$\tilde{O}(nd)$ time algorithm for making $k$-means and $k$-median coresets. We refer to this method as Fast-Coresets.
 
-Unfortunately, the idealized sensitivity sampling probabilities are hard to compute in general. For the specific case of the $k$-means problem, given an $n$ point data set in $d$ dimensional Euclidean space, the best known algorithms run in time $\tilde{O}(nk+nd)$, as shown recently by \cite{DSWY22}. The dependency $O(nd)$ is necessary for any coreset construction. The dependency on $O(nk)$ has been listed as a substantial drawback in many applications \cite{Feldman20}. We thus ask:
+Despite the guarantees offered by the above algorithm, it is certainly possible that another, faster algorithm can obtain effective coresets by compromising on
+edge cases. We evaluate the validity of this hypothetical method by practically analyzing the full spectrum of relevant coreset runtimes.  Naturally, uniform
+sampling is the fastest method as it does not even require one to process the entire input. Since this clearly breaks on datasets with outliers, any algorithm
+that beats uniform sampling must run in $O(nd)$ time. Indeed, the popular Lightweight-Coresets method samples the coreset based on the $1$-means approximation
+-- the simplest approximation to the $k$-means task that exists in $O(nd)$ time. On the other hand, the Fast-Coreset algorithm acts as a natural upper bound as
+it runs in $\tilde{O}(nd)$ time and provides full theoretical guarantees due to the $O(1)$ approximation it computes. Thus, we are interested in the tradeoff
+between the quality of the $k$-means approximation and the coreset's validity.
 
+With respect to this tradeoff, we show that an $O(1)$ approximation is indeed necessary if one wants to be confident in their compression, as even simple
+counterexamples can break the coresets sampled on suboptimal approximations to the objective. However, we preempt the practitioner's concerns, as we also report
+the full spectrum of results to illustrate where each construction does and does not work. For example, it is indeed the case that improving the approximation
+quality improves the coreset accuracy, even on the counterexample datasets. Furthermore, we perform extensive experiments on real-world data to impress upon the
+reader that our counterexamples are hand-crafted -- it is often not necessary to obtain the full $O(1)$ approximation so long as your data is reasonably
+well-behaved. Specifically, the rule of thumb we find is that datasets with strong outliers or uneven densities are likely to thwart $k$-centering coreset
+constructions that cut even small corners.
 
-\begin{question}
-\label{quest1}
-Does there exist a (nearly) linear time coreset construction for Euclidean $k$-median and $k$-means?
-\end{question}
-
-Furthermore, worst case guarantees are notoriously conservative when it comes to practical performance. We thus ask:
-\begin{question}
-\label{quest2}
-Which is the most practically viable compression algorithm for Euclidean $k$-median and $k$-means?
-\end{question}
-
-\subsection{Our Results.}
-
-We answer Question \ref{quest1} in the affirmative. We propose an algorithm that computes a sampling distribution approximating sensitivity sampling and running in near-linear time. Moreover, this algorithm has the same theoretical
-guarantees as sampling with the idealized sensitivity distribution, up to constant factors in the coreset size. 
-Specifically, we show the following theorem.
-
-%We show how to break the dependency in $nk$, allowing for coreset construction running in \textit{linear time}. In the following statement, $\Delta$ is the aspect-ratio (also called spread) of the input, namely the ratio $\frac{\max_{p, q \in P} \lnor p-q\rnor}{\min_{p, q \in P, p \neq q} \lnor p-q\rnor}$.\footnote{The aspect-ratio corresponds to the precision of the data points: to write in binary the coordinates of a data point, $O(\log \Delta)$ bits are required.}
-
-\begin{theorem}\label{thm:main}
-There exists an algorithm running in time $\tilde O\lpar nd + n \log \Delta\rpar$  that computes an $\eps$-coreset for $k$-meeans (or $k$-median) in $\R^d$. The size of the coreset is equal to $T \polylog(k)$, where $T$ is the size of the coreset computed via sensitivity sampling.
-\end{theorem}
-In the previous statement, $\Delta$ is the aspect-ratio (also called spread) of the input, namely the ratio $\frac{\max_{p, q \in P} \lnor p-q\rnor}{\min_{p, q \in P, p \neq q} \lnor p-q\rnor}$.\footnote{The aspect-ratio corresponds to the precision of the data points: to write in binary the coordinates of a data point, $O(\log \Delta)$ bits are required.}
-We remark that it is also possible to use the Group Sampling algorithm by \cite{CSS21} instead of sensitivity sampling. It has a better theoretical bound of  $\tilde{O}(k\cdot \varepsilon^{-2} \min(k^{z/(z+2)},\varepsilon^{-z}))$, where $z=1$ for $k$-median and $2$ for $k$-means \cite{CLSSS22}, compared to sensitivity sampling which achieves size $\tilde{O}(k\varepsilon^{-2z-2})$ \cite{HuangV20}. Nevertheless, it has significant computational overhead and there is recent evidence that its practical performance is inferior to that of sensitivity sampling \cite{chrisESA}. 
-
-%\chris{I'm not sure I'd keep this. If you want to make a case for the simplicity of the algorithm I am all for that. I don't care particularly about the proof. Why a $O(\log k)$ approximation would be sufficient, for example, is not clear at all, so I don't find the comment particularly illuminating.}
-%
-%The proof of this theorem is surprisingly simple: we show that it is enough to compute an $\tilde O(\log k)$ approximation to $k$-median or $k$-means in order
-%to build a coreset, instead of a precise $O(1)$-approximation. This allows us to use linear-time algorithms to compute the sensitivities.
-
-%We also show how to reduce the dependency in the aspect ratio, by presenting an algorithm running in time $\tilde O\lpar nd + n \log \Delta\rpar$. As this is
-%only theoretical improvement, we focus on \cref{thm:main} and explain later how to improve.
-
-To address Question \ref{quest2}, we conduct an extensive experimental evaluation.  We implement generic sensitivity sampling as well as our near linear time
-implementation, uniform sampling, and hybrid sampling distributions interpolating between uniform sampling and sensitivity sampling. Popular examples include
-\emph{lightweight coresets} \cite{bachem2018scalable}, as well as seeding sensitivity sampling by computing a solution with $k'<k$ centers.
-
-Our experiments show that the near linear time sensitivity sampling algorithm outperforms sensitivity sampling and  and consistently yields high accuracy.
-Thus it is not only theoretically optimal with respect to running time, but also a viable alternative in practice. 
-%\david{talk about experiments here}
-%
-%\chris{I don't think the remaining section should be here. The last paragraph has value, the rest I would delete. The last paragraph in my opinion belongs somewhere in the next section. What do you guys think?}
-%\david{for what's between here and  section 1.2 I agree, it is redundant with the update you made}
-%In this paper, our goal is to compare different compression strategies, and to evaluate in terms of speed but also in terms of guarantee offered. We focus more specifically on guarantees for $k$-means clustering problems: the quality of a compression strategy is then how well it preserves the cost of each possible clustering.
-%
-%
-%One of the main selling point for sensitivity sampling for $k$-means is that it produces a small \textit{coreset}, namely, a set such that the cost of any possible $k$-means solution is the same on the coreset than on the full dataset (up to some tiny multiplicative factor).
-%Therefore, any algorithm can be run on the coreset instead of the full dataset: this ensures a faster algorithm  -- the coreset may even have size independent of $n$ -- while preserving the theoretical guarantees of the algorithm.
-%However, the bottleneck in the complexity is in the time to perform the sensitivity sampling: although lots of papers claim to have fast and practical algorithm, their running time $\Omega(nk)$ is often 	unimaginable. The coreset construction time is listed as one of the main potential drawback of coreset in \cite{Feldman20}.
-%
-%
-%In this paper, we show how to implement sensitivity sampling for $k$-means and $k$-median in near-linear time $\tilde O(nd)$.
-%This is surprisingly fast: merely evaluating the cost of a solution to $k$-median and $k$-means requires time $\Omega(nk)$, as for each point it takes time $\Omega(k)$ to compute its cost in the solution. 
-%We provide an implementation of our algorithm, and demonstrate with thorough experiments that it is the only fast and practical algorithm that works consistently well across datasets.
-%In particular, it outperforms by orders of magnitudes previous sensitivity sampling algorithms in terms of running time while constructing coreset that are as accurate. 
-
-
-%%If speed is the main concern over quality, then the go-to solution is uniform sampling. Although it performs decently on many datasets, it miserably fails on others, by missing completely outliers. More precisely, if sampling $t$ points, obtaining provable guarantees require $t = \Omega(n)$ \cite{bachem2017practical}.
-%
-%%An attempt to get the best of those two algorithms is the \emph{lightweight coresets} from \cite{bachem2018scalable}. The idea is to compute a crude approximation to the sensitivities, very fast.
-
-\subsection{Related Work.}
-
-The coreset paradigm has attracted a lot of attention, with a long line of work trying to get the smallest coreset possible in many different metric spaces. The most prominent example is for Euclidean space \cite{BadoiuHI02, HaM04, Chen09, HuangV20, stoc22}. 
-In this case, the \textit{group sampling} algorithm developed in \cite{stoc21, stoc22} yields a coreset of size $\tilde{O}(k\cdot \varepsilon^{-2} \min(k^{z/(z+2)},\varepsilon^{-z}))$ \cite{CLSSS22}, while we know that any coreset must have size $\Omega \lpar k\eps^{-2}\rpar$ \cite{stoc22}.
-Although group sampling has theoretically better bounds than sensitivity sampling, the experiments of \cite{chrisESA} showed that the later one is likely to be more efficient in practice.
-
-Small size coresets for $k$-median and $k$-means also exist in doubling metrics \cite{huang2018varepsilon}, discrete metrics \cite{FeldmanL11}, metrics induced by minor-free graphs \cite{BravermanJKW21} or graphs with bounded treewidth \cite{baker2020coresets}. 
-In finite metrics, the running time $\Omega(nk)$ is required to compute any approximation to $k$-median or $k$-means \cite{mettu2004optimal}. Since coresets can be used to quickly compute an approximation, the running time also applies to coreset construction. 
-
-
-All efficient coreset constructions are probabilistic. This comes with a disadvantage of coresets being difficult to verify and compare. For example, it is co-NP-hard to check whether a candidate compression is a weak coreset \cite{chrisESA} \footnote{A weak coreset guarantee only requires that a $(1+\varepsilon)$ approximation computed on the coreset yields a $(1+\varepsilon)$ on the entire point set.}. Therefore, although the algorithm succeed with some high probability, it is unknown how to determine whether the algorithm succeeded or not. 
-This posed a considerable difficulty for previous experimental evaluations, where researchers would typically focus on the cost of a solution computed on the designated coreset instead.
-%A recent work proposed a pipeline for doing so, and showed that sensitivity sampling algorithm slightly outperforms the theoretically best group sampling \cite{chrisESA}. 
-%We will use this pipeline to evaluate the quality of the coresets analyzed in this paper.
-%We will use a similar heuristic to compo
-
-
-%\subsection{On Coresets for Clustering.}
-\section{Preliminaries}
-
-The $k$-median and $k$-means cost functions are defined as follows: 
-for a dataset $P \in \R^d$ with weights $w : P \rightarrow \R^+$, and any $k$-tuple $\calC$ in $\R^d$ (called a \emph{solution}), 
-\[\cost_z(P, \calC) := \sum_{p \in P} w(p) \dist^z(p, \calC),\]
-with $z=1$ for $k$-median and $z=2$ for $k$-means. We use $\opt$ to denote $\min_{\calS} \cost_z(P, \calC)$.
-
-An $\eps$-coreset for a given cost function is a subset $S \subseteq P$ with weights $\tilde w$ such that
-for any solution $\calC$,
-\[\sum_{p \in S} \tilde w(p) \dist^z(p, \calC) \in (1 \pm \eps) \cost_z(P, \calC).\]
-
-
-%For the clustering tasks of $k$-median and $k$-means, sensitivity sampling offers very strong guarantee: with high probability, the sample is a \textit{coreset}.
-%Specifically, given a pointset $P \subset \mathbb{R}^{d}$
-%a solution space, and a loss function $\mathcal{L}$, a coreset $\coreset$ of $S \ll n$ points has the property that for any $\calC_i$ in the solution space, $\mathcal{L}(\coreset,
-%\calC_i) \in (1 \pm \eps) \mathcal{L}(P, \calC_i)$. In other terms, the coreset preserves the structure of the loss function, up to a factor $(1\pm \eps)$.
-
-%For $k$-median and $k$-means, the solution space is the set of all $k$-tuples in $\R^d$, and the loss function is often called ``cost" instead, and defined as follows:
-%\[\cost_z(P, \calC) := \sum_{p \in P} \dist^z(p, \calC),\]
-%with $z=1$ for $k$-median and $z=2$ for $k$-means.
-
-%Taking $\coreset$ to be a uniform sample of size $S$ of $P$, each smapled point taken with multiplicity (or weight) $|P|/S$, allows to have a coreset ``in expectation": for any fixed solution $\calC$, it holds (from linearity of expectation) that $\E[\cost_z(P, \calC)] = \E[\cost_z(\Omega, \calC)]$. However, this distribution is poorly concentrated, and, in order to get good precision guarantee, one would need to sample $t = \Omega(|P|)$ many points \cite{bachem2017practical}. 
-%
-%
-%On the other hand, we know how to compute coresets with size \textit{independent of $|P|$}. Among algorithm with this theoretical guarantee, the one which seems
-%to perform best is called sensitivity sampling, introduced in \cite{LS10, FeldmanL11}.  
-
-\subsection{On Sensitivity Sampling.}
-\label{ssec:sens_sampling}
-The sensitivity sampling algorithm we consider is the following, as introduced in \cite{FeldmanL11}.
-Given a solution $\calC$ to $k$-median or $k$-means, important scores are defined as
-\begin{equation}
-\label{eq:sensitivity}
- s_\calC(p) = \dfrac{\cost_z(p, \calC)}{\cost_z(\calC_{p}, \calC)} + \dfrac{1}{|\calC_p|},
-\end{equation}
-where $\calC_p$ is the cluster that $p$ belongs to. The true sensitivity values are defined as $\sup_{\calC} \frac{\dist^z(p, \calC)}{\cost_z(P, \calC)}$ -- where the supremum is taken over all possible solutions $\calC$.
-Whenever $\calC$ is a constant factor approximation to the optimal $k$-clustering, the importance scores are close to the true sensitivities. 
-
-The coreset $\Omega$ merely consists of $S$ points sampled proportionate to $s$, and weights defined as follows. First, for any sampled point $p$, define $\tilde w_1(p) := \frac{1}{\Pr[p \in S]} = \frac{\sum_{p'} s_\calC(p')}{|S| s_\calC(p)}$. For a cluster $C_i$, let $|\hat{C_i}|$ be the estimated number of point in $C_i$ via the sample. A sampled point $p$ in $C_i$ is weighted $\tilde w(p) = \tilde w_1(p) \lpar (1+\eps)|C_i| - |\hat{C_i}|\rpar$.
-%
-%This weighting ensure that the coreset is unbiaised, namely for any solution $\calS$ it holds that $\E[\cost_z(S, \calS)] = \E[\cost_z(P, \calS)]$.
-\cite{FeldmanL11} and subsequent works showed that, when $\calC$ is a $O(1)$-approximation, sampling $S = \tilde O\lpar k \eps^{-2z-2}\rpar$ many points was enough to ensure concentration, namely, $\Omega$ is a coreset with probability at least $2/3$.
-
-%Then, points are sampled proportionate to their sensitivity $s(p)$. 
-%The first term corresponds to sampling proportionate to the importance in the solution $\calC$, the second one to uniform sampling.\footnote{This definition is actually an upper-bound on the real sensitivity, 
-%usually defined as $\sup_{\calC} \frac{\dist^z(p, \calC)}{\cost_z(P, \calC)}$ -- where the supremum is taken over all possible solutions $\calC$.
-% This definition is more amenable to generalizations to other problems; it is however NP-hard to compute this supremum, and $s(p)$ defined above is a mere proxy for it.}
- To perform this algorithm, the bottleneck in the running time is therefore to compute the solution $\calC$ as well as the costs of every point to its assigned center in $\calC$. Using any bicriteria approximation algorithm\footnote{For $k$-means an $(\alpha,\beta)$ bicriteria approximation is an algorithm that computes a solution $\calC$ satisfying $\cost(P\calC)\leq \alpha\cdot \opt$ and $|\calC|\leq \beta\cdot k$.} such as the standard $k$-means++ algorithm \cite{ArV07} combined with dimension reduction techniques (see for example \cite{BecchettiBC0S19,CohenEMMP15,MakarychevMR19}), this takes time $\tilde O(nk +nd)$. Lastly, one may use a solution $\calC$ with less than $k$ centers instead. For example \cite{BachemL018} showed that using $\calC=\{\mu\}$, i.e. the mean of the data set, it is still possible to prove weaker with an additive error of $\varepsilon\cdot \cost(P,\{\mu\})$. This is the lightweight coreset algorithm.	
-
-
-
-%The sensitivity of a point $p \in P$ is the maximum relative contribution $p$ can have in any
-%solution: it is formally defined as $\sup_{\calC} \frac{\dist^z(p, \calC)}{\cost_z(P, \calC)}$.  Sensitivity sampling simply samples each point $p$
-%proportionate to its sensitivity $s(p)$. 
-%This is one of the key distributions to build sketches, and it was used in many different contexts \cite{FeldmanL11, CohenP15}.
-%
-%Computing the sensitivities exactly is often NP-hard. Thankfully, it has been shown that sensitivities can be approximated in $O(nk+nd)$ time while preserving
-%theoretical guarantees \cite{varadarajan12,FeldmanL11}.  This algorithm computes an estimate of the sensitivities by computing an $O(1)$-approximation to
-%$k$-means. One then obtains an upper-bound on the sensitivities with
-%\[ \hat{s}(p) = \dfrac{\cost(p, \calC_i)}{\cost(P_{i}, \calC_i)} + \dfrac{1}{|\calC_i|}, \]
-%where $\calC_i$ is the cluster that $p$ belongs to and $P_{i}$ is the entire set of points belonging to that cluster. Thus, the $O(1)$-approximation can be used
-%to obtain a proxy for the real sensitivity $s(p)$. 
-
-%One attempt to get a linear-time algorithm and remove the dependency in $nk$ is the \emph{lightweight coresets} from \cite{bachem2018scalable}. The idea is to
-%very quickly compute a crude approximation $\calC$, instead of an $O(1)$-approximation. 
-%The solution chosen is to take the mere average $\mu$ of the dataset, i.e., solving the $1$-means problem, and to define $s(p)$ as in \cref{eq:sensitivity}, using $\mu$ instead of $\calC$.
-%This sampling strategy guarantees that the cost of any solution is preserved up to an \textit{additive} $\eps
-%\cost_z(P, \{\mu\})$, which may be infinite compared to the $k$-means cost.
-%
-%%In practice, the sensitivities must be upper-bounded as discussed previously. This means that the lightweight coreset samples each point proportionate to the
-%%value
-%%\[ \hat{s}_{lc}(p) = \dfrac{\cost(p, \{\mu\})}{\cost(P, \{\mu\})} + \dfrac{1}{|P|}.\]
-%%Looking at this intuitively, we see that lightweight coresets sample according to a linear combination between a uniform distribution and the sensitivities for
-%%the $1$-means solution. This has the immediate drawback that, for any dataset that is evenly distributed around its mean, the lightweight coreset effectively
-%%performs uniform sampling.
-%
-%To summarize, the picture is the following: uniform sampling runs in time independent of the input, but has no guarantee at all. Lightweight coresets are slower
-%-- the running time is $\Theta(nd)$ -- and come with a potentially unbounded guarantee. 
-%Lastly, sensitivity sampling is slow but is robust in both
-%theoretical and practical applications.
-% 
-%%having an upper-bound on them is enough to build coreset \cite{varadarajan12}. Furthermore, to compute such an upper-bound, it is enough to compute a bi-criteria approximation, namely a solution that can have $O(k)$ many centers (instead of exactly $k$) and cost $O(\opt)$, where $\opt$ is the optimal cost when using exactly $k$ centers. 
-%%
-%%Using those results, the computation time for computing coreset is essentially the time to build this bi-criteria approximation. 
-%%Up until recently, the best running time to do so was $O(nkd)$ (see e.g. \cite{HuangV20, stoc21}, using $k$-means++ \cite{ArV07}. This running time was very recently improved to $O(nd + nk)$ \cite{deng2022nearly}. 
-%%To do so, one can first reduce the dimension to $\tilde d = O(\log k)$ and then use a $O(n \tilde d k)$ algorithms. 
-%
+Thus, we show that the $\tilde{O}(nd)$ runtime and the $O(1)$ approximation factor are tight both in theory and in practice when paired with sensitivity
+sampling. Said otherwise, there exists an easy-to-implement algorithm that finds $k$-median and $k$-means coresets in $\tilde{O}(nd)$ time and any coreset
+algorithm that utilizes a worse approximation factor is easily thwarted by counterexamples. Despite this, we also show the full spectrum of compression results
+in case one is interested in balancing speed and efficacy. The remaining structure of our paper is as follows:
 

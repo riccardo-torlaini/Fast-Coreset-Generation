@@ -195,7 +195,7 @@ def fast_cluster_pp(points, k, norm=2, weights=None, hst_count_from_norm=True, a
     labels = np.ones((n)) * -1
     if loud:
         print('Running Fast-Kmeans++...')
-    for i in tqdm(range(k), total=k):
+    for i in tqdm(range(2*k), total=2*k):
         if len(centers) == 0:
             c = np.random.choice(n)
         else:

@@ -81,7 +81,7 @@ def fit_tree(points, weights):
         """
         node       -- current node in the HST being processed
         split_d    -- dimension to be split on
-        edge_length -- the largest length of the cell along any axis
+        edge_length -- the length of the cell along an axis
         prev_split -- the position of the "bottom-left" corner (or high-dim equivalent) of the current cell
         """
         if len(node) == 1:
