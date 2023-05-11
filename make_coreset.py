@@ -126,7 +126,7 @@ def semi_uniform_coreset(
     norm,
     kmeans_alg=cluster_pp_slow,
     allotted_time=np.inf,
-    j_func='2',
+    j_func='log',
     sample_method='sens',
     weights=None,
     **kwargs

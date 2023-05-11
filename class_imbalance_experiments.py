@@ -20,6 +20,7 @@ def run_class_imbalance_experiments():
     m_scalar = 40
     allotted_time = 600
     n_points = 50000
+    weights = np.ones(n_points)
     num_centers = 50
     D = 50
     hst_count_from_norm = True
@@ -31,7 +32,7 @@ def run_class_imbalance_experiments():
     results = np.zeros((runs, len(class_imbalances), 5))
     for i, run in enumerate(range(runs)):
         print('\n\n')
-        print('Run', run)
+        print('Run', run + 1)
         print('\n\n')
         for j, ci in enumerate(class_imbalances):
             print('\n')
@@ -59,7 +60,7 @@ def run_class_imbalance_experiments():
                 print('\t\tCoreset cost ratio:', distortion)
                 print()
 
-            q_points, q_weights, q_labels = fast_coreset(points, k, m, norm, kmeans_alg=kmeans_alg)
+            q_points, q_weights, q_labels = fast_coreset(points, weights, k, m, norm, kmeans_alg=kmeans_alg)
             distortion = evaluate_coreset(points, k, q_points, q_weights)
             print('Coreset cost ratio:', distortion)
 
