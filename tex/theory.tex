@@ -28,30 +28,29 @@ Both runs in time $\tilde O(nd)$, provided $\calC$.
 Our algorithm is based on the \fkmeans algorithm from \cite{cohen2020fast}: it allows to embed points in a very simple metric,  where it is easy to compute the
 distance to any given set of centers. The two key properties of this algorithm are the following: 
 \begin{itemize}
-\item \fkmeans runs in $\tilde O\lpar n d \log \Delta\rpar$ time, and
+\item \fkmeans runs in $\tilde O\lpar n d \log \Delta\rpar$ time (Corollary 4.3 in \cite{cohen2020fast}, and
 \item \fkmeans computes an assignment from input point to centers that is a $O\lpar d^z \log k\rpar$ approximation to $k$-median ($z=1$) and
-$k$-means ($z=2$). Applying dimension reduction techniques \cite{MakarychevMR19}, the dependency on $d$ may be replaced by a dependency on $\log k$. This results in a $O\lpar\log^{z+1} k\rpar$ approximation.
+$k$-means ($z=2$) (Lemma 3.1 in \cite{cohen2020fast} for $z=2$, discussion above for $z=1$). Applying dimension reduction techniques \cite{MakarychevMR19}, the dependency on $d$ may be replaced by a dependency on $\log k$. This results in a $O\lpar\log^{z+1} k\rpar$ approximation.
 \end{itemize}
 
 The second property is crucial for us: the algorithm does not only compute centers, but also assignments. 
   We use it, in combination with sensitivity sampling, as described in \cref{alg:main}.
 
-\david{algorithm environment breaks}
 
 \begin{algorithm}[tb]
    \caption{Fast-Coreset}
    \label{alg:main}
-\begin{algorithmic}
-   \STATE {\bfseries Input:} data $P$, number of clusters $k$, precision $\eps$ and target size $S$
-   \STATE Use Johnson-Lindenstrauss embedding to compute the embedding $\tilde P$ of $P$ into $\tilde d = O(\log k)$ dimensions
-   \STATE Compute an approximate solution $\tilde \calC = \lbra \tilde c_1, ..., \tilde c_k\rbra $ for $\tilde P$, and an assignment $\tilde \sigma : \tilde P \rightarrow \tilde \calC$ using \fkmeans.	
-   \STATE Let $\calC_i = \tilde \sigma^{-1}(c_i)$.
-   \STATE Compute the $1$-median (or $1$-mean) $c_i$ of each $\calC_i$ in $\R^d$.%, and define $\sigma(p) := c_i$ for all $p \in \calC_i$.
-   \STATE For each point $p \in \calC_i$, define
+\begin{algorithmic}[1]
+   \State {\bfseries Input:} data $P$, number of clusters $k$, precision $\eps$ and target size $S$
+   \State Use Johnson-Lindenstrauss embedding to compute the embedding $\tilde P$ of $P$ into $\tilde d = O(\log k)$ dimensions
+   \State Compute an approximate solution $\tilde \calC = \lbra \tilde c_1, ..., \tilde c_k\rbra $ for $\tilde P$, and an assignment $\tilde \sigma : \tilde P \rightarrow \tilde \calC$ using \fkmeans.	
+   \State Let $\calC_i = \tilde \sigma^{-1}(c_i)$.
+   \State Compute the $1$-median (or $1$-mean) $c_i$ of each $\calC_i$ in $\R^d$.%, and define $\sigma(p) := c_i$ for all $p \in \calC_i$.
+   \State For each point $p \in \calC_i$, define
    $s(p) = \frac{\dist^z(p, c_i)}{\cost(\calC_i, c_i)}+ \frac{1}{|\calC_i|}$.
-   \STATE Compute a set $\coreset$ of $S$ points randomly sampled from $P$ proportionate to $s$.
-   \STATE For each $\calC_i$, define $|\hat \calC_i|$ the estimated weight of $\calC_i$ by $\coreset$, namely $|\hat \calC_i| := \sum_{p \in \calC_i \cap \coreset} \frac{\sum_{p' \in P}s(p')}{s(p)S}$.
-   \STATE {\bfseries Output:} the coreset $\coreset$, with weights $w(p) = \frac{\sum_{p' \in P}s(p')}{s(p)S} \lpar (1+\eps)|\calC_i| - |\hat \calC_i|\rpar$
+   \State Compute a set $\coreset$ of $S$ points randomly sampled from $P$ proportionate to $s$.
+   \State For each $\calC_i$, define $|\hat \calC_i|$ the estimated weight of $\calC_i$ by $\coreset$, namely $|\hat \calC_i| := \sum_{p \in \calC_i \cap \coreset} \frac{\sum_{p' \in P}s(p')}{s(p)S}$.
+   \State {\bfseries Output:} the coreset $\coreset$, with weights $w(p) = \frac{\sum_{p' \in P}s(p')}{s(p)S} \lpar (1+\eps)|\calC_i| - |\hat \calC_i|\rpar$
 \end{algorithmic}
 \end{algorithm}
 
@@ -59,6 +58,7 @@ The second property is crucial for us: the algorithm does not only compute cente
 Given this algorithm, we formalize the proof of \cref{thm:main}.
 
 \begin{proof}[Proof of \cref{thm:main}]
+We show that \cref{alg:main} has the desired guarantees.
 First, performing the Johnson-Lindenstrauss embedding takes time $\tilde O(nd)$.
 
 On the projected dataset, the algorithm \fkmeans runs in time $\tilde O\lpar n \log \Delta\rpar$, and the solution it has an approximation-ratio $O\lpar \tilde{d}^z \log k\rpar = O\lpar\log^{z+1} k\rpar$ for $\tilde P$. 
@@ -66,7 +66,7 @@ The guarantee offered by the embedding ensure that the clustering $\lbra \calC_1
 
 For $k$-means, computing the $1$-mean solution for each $\calC_i$ takes time $O(nd)$ (the $1$-mean is simply the mean). 
 For $k$-median, computing the $1$-median solution can be done as well in time $O(nd)$ \cite{CohenLMPS16}. 
-We note that both may be approximated to a factor $2$ in constant time, by randomly sampling few points \cite{neurips21}.
+We note that both may be approximated to a factor $2$ in constant time, by sampling uniformly at randm few points from each cluster \cite{neurips21}.
 
 Provided the $c_i$ and the partition $\calC_i$, computing $|\calC_i|$ and $\cost(\calC_i, c_i)$ for all $i$ also takes time $O(nd)$.
 
@@ -90,7 +90,7 @@ Since the solution consisting of assigning each $p \in \calC_i$ to $c_i$ is a $O
 %\david{add something depending on the results of experiments}
 
 \subsection*{Extensions.} 
-We conclude this section with a few remarks that allow us to generalize \cref{alg:main}.
+We conclude this section with a few remarks that allows to generalize \cref{alg:main}.
 First, instead of using sensitivity sampling, one could use the group sampling procedure of \cite{stoc21}, or virtually any coreset construction. For many of those, the running time is linear, once provided with an initial solution $\calC$ and assignment $\sigma$. 
 Therefore, our algorithm could use as a subroutine any coreset construction, if in the future one is developed that improves over sensitivity and group sampling.
 
@@ -99,4 +99,4 @@ This initial solution may as well be an $O\lpar\polylog \lnor P \rnor_0 \rpar$ a
 
 As an example, we illustrate a different approach for $k$-median. One could first embed the input into a hierarchically separated tree (HST) with expected distortion $O(\log \lnor P \rnor_0)$ \cite{FakcharoenpholRT03}: on such tree metrics, solving $k$-median can be done in linear time, using dedicated algorithms (see e.g. \cite{Cohen-AddadLNSS21}). Using the solution from the HST metric, one can compute a coreset, and iterate using the previous argument.
 This embedding into HST is very similar to what is done by the \fkmeans algorithm, but can be actually performed in \emph{any} metric space, not only Euclidean. 
-As an example, in a metric described by a graph with $m$ edges, the running time of this construction would be near linear-time $\tilde O(m)$. In Euclidean space, the standard implementation runs in time $\Omega(n^2)$: we therefore omit it from our experiments.
+For instance, in a metric described by a graph with $m$ edges, the running time of this construction would be near linear-time $\tilde O(m)$. %In Euclidean space, the standard implementation runs in time $\Omega(n^2)$: we therefore omit it from our experiments.
