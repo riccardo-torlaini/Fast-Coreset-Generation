@@ -6,39 +6,41 @@ However, the perspectives of theoretical soundness and practical efficacy can be
 guarantees inspire confidence that the algorithm will obtain valid solutions regardless of the inputs. On the other hand, it can be difficult to convince
 oneself to implement theoretically convoluted algorithms when cruder methods are faster to get running and perform well in practice.
 
-In this light, we consider both the theoretical and experimental limits of compression under the $k$-median and $k$-means tasks.
-The most powerful theoretical results produce a \emph{strong coreset guarantee}, wherein the cost of any solution on the sketch is within an
-$\varepsilon$-factor of that solution's cost on the original dataset. Among these, the most desirable coresets are those which remove the dependency on $n$.
+\david{to me this is slightly too specific, I would stay more general and not talk about clustering -- just compression. Maybe phrase it in terms of cost function, and say a coreset is a compression scheme that provably preserves the cost function? In the following you are not as specifically talking about $k$-means}
+In this light, we consider both the theoretical and experimental limits of compression under the $k$-median and $k$-means tasks. \david{This is not super clear, as $k$-means itself is sometimes used for compression. What we want is to preserve the structure of the input wrt $k$-means cost}
+The most powerful theoretical results produce a \emph{strong coreset guarantee}, wherein the cost of any solution on the sketch \david{sketch is not commonly defined } is within an
+$\varepsilon$-factor of that solution's cost on the original dataset. Among these, the most desirable coresets are those which remove the dependency on $n$. \david{this does not look strong enough: you could emphasize that it is suprizing that you can compress to a size completely independent of the original input}
 Beyond simply minimizing the storage space, it is often faster to obtain such a coreset and then perform the secondary task on this sketch
 than it is to simply do the secondary task on the original dataset.
 
 A natural first step is to perform (random) projections to reduce the dimensionality. Although such projections are well-studied and can be done
-in effectively linear time, they are insufficient on their own as they (1) lack the necessary compression guarantees for clustering and (2) do not
-sparsify the input, slowing down downstream tasks. Thus, projections are often paired with sampling to resolve these concerns. Since all sampling schemes
+in effectively linear time, they are insufficient on their own as they (1) lack the necessary compression guarantees for clustering \david{They have some guarantee though, you should be more specific here}
+and (2) do not
+sparsify the input, slowing down downstream tasks \david{downstream task = solving $k$-means in our case, or are you thinking about something more general?}. Thus, projections are often paired with sampling to resolve these concerns. Since all sampling schemes
 mitigate the sparsity concern, the remaining objective is to enforce the coreset property without sacrificing the linear runtime.
 
-On one extreme we have uniform sampling. This runs in sublinear time but may miss an outlier and therefore cannot guarantee accuracy.
-In a sense, one must model -- and therefore read -- the dataset to perform more sophisticated sampling, giving an $O(nd)$ lower-bound on
-the runtime. Consequently, a popular alternative is sensitivity sampling. This guarantees a strong coreset but requires an $O(1)$ approximation to the downstream task to
+On one extreme we have uniform sampling. This runs in sublinear time but may miss an outlier \david{I'm not sure outlier is defined enough: maybe "small but important part of the dataset" ?} and therefore cannot guarantee accuracy.
+In a sense, one must model \david{?} -- and therefore read -- the dataset to perform more sophisticated sampling, giving an $O(nd)$ lower-bound on
+the runtime. Consequently, a popular alternative is sensitivity sampling. This guarantees a strong coreset but requires an $O(1)$ approximation to the downstream task \david{i.e., $k$-means?} to
 model the necessary distribution. Thus, it has been conjectured that performing sensitivity sampling necessitates $\tilde{O}(nd + nk)$ time.
 In a practical setting, the practitioner must therefore strike a balance along the spectrum between uniform sampling's speed and sensitivity sampling's
 performance guarantee. Thus, we ask the natural question: ``Is there a sampling method that guarantees strong $k$-means
-and $k$-median coresets in $\tilde{O}(nd)$ time and when is such a method preferable to faster sampling strategies?''
+and $k$-median coresets in $\tilde{O}(nd)$ time and when is such a method preferable to faster sampling strategies?'' \david{emphasize more the question, with a box or begin question. Also re-say that $O(nd)$ would be optimal.}
 
-We first respond to the conjecture by showing that there is a way to make $k$-clustering coresets that removes the $O(nk)$ time dependency. However, this in
+We first respond to the conjecture \david{question or conjecture?} by showing that there is a way to make $k$-clustering coresets that removes the $O(nk)$ time dependency. However, this in
 itself is not sufficient to guarantee linear time as it avoids the dependency on $k$ by subdividing the space into a tree and, subsequently, the
-maximum depth of this tree becomes a new variable in the runtime analysis. That is, since the tree has a depth equal to the ratio of the largest value over
+maximum depth of this tree becomes a new variable in the runtime analysis. \david{tree is too specific here: I believe you can elaborate on the $\log \Delta$ without talking about tree} That is, since the tree has a depth equal to the ratio of the largest value over
 the smallest value in the input, any algorithm that builds the full tree now has a linear time-dependency on $\log \Delta$, where $\Delta$ is the maximum
 such ratio under the given bit-precision. To this end, we show that even this linear-time dependency can be avoided by FIXME FIXME FIXME. Thus, we
 confirm that there is an $\tilde{O}(nd)$ time algorithm for making $k$-means and $k$-median coresets. This is clearly the fastest possible method up to log
 factors as it is the time required to read the dataset. We refer to this method as Fast-Coresets.
 
 Despite the guarantees offered by the above algorithm, it is certainly possible that another, faster method can obtain effective coresets by compromising on
-edge cases. We evaluate the validity of this hypothetical approach by practically analyzing the full spectrum of relevant coreset runtimes.  Naturally, uniform
+edge cases. We evaluate the validity of this hypothetical approach by practically analyzing the full spectrum of relevant coreset runtimes. \david{not really, we don't try all possible coreset algorithms, which is what I understand from your sentence} Naturally, uniform
 sampling is the fastest method as it does not even require one to process the entire input. Since this clearly breaks on datasets with outliers, any algorithm
-that beats uniform sampling must run in $O(nd)$ time. Indeed, the popular Lightweight-Coresets method samples the coreset based on the $1$-means approximation
+that beats \david{beats in what sense ?} uniform sampling must run in $O(nd)$ time. Indeed, the popular Lightweight-Coresets method samples the coreset based on the $1$-means approximation
 -- the simplest approximation to the $k$-means task that exists in $O(nd)$ time. On the other hand, the Fast-Coreset algorithm acts as a natural upper bound as
-it runs in $\tilde{O}(nd)$ time and provides full theoretical guarantees due to the $O(1)$ approximation it computes. Thus, we are interested in the tradeoff
+it runs in $\tilde{O}(nd)$ time and provides full theoretical guarantees due to the $O(1)$ approximation \david{isn't it a $\polylog(k)$ approximation?} it computes. Thus, we are interested in the tradeoff
 between the quality of the $k$-means approximation and the coreset's validity.
 
 With respect to this tradeoff, we show that an $O(1)$ approximation is indeed necessary if one wants to be confident in their compression, as even simple
