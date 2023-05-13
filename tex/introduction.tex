@@ -1,63 +1,34 @@
 \section{Introduction}
 
-In the age of ``big data", storing datasets with hundreds of billions of points can render even seemingly efficient algorithms intractible. Thus, it has become
-increasingly necessary to devise compression methods that are both theoretically sound and practically effective across diverse sets of data.
-However, the perspectives of theoretical soundness and practical efficacy can be at odds with one another. On the one hand, theoretical
-guarantees inspire confidence that the algorithm will obtain valid solutions regardless of the inputs. On the other hand, it can be difficult to convince
-oneself to implement theoretically convoluted algorithms when cruder methods are faster to get running and perform well in practice.
+The modern data analyst has no shortage of clustering algorithms to choose from but, given the ever-increasing size of relevant datasets, many are often
+rendered unviable due to time constraints. This has prompted the rise of big data algorithms, which provide both theoretical guarantees and
+practical improvements for standard data-science techniques on otherwise insurmountable datasets. The perspectives
+of theoretical soundness and practical efficacy are, however, slightly at odds with one another. On the one hand, theoretical guarantees provide assurance that
+the algorithm will obtain valid solutions without unlucky inputs affecting their runtime or accuracy. On the other hand, it is sometimes difficult to convince
+oneself to implement the theoretically optimal algorithm when there are cruder methods that are faster to get running and perform well in practice.
 
-When compressing a dataset, a natural first step is to reduce the dimensionality -- often done through (random) projections.
-Although such projections are well-studied and can be done in effectively linear time, they are insufficient on their own as they (1) provide suboptimal compression guarantees for clustering
-and (2) do not sparsify the input, slowing down downstream tasks. Thus, projections are often paired with sampling to mitigate these concerns. Since all sampling schemes
-sparsify the dataset, the focus naturally lands on sampling the input in a way that accurately models the dataset without sacrificing the linear runtime.
+Since datasets can be large in the number of points $n$ and/or the number of features $d$, big-data methods must mitigate the effect of large values of both.
+With respect to the feature space, the question is effectively closed as random projections are fast -- running in effectively linear time, practical to
+implement, and provide tight guarantees on the embedding's size and quality. The outlook is less clear when reducing the number of points $n$, with
+two separate paradigms providing distinct advantages.  On the one hand we have uniform sampling, which runs in sublinear time but may miss important subsets of
+the data and therefore cannot guarantee accuracy.  On the other hand the strongest sampling strategies are those that provide the \emph{strong coreset}
+guarantee, wherein the cost of any solution on the compressed data is within an $\varepsilon$-factor of that solution's cost on the original dataset.
+Surprisingly, many coreset constructions can remove the dependency on $n$, significantly accelerating downstream tasks.
 
-In terms of accuracy, the best sampling strategies are those that satisfy the \emph{strong coreset guarantee}, wherein the cost of any solution on the compressed data
-is within an $\varepsilon$-factor of that solution's cost on the original dataset.
-Surprisingly, many coreset constructions can remove the dependency on $n$, significantly accelerating downstream tasks. Thus, an optimal sampling
-strategy should run in the time it takes to read the input but preserve the coreset guarantee with respect to its downstream task.
+We study both paradigms with respect to a classic problem -- what are the limits and possibilities of compression for the $k$-means and $k$-median objectives?
+Whereas uniform sampling provides optimal speed with no guarantees regarding size vs. accuracy, coreset constructions have
+unclear runtime bounds despite their tight guarantees on the minimum number of samples required. Although there is little to study with respect to random
+sampling, the lack of clarity regarding linear-time coreset constructions throws into question their ability to facilitate clustering on large datasets.
+Indeed, it has been conjectured that producing a $k$-means or $k$-median coreset necessitates an $\tilde{O}(nd + nk)$ runtime.
+Since the issue of optimal coreset sizes has been resolved, this is one of the main open problems regarding center-based coresets. To this end, we show that
+there does exist an easy-to-implement algorithm that constructs coresets in $\tilde{O}(nd)$ time -- only logarithmic factors away from the time it takes to read
+in the dataset.
 
-On one extreme of this speed/accuracy tradeoff is uniform sampling. This runs in sublinear time but may miss
-important subsets of the data and therefore cannot guarantee accuracy.  Consequently, a popular alternative is sensitivity sampling, which guarantees a strong
-coreset but requires an $O(1)$ approximation to the downstream task and is therefore inherently slow.
-
-We study this dichotomy with respect the most classic variant of the coreset problem -- finding coresets for the $k$-means and $k$-median objectives.
-Indeed, it has been conjectured that performing sensitivity sampling in this setting necessitates an $\tilde{O}(nd + nk)$ runtime.
-Perhaps surprisingly, one can use the results in \cite{cohen2020fast} to replace the $\tilde{O}(nk)$ dependency with an $\tilde{O}(n \log \Delta)$, where $\Delta$ is the ratio
-between the maximum and minimum distance in the dataset and $\log \Delta$ is linear in the bit-complexity of the input. Nonetheless, the spirit of the conjecture remains and
-can be summarized in the following question:
-\begin{question}
-\label{q:theory}
-Does there exist an effectively-linear, $\tilde{O}(nd)$-time algorithm to find $k$-means and $k$-median coresets whose size doesn't depend on $n$?
-\end{question}
-While the above question seeks to find the optimal theoretical result, the duality between theory and practice implies a second, equally relevant question:
-\begin{question}
-\label{q:practice}
-When are optimal $k$-means and $k$-median coresets necessary and what is the practical tradeoff between coreset speed and accuracy?
-\end{question}
-
-We begin by responding to Question \ref{q:theory} in the affirmative. Indeed, we show that the linear time dependency on $\log \Delta$ can be replaced by $\log
-\log \Delta$. We furthermore verify that this derivation holds in both the $k$-means and $k$-median settings. Thus,
-we provide the first coreset construction for $k$-means and $k$-median that runs in $\tilde{O}(nd)$ time. We refer to this method as Fast-Coresets.
-
-Since Question \ref{q:practice} does not lend itself to such a black-and-white answer as Question \ref{q:theory}, we instead respond to Question
-\ref{q:practice} through a comprehensive analysis of the sampling-based coreset constructions.
-In terms of speed, uniform sampling is the clear frontrunner as it does not even require one to process the entire input.
-Since this breaks on datasets with outliers, any algorithm that hopes to be more accurate must run in $O(nd)$ time.
-Indeed, the popular Lightweight-Coresets method samples the coreset based on the $1$-means approximation
--- the simplest approximation to the $k$-means task that exists in $O(nd)$ time. On the other hand, the Fast-Coreset algorithm acts as a natural upper bound as
-it runs in $\tilde{O}(nd)$ time and provides full theoretical guarantees due to the $O(1)$ approximation it computes~\cite{MakarychevMSW16}. Thus, we are
-interested in the relationship between the quality of the $k$-means approximation and the coreset's validity.
-
-With respect to this tradeoff, we show that an $O(1)$ approximation is indeed necessary if one wants to be confident in their compression, as even simple
-counterexamples can break sensitivity coresets that use suboptimal approximations to the objective. However, we preempt the practitioner's concerns and also report
-the full spectrum of results to illustrate where each construction does and does not work. For example, it is indeed the case that improving the approximation
-quality improves the coreset accuracy, even on the counterexample datasets. Furthermore, we perform extensive experiments on real-world data to impress upon the
-reader that our counterexamples are hand-crafted -- it is often not necessary to obtain the full $O(1)$ approximation so long as your data is reasonably
-well-behaved. Specifically, the rule of thumb is that datasets with strong outliers or uneven densities are likely to thwart center-based coreset
-algorithms that cut corners.
-
-In summary, we show that both the $\tilde{O}(nd)$ runtime and the $O(1)$ approximation factor are tight both in theory and in practice.
-Said otherwise, there exists an easy-to-implement algorithm that finds $k$-median and $k$-means coresets in $\tilde{O}(nd)$ time and any coreset
-algorithm that utilizes a worse approximation factor is easily thwarted by counterexamples. Despite this, we also show the full spectrum of compression results
-in case one is interested in balancing speed and efficacy. Our code contains implementations of all the algorithms in the experimental section and has scripts
-that reproduce every experiment.
+Nonetheless, this does not fully illuminate the landscape between the sampling paradigms for clustering algorithms. Although our algorithm achieves an optimal
+runtime, it is certainly possible that other, cruder methods are equally viable in practice despite being faster and easier to implement. Other than uniform
+sampling, this includes methods such as Lightweight Coresets, which do not satisfy the strong coreset guarantee and simply sample based on distance to the mean
+of the dataset. Thus, there is a natural spectrum within the linear-time algorithms where obtaining more information about the dataset allows for a better
+sampling strategy at the expense of sublinear factors in speed. We state this formally in the following question: When are optimal $k$-means and $k$-median
+coresets necessary and what is the practical tradeoff between coreset speed and accuracy? To this end, we show that while many practical settings do not require
+the full coreset guarantee, one cannot cut any corners regarding the strong coreset constructions if seeking guaranteed compression. We also show that this
+extends to the streaming data paradigm and applies across downstream $k$-means and $k$-median approaches.
