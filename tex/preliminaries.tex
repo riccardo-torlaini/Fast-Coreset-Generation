@@ -1,48 +1,71 @@
-\section{Preliminaries}
+\section{Preliminaries and Related Work}
 
-The $k$-median and $k$-means cost functions are defined as follows: 
-for a dataset $P \in \R^d$ with weights $w : P \rightarrow \R^+$, and any $k$-tuple $\calC$ in $\R^d$ (called a \emph{solution}), 
-\[\cost_z(P, \calC) := \sum_{p \in P} w(p) \dist^z(p, \calC),\]
-with $z=1$ for $k$-median and $z=2$ for $k$-means. We use $\opt$ to denote $\min_{\calS} \cost_z(P, \calC)$.
-
-An $\eps$-coreset for a given cost function is a subset $S \subseteq P$ with weights $\tilde w$ such that
-for any solution $\calC$,
-\[\sum_{p \in S} \tilde w(p) \dist^z(p, \calC) \in (1 \pm \eps) \cost_z(P, \calC).\]
-
-
-%For the clustering tasks of $k$-median and $k$-means, sensitivity sampling offers very strong guarantee: with high probability, the sample is a \textit{coreset}.
-%Specifically, given a pointset $P \subset \mathbb{R}^{d}$
-%a solution space, and a loss function $\mathcal{L}$, a coreset $\coreset$ of $S \ll n$ points has the property that for any $\calC_i$ in the solution space, $\mathcal{L}(\coreset,
-%\calC_i) \in (1 \pm \eps) \mathcal{L}(P, \calC_i)$. In other terms, the coreset preserves the structure of the loss function, up to a factor $(1\pm \eps)$.
-
-%For $k$-median and $k$-means, the solution space is the set of all $k$-tuples in $\R^d$, and the loss function is often called ``cost" instead, and defined as follows:
-%\[\cost_z(P, \calC) := \sum_{p \in P} \dist^z(p, \calC),\]
-%with $z=1$ for $k$-median and $z=2$ for $k$-means.
-
-%Taking $\coreset$ to be a uniform sample of size $S$ of $P$, each smapled point taken with multiplicity (or weight) $|P|/S$, allows to have a coreset ``in expectation": for any fixed solution $\calC$, it holds (from linearity of expectation) that $\E[\cost_z(P, \calC)] = \E[\cost_z(\Omega, \calC)]$. However, this distribution is poorly concentrated, and, in order to get good precision guarantee, one would need to sample $t = \Omega(|P|)$ many points \cite{bachem2017practical}. 
-%
-%
-%On the other hand, we know how to compute coresets with size \textit{independent of $|P|$}. Among algorithm with this theoretical guarantee, the one which seems
-%to perform best is called sensitivity sampling, introduced in \cite{LS10, FeldmanL11}.  
-
-\subsection{On Sensitivity Sampling.}
+\subsection{On Sampling Strategies.}
 \label{ssec:sens_sampling}
-The sensitivity sampling algorithm we consider is the following, as introduced in \cite{FeldmanL11}.
-Given a solution $\calC$ to $k$-median or $k$-means, important scores are defined as
+
+As discussed, we focus our study on linear- and sublinear-time sampling strategies. Specifically, given a dataset $P \in \R^{n \times d}$, we want to sample $S
+\in \R^{m \times d} \subset P$ such that $m \ll n$ along with a weights vector $w \in \R^m$ such that. The goal is then that for some solution $\calC$, $S$
+provides us with an idea of the solution's quality with respect to the original dataset, i.e. $\sum_{p \in S} w_p \cost(p, \calC) \sim \sum_{p \in P} \cost(p,
+\calC)$. 
+The quickest sampling strategy, running in sublinear time, is uniform sampling. It is clear, however, that this cannot provide any cost-preservation guarantee
+as missing a single extreme outlier will cause the sampling strategy to fail. Thus, any approach that outperforms this strategy must read in the entire dataset
+and therefore run in at least linear time. 
+
+Among these more sophisticated sampling strategies, one cannot do better than the strong coreset guarantee. Specifically, an $\eps$-coreset is a subset $S
+\subseteq P$ with weights $\tilde w$ such that for \emph{any} solution $\calC$, \[\sum_{p \in S} w_p \cost(p, \calC) \in (1 \pm \eps) \cost(P, \calC).\] Going
+forward, we will discuss this exclusively in the context of the $k$-median and $k$-means cost functions: for a dataset $P \in \R^d$ with weights $w
+: P \rightarrow \R^+$, and any $k$-tuple $\calC$ in $\R^d$ (called a \emph{solution}), \[\cost_z(P, \calC) := \sum_{p \in P} w(p) \dist^z(p, \calC),\] with
+$z=1$ for $k$-median and $z=2$ for $k$-means. We use $\opt$ to denote $\min_{\calS} \cost_z(P, \calC)$. In this setting, the coreset property is ensured by
+a pair $(S, w)$ such that \[\sum_{p \in S} w_p ||p - \calC_p||_2^z \in (1 \pm \eps) \cost_z(P, \calC),\] where $c_p$ is the center in $\calC$ that point $p$
+corresponds to.
+
+Recently, sampling with respect to sensitivity values has grown to prominence due to its simplicity and coreset guarantee.  True sensitivity values are defined
+as $\sup_{\calC} \frac{\dist^z(p, \calC)}{\cost_z(P, \calC)}$, where the supremum is taken over all possible solutions $\calC$. Intuitively, this is a measure
+of the maximum impact a point can have on a solution and is naturally proven difficult to evaluate directly.
+The sensitivity sampling algorithm we therefore consider is the following, as introduced in \cite{FeldmanL11}.
+Given a solution to a clustering problem $\calC$, importance scores are defined as
 \begin{equation}
 \label{eq:sensitivity}
- s_\calC(p) = \dfrac{\cost_z(p, \calC)}{\cost_z(\calC_{p}, \calC)} + \dfrac{1}{|\calC_p|},
+\sigma_\calC(p) = \dfrac{\cost(p, \calC)}{\cost(\calC_{p}, \calC)} + \dfrac{1}{|\calC_p|},
 \end{equation}
-where $\calC_p$ is the cluster that $p$ belongs to. The true sensitivity values are defined as $\sup_{\calC} \frac{\dist^z(p, \calC)}{\cost_z(P, \calC)}$ -- where the supremum is taken over all possible solutions $\calC$.
-Whenever $\calC$ is a constant factor approximation to the optimal $k$-clustering, the importance scores are close to the true sensitivities. 
+where $\calC_p$ is the cluster that $p$ belongs to. This is always an upper-bound on the sensitivity values.
 
-The coreset $\Omega$ merely consists of $S$ points sampled proportionate to $s$, and weights defined as follows. First, for any sampled point $p$, define $\tilde w_1(p) := \frac{1}{\Pr[p \in S]} = \frac{\sum_{p'} s_\calC(p')}{|S| s_\calC(p)}$. For a cluster $C_i$, let $|\hat{C_i}|$ be the estimated number of point in $C_i$ via the sample. A sampled point $p$ in $C_i$ is weighted $\tilde w(p) = \tilde w_1(p) \lpar (1+\eps)|C_i| - |\hat{C_i}|\rpar$.
-%
-%This weighting ensure that the coreset is unbiaised, namely for any solution $\calS$ it holds that $\E[\cost_z(S, \calS)] = \E[\cost_z(P, \calS)]$.
-\cite{FeldmanL11} and subsequent works showed that, when $\calC$ is a $O(1)$-approximation, sampling $S = \tilde O\lpar k \eps^{-2z-2}\rpar$ many points was enough to ensure concentration, namely, $\Omega$ is a coreset with probability at least $2/3$.
+The coreset $S$ then consists of $m$ points sampled proportionate to $\sigma$ with weights defined as follows. First, for any sampled point $p$, define $w_p :=
+\frac{1}{\Pr[p \in S]} = \frac{\sum_{p'} s_\calC(p')}{m s_\calC(p)}$. For a cluster $C_i$, let $|\hat{C_i}|$ be the estimated number of points in $C_i$ via the
+sample\andrew{I'm not sure what `via the sample' means}. A sampled point $p$ in $C_i$ is weighted $\tilde w(p) = \tilde w_1(p) \lpar (1+\eps)|C_i|
+- |\hat{C_i}|\rpar$.  \cite{FeldmanL11} and subsequent works showed that, when $\calC$ is a $O(1)$-approximation, sampling $S = \tilde O\lpar
+k \eps^{-2z-2}\rpar$ many points was enough to ensure concentration, namely, $S$ is a coreset with probability at least $2/3$.
 
-%Then, points are sampled proportionate to their sensitivity $s(p)$. 
-%The first term corresponds to sampling proportionate to the importance in the solution $\calC$, the second one to uniform sampling.\footnote{This definition is actually an upper-bound on the real sensitivity, 
-%usually defined as $\sup_{\calC} \frac{\dist^z(p, \calC)}{\cost_z(P, \calC)}$ -- where the supremum is taken over all possible solutions $\calC$.
-% This definition is more amenable to generalizations to other problems; it is however NP-hard to compute this supremum, and $s(p)$ defined above is a mere proxy for it.}
- To perform this algorithm, the bottleneck in the running time is therefore to compute the solution $\calC$ as well as the costs of every point to its assigned center in $\calC$. Using any bicriteria approximation algorithm\footnote{For $k$-means an $(\alpha,\beta)$ bicriteria approximation is an algorithm that computes a solution $\calC$ satisfying $\cost(P\calC)\leq \alpha\cdot \opt$ and $|\calC|\leq \beta\cdot k$.} such as the standard $k$-means++ algorithm \cite{ArV07} combined with dimension reduction techniques (see for example \cite{BecchettiBC0S19,CohenEMMP15,MakarychevMR19}), this takes time $\tilde O(nk +nd)$. Lastly, one may use a solution $\calC$ with less than $k$ centers instead. For example \cite{BachemL018} showed that using $\calC=\{\mu\}$, i.e. the mean of the data set, it is still possible to prove weaker with an additive error of $\varepsilon\cdot \cost(P,\{\mu\})$. This is the lightweight coreset algorithm.	
+To perform this algorithm, the bottleneck in the running time lies in computing the solution $\calC$ as well as the costs of every point to its assigned
+center in $\calC$. Using any bicriteria approximation algorithm\footnote{For $k$-means an $(\alpha,\beta)$ bicriteria approximation is an algorithm that
+computes a solution $\calC$ satisfying $\cost(P\calC)\leq \alpha\cdot \opt$ and $|\calC|\leq \beta\cdot k$.} such as the standard $k$-means++ algorithm
+\cite{ArV07} combined with dimension reduction techniques (see for example \cite{BecchettiBC0S19,CohenEMMP15,MakarychevMR19}), this takes time $\tilde O(nk
++nd)$. Indeed, this is precisely what was conjectured as the necessary runtime for obtaining $k$-means and $k$-median coresets.
+
+\subsection{Other Coreset Strategies}
+\label{ssec:clustering_prelim}
+
+The coreset paradigm has attracted a lot of attention, with a long line of work trying to get the smallest coreset possible in many different metric spaces. The
+most prominent example is for Euclidean space \cite{BadoiuHI02, HaM04, Chen09, HuangV20, stoc22}.Much of the literature regarding coresets concentrates on obtaining the optimal size as it is known
+that any coreset must have size $S \lpar k\eps^{-2}\rpar$ \cite{stoc22}. 
+
+Although the group sampling algorithm developed in \cite{stoc21, stoc22} yields a coreset of size $\tilde{O}(k\cdot \varepsilon^{-2}
+\min(k^{z/(z+2)},\varepsilon^{-z}))$ \cite{CLSSS22} and provides theoretically smaller coresets than sensitivity sampling, the experiments of \cite{chrisESA}
+showed that the latter is often more efficient in practice. We also note that one could use virtually any coreset construction as many are linear-time once
+provided with an initial solution $\calC$ and assignment $\sigma$.  Therefore, our algorithm could use as a subroutine any coreset construction, if in the
+future one is developed that improves over sensitivity and group sampling.
+
+In terms of other linear-time coreset algorithms, we are only aware of lightweight coresets \cite{BachemL018}, wherein one performs sensitivity sampling with
+respect to a solution $\calC=\{\mu\}$, i.e. the mean of the data set. This runs in $O(nd)$ time but provides a weaker guarantee -- one incurs an additive error of $\varepsilon\cdot \cost(P,\{\mu\})$.
+We note that this can be generalized to performing sensitivity sampling using a $\calC$ that has fewer than $k$ centers and essentially prompts the question.
+Indeed, since the lightweight coreset construction uses the $1$-means solution and sensitivity sampling uses an $O(1)$ approximation to the $k$-means/median
+solution, it is natural to investigate the relationship between the approximation quality and coreset quality. We discuss this in more depth in Section
+\ref{ssec:algorithms}.
+
+All efficient coreset constructions are probabilistic. This comes with a disadvantage of coresets being difficult to evaluate. For example, it is
+co-NP-hard to check whether a candidate compression is a weak coreset \cite{chrisESA} \footnote{A weak coreset guarantee only requires that a $(1+\varepsilon)$
+approximation computed on the coreset yields a $(1+\varepsilon)$ on the entire point set.}. Therefore, although coreset algorithms succeed with some high
+probability, it is unclear how to computationally verify this.  This posed a considerable difficulty for previous experimental evaluations,
+where researchers would typically focus on the cost of a solution computed on the designated coreset instead. We refer to \cite{chrisESA} for further discussion
+on this topic and discuss our metrics in Section \ref{sssec:metrics}.
+
