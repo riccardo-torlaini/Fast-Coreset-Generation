@@ -36,15 +36,16 @@ We compare our method (Algorithm~\ref{alg:main}) against 4 different benchmark c
 We take a moment here to motivate the welterweight coreset algorithm.  Consider that lightweight coresets are simply solving $1$-means to obtain sensitivity
 values whereas sensitivity sampling is solving the $k$-means problem. Since the lightweight coreset has the advantage of being fast while sensitivity sampling
 is more precise, one could hope to interpolate in order to get the best of the two worlds: computing an approximate $j$-means solution may allow to obtain
-a more precise sampling distribution than that of lightweight-coresets, while being faster than sensitivity sampling. We analyze the different choices of $j$ in
-Table~\ref{tbl:class-imbalance} and default to $j = \log k$ in the other experiments.
+a more precise sampling distribution than that of lightweight-coresets, while being faster to compute than the $k$-means $O(1)$ approximation necessary for true
+sensitivity sampling. We analyze the different choices of $j$ in Table~\ref{tbl:class-imbalance} and default to $j = \log k$ in the other experiments.
 
 \subsubsection{Datasets}
+\label{sssec:datasets}
 
 We employ several real and artificial datasets to evaluate the quality of a coreset. 
 
 For our real-world data, we utilize the Adult~\cite{Dua:2019}, MNIST~\cite{mnist}, Song~\cite{song}, Census~\cite{census}, and Cover Type~\cite{covtype}
-datasets, whose characteristics are summarized in Table~\ref{tbl:datasets} below. These are the standard datasets for coreset and clustering applications.
+datasets, whose characteristics are summarized in Table~\ref{tbl:datasets} below. These are standard datasets for coreset and clustering applications.
 
 \begin{table}[htbp]
     \centering
@@ -55,14 +56,36 @@ datasets, whose characteristics are summarized in Table~\ref{tbl:datasets} below
         \emph{MNIST} & 60\,000 & 784 \\
         \emph{Song} & 515\,345 & 90 \\
         \emph{Cover Type} & 581\,012 & 54 \\
-        \emph{Census} & 2\,458\,285 & 68
+        \emph{Census} & 2\,458\,285 & 68 \\
+        \hline
+        \vspace*{0.1cm}
     \end{tabular}
     \caption{Description of real world datasets}
-        \label{tbl:datasets}
+    \label{tbl:datasets}
+\end{table}
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{lrrrr}
+        \hline
+        Value of $r$ & 20 & 30 & 40 & 50 \\
+        Runtime (s) & 13.5 & 14.3 & 15.7 & 16.1 \\
+        \hline
+        \vspace*{0.1cm}
+    \end{tabular}
+    \caption{Runtime in seconds of the \fkmeans algorithm as a function of $r$, as described in Section \ref{sssec:datasets}. Since $\log \Delta$ grows linearly
+    with $r$, this evidences that \fkmeans has a linear time-dependency on $\log \Delta$.}
+    \label{tbl:logdelta}
 \end{table}
 
 To complement those, we use several artificial datasets. Unless stated otherwise, $n = 50\,000$ and $d=50$.
 \begin{itemize}
+
+    \item \emph{$\log \Delta$ testbed}. Arrange $n - n'$ points uniformly in the $[-1, 1]^2$ square. Then, for $r \in \mathbb{Z}^+$, produce a sequence of
+        points at $(0, 1), (0, 0.5), \cdots, (0, 0.5^r)$. Copy this sequence $n' / r$ times, each time with a different $x$ coordinate. The result is a dataset
+        of $n$ points where the HST always has constant breadth but the branch depths (and correspondingly $\log \Delta$) grow linearly with $r$.
+        This effect can be seen in table \ref{tbl:logdelta}.
+
     \item \emph{c-outlier}. Place $n-c$ points in a single location and $c$ points placed at a large distance away, for various constants $c$. 
 	This data set constitutes an instance where we expect uniform sampling to perform poorly while all the other algorithms will do well.
 
@@ -73,7 +96,7 @@ To complement those, we use several artificial datasets. Unless stated otherwise
         $|C_0|$, we repeat the process for the next cluster with $|C_1| = \frac{n - |C_0|}{\kappa-1}\exp \left( \gamma(\rho_1 - \frac{1}{2}) \right)$.  Thus,
         each cluster has size $\frac{n}{k}$ when $\gamma = 0$ and the cluster sizes diverge as $\gamma$ grows. We default to $\gamma = 5$.
         
-  This instance represents a well-clusterable instance with respect to cost stability conditions, see \cite{AwS12,Cohen-AddadS17,KuK10,ORSS12}.
+  This is a well-clusterable instance with respect to cost stability conditions, see \cite{AwS12,Cohen-AddadS17,KuK10,ORSS12}.
 
     \item \emph{Geometric}. Place $c k$ points at $(1, 0, 0, \cdots)$, $\frac{ck}{r}$ points at $(0, 1, 0, \cdots)$, $\frac{ck}{r^2}$ points
         at $(0, 0, 1, \cdots)$, and so on for $\log_r (ck)$ rounds. Thus, the data creates a high-dimensional simplex with uneven weights across the vertices. We
