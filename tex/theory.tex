@@ -75,13 +75,34 @@ This algorithm computes an $\eps$-coreset in time $\tilde O(nd \log \Delta)$: we
 
 
 \section{Reducing the Impact of the Spread}
-To reduce the dependency of $\Delta$ on the running time, we proceed in two steps: first, we compute a very crude upper-bound on the cost $U$ of the optimal solution -- up to a $\poly(n)$ factor. 
-If $U$ is a $c$-approximation of the optimal cost, the natural attempt to reduce the aspect-ratio is to round all coordinates to multiples of $U/(cnà$, such that the smallest distance is $U/(cn)$; it is then enough to reduce the diameter to $\poly(n) U$. We proceed as follows: we place a grid with cell length $O(n \cdot U)$, so that two points from the same cluster in $\opt$ fall into the same cell w.h.p. That way, the distinct cells do not interact with each other in any reasonable solution. 
-Then, we compress the input by "moving" non-empty cells closer to each other.
+
+To reduce the dependency of the running time on $\Delta$, we proceed in two steps: first, we compute a very crude upper-bound on the cost $U$ of the optimal
+solution -- up to a $\poly(n)$ factor.  If $U$ is a $c$-approximation of the optimal cost, the natural attempt to reduce the aspect-ratio is to round all
+coordinates to multiples of $U/(cnà$, such that the smallest distance is $U/(cn)$; it is then enough to reduce the diameter to $\poly(n) U$. We proceed as
+follows: we place a grid with cell length $O(n \cdot U)$, so that two points from the same cluster in $\opt$ fall into the same cell w.h.p. That way, the
+distinct cells do not interact with each other in any reasonable solution.  Then, we compress the input by "moving" non-empty cells closer to each other.
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{lrrrr}
+        \hline
+        Value of $r$ & 20 & 30 & 40 & 50 \\
+        Runtime (s) & 13.5 & 14.3 & 15.7 & 16.1 \\
+        \hline
+        \vspace*{0.1cm}
+    \end{tabular}
+    \caption{Mean runtime in seconds of the \fkmeans algorithm as a function of $r$ on the $\log \Delta$-testbed dataset described in Section
+    \ref{sssec:datasets}. The mean is taken over 5 runs.  Since $\log \Delta$ grows linearly with $r$, this evidences that \fkmeans indeed has a linear
+    time-dependency on $\log \Delta$.}
+    \label{tbl:logdelta}
+\end{table}
+
 
 \subsection{Computing a crude upper-bound}
-As described, we start by computing a $U$ such that $U \leq \poly(n) \cdot \cost(\opt)$. For this, we start by simplifying a lot our task: our first lemma shows that it is enough focus on the $k$-median problem; we then embed the input into a tree, easier to handle than Euclidean space. In this tree, we will show that it is enough to find the first level for which the input lies in $k+1$ disjoint subtrees: the final algorithm is therefore a mere binary-search to find efficiently this level.
-
+As described, we start by computing a $U$ such that $U \leq \poly(n) \cdot \cost(\opt)$. For this, we start by simplifying a lot our task: our first lemma shows
+that it is enough focus on the $k$-median problem; we then embed the input into a tree, easier to handle than Euclidean space. In this tree, we will show that
+it is enough to find the first level for which the input lies in $k+1$ disjoint subtrees: the final algorithm is therefore a mere binary-search to find
+efficiently this level.
 
 We focus here on the $k$-median problem, and show in \cref{app:redKM} how to reduce $k$-means to this case.
 
