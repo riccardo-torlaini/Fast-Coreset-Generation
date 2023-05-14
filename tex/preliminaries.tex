@@ -32,7 +32,7 @@ where $\calC_p$ is the cluster that $p$ belongs to. This is always an upper-boun
 
 The coreset $S$ then consists of $m$ points sampled proportionate to $\sigma$ with weights defined as follows. First, for any sampled point $p$, define $w_p :=
 \frac{1}{\Pr[p \in S]} = \frac{\sum_{p'} s_\calC(p')}{m s_\calC(p)}$. For a cluster $C_i$, let $|\hat{C_i}|$ be the estimated number of points in $C_i$ via the
-sample\andrew{I'm not sure what `via the sample' means}. A sampled point $p$ in $C_i$ is weighted $\tilde w(p) = \tilde w_1(p) \lpar (1+\eps)|C_i|
+sample, namely, the number of points in $C_i \cap S$ weighted with $w_p$ \andrew{I'm not sure what `via the sample' means}. A sampled point $p$ in $C_i$ is weighted $\tilde w(p) = \tilde w_1(p) \lpar (1+\eps)|C_i|
 - |\hat{C_i}|\rpar$.  \cite{FeldmanL11} and subsequent works showed that, when $\calC$ is a $O(1)$-approximation, sampling $S = \tilde O\lpar
 k \eps^{-2z-2}\rpar$ many points was enough to ensure concentration, namely, $S$ is a coreset with probability at least $2/3$.
 
@@ -40,16 +40,15 @@ To perform this algorithm, the bottleneck in the running time lies in computing 
 center in $\calC$. Using any bicriteria approximation algorithm\footnote{For $k$-means an $(\alpha,\beta)$ bicriteria approximation is an algorithm that
 computes a solution $\calC$ satisfying $\cost(P\calC)\leq \alpha\cdot \opt$ and $|\calC|\leq \beta\cdot k$.} such as the standard $k$-means++ algorithm
 \cite{ArV07} combined with dimension reduction techniques (see for example \cite{BecchettiBC0S19,CohenEMMP15,MakarychevMR19}), this takes time $\tilde O(nk
-+nd)$. Indeed, this is precisely what was conjectured as the necessary runtime for obtaining $k$-means and $k$-median coresets.
++nd)$. This is precisely what was conjectured as the necessary runtime for obtaining $k$-means and $k$-median coresets, as merely assigning points to their centers from the bicriteria seems to require $\Omega(nk)$ running time.
 
 \subsection{Other Coreset Strategies}
 \label{ssec:clustering_prelim}
 
 The coreset paradigm has attracted a lot of attention, with a long line of work trying to get the smallest coreset possible in many different metric spaces. The
-most prominent example is for Euclidean space \cite{BadoiuHI02, HaM04, Chen09, HuangV20, stoc22}.Much of the literature regarding coresets concentrates on obtaining the optimal size as it is known
-that any coreset must have size $S \lpar k\eps^{-2}\rpar$ \cite{stoc22}. 
+most prominent example is for Euclidean space \cite{BadoiuHI02, HaM04, Chen09, HuangV20, stoc22}. Much of the literature regarding coresets concentrates on obtaining the optimal size, and a recent lower bound \cite{huangLB} showed that the group sampling algorithm developed in \cite{stoc21, stoc22} is optimal.
 
-Although the group sampling algorithm developed in \cite{stoc21, stoc22} yields a coreset of size $\tilde{O}(k\cdot \varepsilon^{-2}
+Although this algorithm yields a coreset of size $\tilde{O}(k\cdot \varepsilon^{-2}
 \min(k^{z/(z+2)},\varepsilon^{-z}))$ \cite{CLSSS22} and provides theoretically smaller coresets than sensitivity sampling, the experiments of \cite{chrisESA}
 showed that the latter is often more efficient in practice. We also note that one could use virtually any coreset construction as many are linear-time once
 provided with an initial solution $\calC$ and assignment $\sigma$.  Therefore, our algorithm could use as a subroutine any coreset construction, if in the
@@ -58,7 +57,7 @@ future one is developed that improves over sensitivity and group sampling.
 In terms of other linear-time methods, we are only aware of the lightweight coresets approach\cite{BachemL018}, wherein one performs sensitivity sampling with
 respect to a solution $\calC=\{\mu\}$, i.e. the mean of the data set. This runs in $O(nd)$ time but provides a weaker guarantee -- one incurs an additive error
 of $\varepsilon\cdot \cost(P,\{\mu\})$.  We note that this can be generalized to performing sensitivity sampling using a $\calC$ that has fewer than $k$ centers
-and essentially prompts the question.  Indeed, since the lightweight coreset construction uses the $1$-means solution and sensitivity sampling uses an $O(1)$
+and essentially prompts the question \david{which question?}.  Indeed, since the lightweight coreset construction uses the $1$-means solution and sensitivity sampling uses an $O(1)$
 approximation to the $k$-means/median solution, it is natural to investigate the relationship between the approximation quality and coreset quality. We discuss
 this in more depth in Section \ref{ssec:algorithms}.
 
