@@ -45,3 +45,4 @@ If the input is spread in $k+1$ distinct cell at level $i$, then in any solution
 On the other hand, if the input is contained into $k$ cells at level $i-1$, then placing arbitrarily a center in each cell yields a solution with cost at most $n \cdot \sqrt{d}2^{-i+4} \cdot \boxsize$: indeed, the distance from any point to its closest center is at most $2 \cdot \sum_{j \geq i-1} \sqrt{d}2^{-j} \cdot 2\boxsize \leq 4 \sqrt{d}2^{-i+2} \cdot \boxsize$ (summing the edge length from the point to the cell at level $i$, and then going down to the center). This concludes.
 \end{proof}
 
+\input{figures/lightweight_breaks.tex}

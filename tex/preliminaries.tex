@@ -4,20 +4,18 @@
 \label{ssec:sens_sampling}
 
 As discussed, we focus our study on linear- and sublinear-time sampling strategies. Specifically, given a dataset $P \in \R^{n \times d}$, we want to sample $S
-\in \R^{m \times d} \subset P$ such that $m \ll n$ along with a weights vector $w \in \R^m$ such that. The goal is then that for some solution $\calC$, $S$
+\in \R^{m \times d} \subset P$ such that $m \ll n$ along with a weights vector $w \in \R^m$. The goal is then that for some solution $\calC$, $S$
 provides us with an idea of the solution's quality with respect to the original dataset, i.e. $\sum_{p \in S} w_p \cost(p, \calC) \sim \sum_{p \in P} \cost(p,
 \calC)$. 
 The quickest sampling strategy, running in sublinear time, is uniform sampling. It is clear, however, that this cannot provide any cost-preservation guarantee
 as missing a single extreme outlier will cause the sampling strategy to fail. Thus, any approach that outperforms this strategy must read in the entire dataset
 and therefore run in at least linear time. \andrew{Is there more we can say or some references we can put in here?}
 
-Among these more sophisticated sampling strategies, one cannot do better than the strong coreset guarantee. Specifically, an $\eps$-coreset is a subset $S
-\subseteq P$ with weights $\tilde w$ such that for \emph{any} solution $\calC$, \[\sum_{p \in S} w_p \cost(p, \calC) \in (1 \pm \eps) \cost(P, \calC)\] with
+Among these more sophisticated sampling strategies, one cannot do better than the strong coreset guarantee. Specifically, a strong $\eps$-coreset is a subset $S
+\subseteq P$ with weights $\tilde w$ such that for \emph{any} solution $\calC$, \[\sum_{p \in S} \tilde w_p \cost(p, \calC) \in (1 \pm \eps) \cost(P, \calC)\] with
 high probability.  Going forward, we will discuss this in the context of the $k$-median and $k$-means cost functions: for a dataset $P \in \R^d$ with weights $w
-: P \rightarrow \R^+$, and any $k$-tuple $\calC$ in $\R^d$ (called a \emph{solution}), \[\cost_z(P, \calC) := \sum_{p \in P} w(p) \dist^z(p, \calC),\] with
-$z=1$ for $k$-median and $z=2$ for $k$-means. We use $\opt$ to denote $\min_{\calS} \cost_z(P, \calC)$. In this setting, the coreset property is ensured by
-a pair $(S, w)$ such that \[\sum_{p \in S} w_p ||p - \calC_p||_2^z \in (1 \pm \eps) \cost_z(P, \calC),\] where $c_p$ is the center in $\calC$ that point $p$
-corresponds to.
+: P \rightarrow \R^+$, and any $k$-tuple $\calC$ in $\R^d$, \[\cost_z(P, \calC) := \sum_{p \in P} \tilde w(p) \dist^z(p, \calC),\] with
+$z=1$ for $k$-median and $z=2$ for $k$-means. We use $\opt$ to denote $\min_{\calS} \cost_z(P, \calC)$.
 
 Recently, sampling with respect to sensitivity values has grown to prominence due to its simplicity and coreset guarantee.  True sensitivity values are defined
 as $\sup_{\calC} \frac{\dist^z(p, \calC)}{\cost_z(P, \calC)}$, where the supremum is taken over all possible solutions $\calC$. Intuitively, this is a measure
@@ -28,13 +26,14 @@ Given a solution to a clustering problem $\calC$, importance scores are defined 
 \label{eq:sensitivity}
 \sigma_\calC(p) = \dfrac{\cost(p, \calC)}{\cost(\calC_{p}, \calC)} + \dfrac{1}{|\calC_p|},
 \end{equation}
-where $\calC_p$ is the cluster that $p$ belongs to. This is always an upper-bound on the sensitivity values.
+where $\calC_p$ is the cluster that $p$ belongs to. This is always an upper-bound on the sensitivity values \andrew{ref?}.
 
 The coreset $S$ then consists of $m$ points sampled proportionate to $\sigma$ with weights defined as follows. First, for any sampled point $p$, define $w_p :=
 \frac{1}{\Pr[p \in S]} = \frac{\sum_{p'} s_\calC(p')}{m s_\calC(p)}$. For a cluster $C_i$, let $|\hat{C_i}|$ be the estimated number of points in $C_i$ via the
-sample, namely, the number of points in $C_i \cap S$ weighted with $w_p$ \andrew{I'm not sure what `via the sample' means}. A sampled point $p$ in $C_i$ is weighted $\tilde w(p) = \tilde w_1(p) \lpar (1+\eps)|C_i|
-- |\hat{C_i}|\rpar$.  \cite{FeldmanL11} and subsequent works showed that, when $\calC$ is a $O(1)$-approximation, sampling $S = \tilde O\lpar
-k \eps^{-2z-2}\rpar$ many points was enough to ensure concentration, namely, $S$ is a coreset with probability at least $2/3$.
+sample, namely, the number of points in $C_i \cap S$ weighted with $w_p$ \andrew{I'm not sure what `via the sample' means}. A sampled point $p$ in $C_i$ is
+weighted $\tilde w(p) = \tilde w_1(p) \lpar (1+\eps)|C_i| - |\hat{C_i}|\rpar$.  \cite{FeldmanL11} and subsequent works showed that, when $\calC$ is
+a $O(1)$-approximation, sampling $S = \tilde O\lpar k \eps^{-2z-2}\rpar$ many points was enough to ensure concentration, namely, $S$ is a coreset with
+probability at least $2/3$.
 
 To perform this algorithm, the bottleneck in the running time lies in computing the solution $\calC$ as well as then obtaining costs of every point to its
 assigned center in $\calC$. Using any bicriteria approximation algorithm\footnote{For $k$-means an $(\alpha,\beta)$ bicriteria approximation is an algorithm
@@ -46,10 +45,9 @@ centers from the bicriteria seems to require $\Omega(nk)$ running time.
 \subsection{Other Coreset Strategies}
 \label{ssec:clustering_prelim}
 
-The coreset paradigm has attracted a lot of attention in recent years, with a long line of work trying to get the smallest coreset possible in many different
-metric spaces. The most prominent example is for Euclidean space \cite{BadoiuHI02, HaM04, Chen09, HuangV20, stoc22}. Much of the literature regarding coresets
-concentrates on obtaining the optimal size in the $k$-means and $k$-median setting, where a recent lower bound \cite{huangLB} showed that the group sampling
-algorithm developed in \cite{stoc21, stoc22} is optimal.
+Much of the advancements regarding coresets have sought the smallest coreset possible across metric spaces and downstream objectives. The most prominent
+examples are in Euclidean space \cite{BadoiuHI02, HaM04, Chen09, HuangV20, stoc22}, with much of the focus on obtaining the optimal size in the $k$-means and
+$k$-median setting. Recently, a lower bound \cite{huangLB} showed that the group sampling algorithm developed in \cite{stoc21, stoc22} is optimal.
 
 Although this algorithm yields a coreset of size $\tilde{O}(k\cdot \varepsilon^{-2}
 \min(k^{z/(z+2)},\varepsilon^{-z}))$ \cite{CLSSS22} and provides theoretically smaller coresets than sensitivity sampling, the experiments of \cite{chrisESA}
@@ -57,12 +55,12 @@ showed that the latter is often more efficient in practice. We also note that on
 provided with an initial solution $\calC$ and assignment $\sigma$.  Therefore, our algorithm could use as a subroutine any coreset construction, if in the
 future one is developed that is preferable to sensitivity and group sampling.
 
-In terms of other linear-time methods, we are only aware of the lightweight coresets approach\cite{BachemL018}, wherein one performs sensitivity sampling with
-respect to a solution $\calC=\{\mu\}$, i.e. the mean of the data set. This runs in $O(nd)$ time but provides a weaker guarantee -- one incurs an additive error
-of $\varepsilon\cdot \cost(P,\{\mu\})$.  We note that this can be generalized to performing sensitivity sampling using a $\calC$ that has fewer than $k$
-centers. Since the lightweight coreset construction uses the $1$-means solution and sensitivity sampling uses an $O(1)$ approximation to the $k$-means/median
-solution, it is natural to investigate the relationship between the approximation quality and coreset quality. We discuss this in more depth in Section
-\ref{ssec:algorithms}.
+In terms of other linear-time methods, we are only aware of the lightweight coresets approach\cite{BachemL018}\andrew{True?}, wherein one performs sensitivity
+sampling with respect to a solution $\calC=\{\mu\}$, i.e. the mean of the data set. This runs in $O(nd)$ time but provides a weaker guarantee -- one incurs an
+additive error of $\varepsilon\cdot \cost(P,\{\mu\})$.  We note that this can be generalized to performing sensitivity sampling using a $\calC$ that has fewer
+than $k$ centers. Since the lightweight coreset construction uses the $1$-means solution and sensitivity sampling uses an $O(1)$ approximation to the
+$k$-means/median solution, it is natural to investigate the relationship between the approximation quality and coreset quality. We discuss this in more depth in
+Section \ref{ssec:algorithms}.
 
 All efficient coreset constructions are probabilistic. This comes with a disadvantage of coresets being difficult to evaluate. For example, it is
 co-NP-hard to check whether a candidate compression is a weak coreset \cite{chrisESA} \footnote{A weak coreset guarantee only requires that a $(1+\varepsilon)$
@@ -70,17 +68,3 @@ approximation computed on the coreset yields a $(1+\varepsilon)$ on the entire p
 probability, it is unclear how to computationally verify this.  This posed a considerable difficulty for previous experimental evaluations,
 where researchers would typically focus on the cost of a solution computed on the designated coreset instead. We refer to \cite{chrisESA} for further discussion
 on this topic and discuss our metrics in Section \ref{sssec:metrics}.
-
-\subsection{$k$-means and $k$-median Algorithms}
-%FIXME -- we should add something about what the downstream algorithms may be. kmeans++, lloyd's, local search, etc.
-
-\subsection{Streaming Setting}
-\label{ssec:streaming_prelim}
-\andrew{I don't really know what I'm saying here\ldots}
-
-One of the most common use-cases for big-data algorithms is the streaming setting, where one receives input in batches and must maintain a compression that is
-representative of the dataset as a whole. Although there is a wealth of methods for sampling and coresets in the streaming setting \andrew{references}, we
-require consistency across algorithms and therefore assume a black-box sampling procedure. To this end, we study the merge-\&-reduce strategy
-\andrew{citations?} wherein one discretizes the input into blocks and forms a coreset\footnote{These can be coresets or can simply be random samples.} from each
-block. Then, using a complete binary tree, a final coreset is constructed by (1) recursively re-sampling from the children until there is one coreset for each
-level in the tree and then (2) concatenating these coresets and obtaining one final coreset from the concatenation. \andrew{Include error/variance bounds here}
