@@ -1,15 +1,13 @@
 \section{Coreset Algorithms}
 \label{sec:theory}
-In this section, we first combine two existing results to produce a strong coreset  in time $\tilde{O}(nd \log \Delta)$, where $\Delta$ is the aspect-ratio of the input.
-We show afterwards how to reduce the dependency in $\Delta$ to $\log \log \Delta$.
 
+In this section, we first combine two existing results to produce a strong coreset in time $\tilde{O}(nd \log \Delta)$, where $\Delta$ is the aspect-ratio of
+the input.  We show afterwards how to reduce the dependency in $\Delta$ to $\log \log \Delta$, giving the desired nearly-linear runtime.
 
-The algorithm is based on the following observations about the group
-sampling \cite{stoc21} and sensitivity sampling \cite{FeldmanL11} coreset construction algorithms.
-Both start by computing a solution $\calC$. When $\calC$ is a $c$-approximation, they compute a $c \eps$-coreset of size $\tilde O\lpar
+Our method is based on the following observations about the group sampling \cite{stoc21} and sensitivity sampling \cite{FeldmanL11} coreset construction
+algorithms. Both start by computing a solution $\calC$. When $\calC$ is a $c$-approximation, they compute a $c \eps$-coreset of size $\tilde O\lpar
 k \eps^{-z-2}\rpar$ and $\tilde O\lpar k \eps^{-2z -2}\rpar$, respectively. Hence, by rescaling, they provide $\eps$-coreset with size $\tilde O\lpar
 k (\eps/c)^{-z-2}\rpar$ and $\tilde O\lpar k (\eps/c)^{-2z-2}\rpar$. 
-%\footnote{For group sampling, this result is not formally stated, but can be observed in Definition 1 and Lemma 12 of \cite{stoc21}: if $\calC$ is a $c$ approximation, rescaling $\eps$ by $c$ provides an approximate centroid set of the right precision, and the right error on the coreset. For sensitivity sampling, this can be seen in Lemma 15.4 of \cite{FLArxiv}, where $B$ is our $\calC$: if it is a $c$ approximation, rescaling $\eps$ by $c$ ensures an error $\eps \opt$ in the last line of the proof.} 
 
 This leads to the following fact:
 \begin{fact}\label{fact:logApprox}
@@ -18,17 +16,7 @@ Then, group sampling using solution $\calC$ computes a coreset of size $\tilde O
 k \eps^{-z-2}\rpar$, and sensitivity sampling one of size $\tilde O\lpar k \eps^{-2z-2}\rpar$. 
 Both runs in time $\tilde O(nd)$, provided $\calC$.
 \end{fact}
-%Therefore, taking $c = O(\log k)$ merely affects the size of the computed coreset, while allowing for approximation algorithms that are way faster.
 
-%\david{remove the next two paragraphs?}
-%Due to the difficulty of verifying coresets, it is important to have a theoretical proof of efficiency of the coreset algorithms.  Showing, as we do, that one can use $O(\log k)$-approximations (e.g., $k$-means++) while benefiting from the same
-%guarantees as with a slow $O(1)$-approximation is thus not only an artifact, but a crucial piece of coreset's success. 
-%
-%It is indeed tempting to use those large-factor approximations, especially since they seem to perform better in practice. 
-%It might however have been the case that coresets constructed that way have poor quality, without being able to notice it due to the aforementioned hardness. 
-%We show that this unfortunate event does not happen, and that, even with the ``worst-case" guarantee $O(\log k)$, these algorithms indeed produce coresets.
-
-%\subsection{HSTs and Fast-$k$Means++}
 To turn \cref{fact:logApprox} into an algorithm, we use the \fkmeans approximation algorithm from \cite{cohen2020fast}, which has the two following key properties: 
 \begin{itemize}
 \item \fkmeans runs in $\tilde O\lpar n d \log \Delta\rpar$ time (Corollary 4.3 in \cite{cohen2020fast}), and
@@ -36,9 +24,12 @@ To turn \cref{fact:logApprox} into an algorithm, we use the \fkmeans approximati
 $k$-means ($z=2$) (Lemma 3.1 in \cite{cohen2020fast} for $z=2$, the discussion above for $z=1$). Applying dimension reduction techniques \cite{MakarychevMR19}, the dimension $d$ may be replaced by a $\log k$. This results in a $O\lpar\log^{z+1} k\rpar$ approximation.
 \end{itemize}
 
-The second property is crucial for us: the algorithm does not only compute centers, but also assignments. 
-  We use it, in combination with sensitivity sampling, as described in \cref{alg:main}.
-This algorithm computes an $\eps$-coreset in time $\tilde O(nd \log \Delta)$: we prove formally the statement in \cref{app:theory}
+The second property is crucial for us: the algorithm does not only compute centers, but also assignments in $\tilde{O}(nd\log \Delta)$ time.  We use it, in
+combination with sensitivity sampling, as described in \cref{alg:main}.  This algorithm computes an $\eps$-coreset in time $\tilde O(nd \log \Delta)$: we prove
+formally the statement in \cref{app:theory} Thus, it is easy to combine existing results to obtain an $\eps$-coreset without an $\tilde{O}(nk)$ time-dependency.
+However, our method thus far has only replaced the $\tilde{O}(nd + nk)$ with an $\tilde{O}(nd \log \Delta)$. Indeed, the spirit of the issue remains -- this is
+not log-linear in the input dimension.  We verify this in Table \ref{tbl:logdelta}, where the runtime grows linearly with the ratio of the maximum and minimum
+distance.
 
 \begin{algorithm}[tb]
    \caption{Fast-Coreset($P, k, \eps, S$)}
@@ -56,32 +47,6 @@ This algorithm computes an $\eps$-coreset in time $\tilde O(nd \log \Delta)$: we
 \end{algorithmic}
 \end{algorithm}
 
-
-%
-%\subsection{A Two-Step Algorithm}
-%We present a different algorithm, based on the following standard transitivity property: if $\coreset_1$ is an $\eps$-coreset of $P$, and $\coreset_2$ an $\eps$-coreset of $\coreset_1$, then $\coreset_2$ is a $2\eps$-coreset of $P$.
-%
-%This property could be used as follows: computing a precise approximation for $P$ may be slow. Instead, one could spend the time budget as follows:
-%
-%\begin{enumerate}
-%\item First, compute a rough approximation and use it to build an $\eps/2$-coreset $\coreset_1$. Due to the poor quality of approximation, this coreset may be larger than the target size; but still way smaller than $P$.
-%\item  Then, compute a precise approximation on $\coreset_1$, and use it to build a smaller $\eps/2$-coreset $\coreset_2$ of $\coreset_1$. 
-%\end{enumerate}
-%By transitivity, $\coreset_2$ is therefore a small $\eps$-coreset for $P$. The bottleneck running time, to compute the precise approximation, now depends merely on $|\coreset_1|$ instead of $P$: one can therefore hope to be able to compute a much more precise estimations of the sensitivities required to sample a small coreset afterwards.
-%
-%The theoretical result does not improve compared to \cref{thm:main}, but this algorithm may be more practical. Therefore, we try it as well in our experiments.
-%
-%\david{add something depending on the results of experiments}
-
-
-\section{Reducing the Impact of the Spread}
-
-To reduce the dependency of the running time on $\Delta$, we proceed in two steps: first, we compute a very crude upper-bound on the cost $U$ of the optimal
-solution -- up to a $\poly(n)$ factor.  If $U$ is a $c$-approximation of the optimal cost, the natural attempt to reduce the aspect-ratio is to round all
-coordinates to multiples of $U/(cnà$, such that the smallest distance is $U/(cn)$; it is then enough to reduce the diameter to $\poly(n) U$. We proceed as
-follows: we place a grid with cell length $O(n \cdot U)$, so that two points from the same cluster in $\opt$ fall into the same cell w.h.p. That way, the
-distinct cells do not interact with each other in any reasonable solution.  Then, we compress the input by "moving" non-empty cells closer to each other.
-
 \begin{table}[htbp]
     \centering
     \begin{tabular}{lrrrr}
@@ -97,33 +62,47 @@ distinct cells do not interact with each other in any reasonable solution.  Then
     \label{tbl:logdelta}
 \end{table}
 
+\section{Reducing the Impact of the Spread}
+\newcommand{\boxsize}{\textsc{MaxDist}}
+
+It is well known that, for $k$-median, embedding the input into a tree using the quadtree decomposition loses only an $O(d \log \Delta)$ factor but that
+building this embedding takes time $O(nd \log \Delta)$. However, we will show that we only need to build a fraction of it, allowing for a running time $O(nd
+\log \log \Delta)$. 
+
+We preface the discussion by giving an overview of the quadtree embedding algorithm. First, obtain a box enclosing all input points, centered at zero, with all
+side length equal to $\boxsize$.\footnote{This can be done as follows: select an arbitrary input point, and translate the dataset so that this point is at the
+origin. Then, compute the maximum distance from any point to the origin in time $O(nd)$, and let $\boxsize$ be that distance.} Then, a random shift $s \leq
+\boxsize$ is added to all coordinates of all points: the input is now in the box $[-2\boxsize, 2\boxsize]^d$ and this transformation did not change any
+distances, henceforth the $k$-median cost is preserved.  The $i$-th level of the tree (for $i \in \lbra 0, ..., \log \Delta \rbra$) is constructed as follows:
+a grid of side length $2^{-i} \cdot 2\boxsize$ centered at $0$ is placed, and each cell is a node in the tree.  The parent of a cell $c$ is simply the cell at
+level $i-1$ that contains $c$, and the distance between $c$ and its parent is set to $\sqrt{d}2^{-i} \cdot 2\boxsize$ (namely, the $\ell_2$ diameter of $c$).
+ 
+This tree has $O(\log \Delta)$ levels, and it is known that for any solution $\calS$, its cost in the tree metric is within a factor $O(\sqrt d \log \Delta)$ of
+its cost for the original metric. Therefore, it is enough for us to find an approximation in the tree metric. We let $\opt_T$ be the optimal solution in the
+tree metric, bounded as follows:
+ 
+To remove the $\log\Delta$ dependency, we proceed in two steps: first, we compute a very crude upper-bound on the cost $U$ of the optimal
+solution -- up to a $\poly(n)$ factor.  If $U$ is a $c$-approximation of the optimal cost, the natural attempt to reduce the aspect-ratio is to round all
+coordinates to multiples of $g = U/(cn)$, giving us a minimum distance of $g$; it is then enough to reduce the diameter to $\poly(n) U$. We proceed as
+follows: we place a grid with cell length $O(n \cdot U)$, so that two points from the same cluster in $\opt$ fall into the same cell w.h.p. That way, the
+distinct cells do not interact with each other in any reasonable solution.  Then, we compress the input by "moving" non-empty cells closer to each other.
 
 \subsection{Computing a crude upper-bound}
-As described, we start by computing a $U$ such that $U \leq \poly(n) \cdot \cost(\opt)$. For this, we start by simplifying a lot our task: our first lemma shows
-that it is enough focus on the $k$-median problem; we then embed the input into a tree, easier to handle than Euclidean space. In this tree, we will show that
-it is enough to find the first level for which the input lies in $k+1$ disjoint subtrees: the final algorithm is therefore a mere binary-search to find
-efficiently this level.
 
-We focus here on the $k$-median problem, and show in \cref{app:redKM} how to reduce $k$-means to this case.
+As described, we start by computing an approximate solution $U$ such that $U \leq \poly(n) \cdot \cost(\opt)$ on an.  We focus here on the simpler $k$-median
+problem, and show in \cref{app:redKM} how to reduce $k$-means to this case. Our first step is embedding the input into a quadtree as described above. In this
+tree, our first lemma shows the necessary approximation exists at the first level for which the input lies in $k+1$ disjoint subtrees. The algorithm to find
+this is then a simple binary search through the levels of the tree.
 
-\paragraph{Reduction to Structured Tree.}
-\david{if we need space, I can easily cut this}
-\newcommand{\boxsize}{\textsc{MaxDist}}
-It is well known that, for $k$-median, embedding the input into a tree using the quadtree decomposition loses only a $O(d \log \Delta)$ factor. Building explicitely this embedding takes time $O(nd \log \Delta)$: however, we will show that we only need to build only a fraction of it, allowing for a running time $O(nd \log \log \Delta)$. 
-
-The embedding is constructed as follows. First, the algorithm finds a box enclosing all input points, centered at zero, with all side length equal to $\boxsize$.\footnote{This can be done as follows: select an arbitrary input point, and translate the dataset so that this point is at the origin. Then, compute the maximum distance from any point to the origin in time $O(nd)$, and let $\boxsize$ be that distance.} Then, a random shift $s \leq \boxsize$ is added to all coordinates of all points: the input is now in the box $[-2\boxsize, 2\boxsize]^d$ and this transformation did not change any distances, henceforth the $k$-median cost is preserved. 
-The $i$-th level of the tree (for $i \in \lbra 0, ..., \log \Delta \rbra$) is constructed as follows: a grid of side length $2^{-i} \cdot 2\boxsize$ centered at $0$ is placed, and each cell is a node in the tree.
- The parent of a cell $c$ is simply the cell at level $i-1$ that contains $c$, and the distance between $c$ and its parent is set to $\sqrt{d}2^{-i} \cdot 2\boxsize$ (namely, the $\ell_2$ diameter of $c$).
- 
- This tree has $O(\log \Delta)$ levels, and it is known that for any solution $\calS$, its cost in the tree metric is within a factor $O(\sqrt d \log \Delta)$ of its cost for the original metric. Therefore, it is enough for us to find an approximation in the tree metric. We let $\opt_T$ be the optimal solution in the tree metric, bounded as follows:
- 
 \begin{lemma}\label{lem:apxTree}
-Let $i$ be the first level of the decomposition such that at least $k+1$ cells at level $i$ contains any point. Then, $\sqrt{d}2^{-i+1} \cdot \boxsize \leq \opt_T \leq n \cdot \sqrt{d}2^{-i+4} \cdot \boxsize$.
+Let $i$ be the first level of the decomposition such that at least $k+1$ cells at level $i$ contains any point. Then, $\sqrt{d}2^{-i+1} \cdot \boxsize \leq
+\opt_T \leq n \cdot \sqrt{d}2^{-i+4} \cdot \boxsize$.
 \end{lemma}
 
-A direct consequence of this lemma is that the first level of the tree for which at least $k+1$ cells are non empty provides an $O(n)$-approximation. 
-To count the number of non-empty cells at a given level $i$, one can merely iterate over all points, for each point identify the cell that contains it (using modulo operation), and store all those cells into a hash table to count the number of elements. This is done in time $O(nd)$.
-Using a binary search on the $O(\log \Delta)$ many levels then concludes this section with the following result:
+We prove this in Section \ref{app:apx-tree-proof} of the appendix. A direct consequence of this lemma is that the first level of the tree for which at least
+$k+1$ cells are non empty provides an $O(n)$-approximation. To count the number of non-empty cells at a given level $i$, one can merely iterate over all
+points, for each point identify the cell that contains it (using modulo operation), and store all those cells into a hash table to count the number of elements.
+This is done in time $O(nd)$.  Using a binary search on the $O(\log \Delta)$ many levels then concludes this section with the following result:
 
 \begin{lemma}\label{lem:crudeApx}
 There is an algorithm running in time $O(nd \log \log \Delta)$ that computes an  $O(n^2 d \log \Delta)$-approximation to $k$-median or $k$-means.
@@ -136,35 +115,53 @@ The following folklore lemma ensures that with high probability, no cluster of t
 \begin{lemma}
 The probability that two points $p$ and $q$ are in different grid cells is $O\lpar \frac{\|p-q\|^2}{n^2 U}\rpar$
 \end{lemma}
-Since $U$ is larger than the distance between any input point and its center in the optimal solution, a union-bound ensures that with probability $1-1/n$, no cluster of this solution is split among different cells.
-In particular, there are at most $k$-non empty cells. We call those "boxes".
 
-From this input, we build a new one $P'$ as follows: first, identify the non empty cell (using a hash table as previously). We associate each box with its center.
-For each coordinate $i \in \lbra 1, ..., d \rbra$, sort (in time $O(k \log k)$ the centers according to their value on coordinate $i$. Then, for each $j \in \lbra 1, ..., k\rbra$, let $c^i_j$ and $c^i_{j+1}$ be the $i$-th coordinate of centers of the $j$-th and $(j+1)$-th boxes. If $c^i_{j+1} - c^i_j \geq 2d n^2\cdot U$, then for all cell $j'$ with $j' > j$, shift points  of $j'$ by an amount $c^i_{j+1} - c^i_j - 2d n^2\cdot U$ in $i$-th coordinate.
+Since $U$ is larger than the distance between any input point and its center in the optimal solution, a union-bound ensures that with probability $1-1/n$, no
+cluster of this solution is split among different cells.  In particular, there are at most $k$-non empty cells. We call those "boxes".
 
+From this input, we build a new set of points $P'$ as follows: first, identify the non empty cell (using a hash table as previously). We associate each box with
+its center.  For each coordinate $i \in \lbra 1, ..., d \rbra$, sort (in time $O(k \log k)$) the centers according to their value on coordinate $i$. Then, for
+each $j \in \lbra 1, ..., k\rbra$, let $c^i_j$ and $c^i_{j+1}$ be the $i$-th coordinate of centers of the $j$-th and $(j+1)$-th boxes. If $c^i_{j+1} - c^i_j
+\geq 2d n^2\cdot U$, then for all cells $j'$ with $j' > j$, shift the points of $j'$ by $c^i_{j+1} - c^i_j - 2d n^2\cdot U$ in the $i$-th coordinate.
 
-This can be implemented with a linear scan, and has two effects: first, the diameter of the input is now $\sqrt{d} \cdot 2d n^2\cdot U \cdot k$, as along any coordinate the maximal distance is $2d n^2\cdot U \cdot k$. Second, two boxes that were adjacents are still adjacents, and two boxes that were non-adjacents are still non-adjacent.
+This can be implemented with a linear scan, and has two effects: first, the diameter of the input is now $\sqrt{d} \cdot 2d n^2\cdot U \cdot k$, as along any
+coordinate the maximal distance is $2d n^2\cdot U \cdot k$. Second, two boxes that were adjacent are still adjacent and two boxes that were non-adjacent are
+still non-adjacent.
 
-The first property allows to reduce the aspect-ratio to $(nd \log \Delta)^{O(1)}$. Indeed, one can round all coordinates to the closest multiple of $\frac{U}{n^4 d^{2} \log \Delta}$. That way, each point is at distance at most $\frac{U}{n^4 d^{2} \log \Delta}$ of its rounding. using \cref{lem:crudeApx}, $U \leq n^2 d \log(\Delta) \opt$, and therefore the distance between any point and its rounding is at most $\frac{\opt}{n^2}$. Summing this error over all points, this ensures that any solution computed on the rounding has cost within an additive factor $\pm \frac{\opt}{n}$ of the true cost. Furthermore, the smallest non-zero distance is $\frac{U}{n^4 d^{2} \log \Delta}$, and therefore the aspect-ratio of the new metric is $2 n^6 d k \log \Delta = (nd \log \Delta)^{O(1)}$, as claimed.
+The first property allows us to reduce the aspect-ratio to $(nd \log \Delta)^{O(1)}$.  Indeed, one can round all coordinates to the closest multiple of
+$g = \frac{U}{n^4 d^{2} \log \Delta}$. Since every point has moved by at most $g$ and, using \cref{lem:crudeApx}, $U
+\leq n^2 d \log(\Delta) \opt$, it is clear that the distance between any point and its rounding is at most $\frac{\opt}{n^2}$. Summing this error over all points,
+any solution computed on the gridded data has cost within an additive factor $\pm \frac{\opt}{n}$ of the true cost. Furthermore, the smallest
+non-zero distance is $g = \frac{U}{n^4 d^{2} \log \Delta}$, implying that the aspect-ratio of the new metric is $(nd \log \Delta)^{O(1)}$,
+as claimed.
 
-The second property, on the other hand, ensures that we can transform a solution $\calS'$ for $P'$ to a solution with exactly the same cost for $P$: in any (reasonable) solution, points from two non-adjacent box will not be in the same cluster in $P'$ nor in $P$. Therefore, simply adding to centers of $\calS'$ the corresponding shift allows to transform it to a solution $\calS$, such that the distance between any point and its closest center does not change. This is formalized in the next lemma.
+The second property, on the other hand, ensures that we can transform a solution $\calS'$ for $P'$ to a solution with exactly the same cost for $P$: in any
+(reasonable) solution, points from two non-adjacent boxes will not be in the same cluster in either $P'$ or $P$. Therefore, simply adding back the corresponding
+shift to centers of $\calS'$ allows us to transform it to a solution $\calS$. We note that the distance between any point and its closest center does not
+change. This is formalized in the next lemma.
 
 \begin{lemma}
 Let $\calS'$ be a $c'$-approximation for  $k$-median (resp. $k$-means) on $P'$, where $c' \leq nc$ and $c$ is the approximation guarantee from \cref{lem:crudeApx}. Then, one can compute a solution for $P$ for $k$-median (resp. $k$-means) on $P$, with same cost as $\calS'$ for $P'$, in time $O(nd)$.
 \end{lemma}
 \begin{proof}
-First, since distances in $P'$ are smaller than in $P$, the optimal solution for $P'$ has cost at most $U$. Therefore, two points that are in non-adjacent boxes (i.e., at distance more than $d n^2\cdot U$) are not in the same cluster of $\calS'$ -- as otherwise $\calS'$ would not be a $c'$-approximation.
 
-Let $\calS$ be the solution obtained from $\calS'$ by reversing the construction of $P'$. Since this construction preserves adjacency, for all cluster of the solution, all distances are the same in $P$ and $P'$: therefore, the cost are alike. This concludes.
+First, since distances in $P'$ are smaller than in $P$, the optimal solution for $P'$ has cost at most $U$. Therefore, two points that are in non-adjacent boxes
+(i.e., at distance more than $d n^2\cdot U$) are not in the same cluster of $\calS'$ -- as otherwise $\calS'$ would not be a $c'$-approximation.  Let $\calS$ be
+the solution obtained from $\calS'$ by reversing the construction of $P'$. Since this construction preserves adjacency, for all clusters of the solution, all
+distances are the same in $P$ and $P'$. Therefore, the costs are equal.
+
 \end{proof}
 
-
 \subsection*{Extensions.} 
-We conclude this section with a few remarks that allows to generalize \cref{alg:main}.
+We conclude this section with a few remarks that allow us to generalize \cref{alg:main}.
 
-Second, one could compute the solution $\calC$ via a different algorithm: \cref{alg:main} only needs to be provided with an assignment to a solution that is a $O(\polylog k)$ approximation. 
-This initial solution may as well be an $O\lpar\polylog \lnor P \rnor_0 \rpar$ approximation: using the iterative coreset construction from \cite{BravermanJKW21}, one could then derive a near-optimal coreset size, only suffering a $O(\log^* n)$ loss in the running time.
+Consider that \cref{alg:main}  only needs to be provided with an assignment to a solution that is a $O(\polylog k)$ approximationone, implying that one could
+compute the solution $\calC$ via any algorithm that satisfies this.  This initial solution may as well be an $O\lpar\polylog \lnor P \rnor_0 \rpar$
+approximation: using the iterative coreset construction from \cite{BravermanJKW21}, one could then derive a near-optimal coreset size, only suffering
+a $O(\log^* n)$ loss in the running time.
 
-As an example, we illustrate a different approach for $k$-median. One could first embed the input into a hierarchically separated tree (HST) with expected distortion $O(\log \lnor P \rnor_0)$ \cite{FakcharoenpholRT03}: on such tree metrics, solving $k$-median can be done in linear time, using dedicated algorithms (see e.g. \cite{Cohen-AddadLNSS21}). Using the solution from the HST metric, one can compute a coreset, and iterate using the previous argument.
-This embedding into HST is very similar to what is done by the \fkmeans algorithm, but can be actually performed in \emph{any} metric space, not only Euclidean. 
-For instance, in a metric described by a graph with $m$ edges, the running time of this construction would be near linear-time $\tilde O(m)$. %In Euclidean space, the standard implementation runs in time $\Omega(n^2)$: we therefore omit it from our experiments.
+As an example, we illustrate a different approach for $k$-median. One could first embed the input into a hierarchically separated tree (HST) with expected
+distortion $O(\log \lnor P \rnor_0)$ \cite{FakcharoenpholRT03}. On such tree metrics, solving $k$-median can be done in linear time using dedicated algorithms
+(see e.g. \cite{Cohen-AddadLNSS21}). Using the solution from the HST metric, one can compute a coreset, and iterate using the previous argument.  This embedding
+into HST is very similar to what is done by the \fkmeans algorithm, but can be actually performed in \emph{any} metric space, not only Euclidean.  For instance,
+in a metric described by a graph with $m$ edges, the running time of this construction would be near linear-time $\tilde O(m)$.

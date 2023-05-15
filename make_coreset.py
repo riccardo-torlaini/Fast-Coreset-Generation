@@ -62,6 +62,7 @@ def get_coreset(sensitivities, m, points, labels, weights=None):
     """
     replace = False
     if m > len(points):
+        m = len(points)
         replace = True
     rng = np.random.default_rng()
     coreset_inds = rng.choice(np.arange(len(sensitivities)), size=m, replace=False, p=sensitivities)
@@ -91,6 +92,8 @@ def uniform_coreset(points, m, weights=None, **kwargs):
     n = len(points)
     if weights is None:
         weights = np.ones(n)
+    if m > len(points):
+        m = len(points)
     weights_prob_dist = weights / np.sum(weights)
     rng = np.random.default_rng()
     coreset_inds = rng.choice(np.arange(n), size=m, replace=False, p=weights_prob_dist)

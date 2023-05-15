@@ -200,6 +200,8 @@ def make_scores_over_datasets_plot(
                 metrics[dataset][method][param_value]['vars'][0] = np.var(scores['acc'])
                 metrics[dataset][method][param_value]['vars'][1] = np.var(scores['time'])
 
+    print(metrics)
+
     image_dir = os.path.join('tex', 'images', norm)
     os.makedirs(image_dir, exist_ok=True)
 
@@ -301,11 +303,12 @@ def make_scores_over_datasets_plot(
         )
         color_legend = last_axis.legend(color_handles, color_labels, loc='upper right')
         ax = last_axis.add_artist(color_legend)
-        # pattern_legend = first_axis.legend(pattern_handles, value_list, loc='upper left')
+        pattern_legend = first_axis.legend(pattern_handles, value_list, loc='upper left')
         if index == 0:
             save_path = 'coreset_distortion-' + figure_title
         else:
             save_path = 'coreset_runtime-' + figure_title
+        plt.show()
         save_path = os.path.join(image_dir, save_path)
         plt.savefig(save_path, bbox_inches='tight', pad_inches=0.1)
 
@@ -331,32 +334,32 @@ if __name__ == '__main__':
     # for norm in ['1', '2']:
     for norm in ['2']:
         # methods = ['semi_uniform', 'fast_coreset', 'uniform_sampling', 'lightweight', 'bico']
-        methods = ['fast_coreset', 'uniform_sampling', 'semi_uniform']
-        results, params = read_outputs(
-            outputs_dir,
-            npy_file='metrics',
-            filter_strs=methods,
-            print_dict=True
-        )
-        m_scalar_pattern_dict = {
-            '5': 'm=5k',
-            '10': 'm=10k',
-            '20': 'm=20k',
-            '40': 'm=40k',
-            '60': 'm=60k',
-            '80': 'm = 80k',
-        }
-        datasets = [
-            # 'artificial',
-            # 'geometric',
-            # 'benchmark',
-            # 'blobs',
-            'adult',
-            'mnist',
-            'song',
-            'cover_type',
-            'census',
-        ]
+        # methods = ['fast_coreset', 'uniform_sampling', 'semi_uniform']
+        # results, params = read_outputs(
+        #     outputs_dir,
+        #     npy_file='metrics',
+        #     filter_strs=methods,
+        #     print_dict=True
+        # )
+        # m_scalar_pattern_dict = {
+        #     '5': 'm=5k',
+        #     '10': 'm=10k',
+        #     '20': 'm=20k',
+        #     '40': 'm=40k',
+        #     '60': 'm=60k',
+        #     '80': 'm = 80k',
+        # }
+        # datasets = [
+        #     # 'artificial',
+        #     # 'geometric',
+        #     # 'benchmark',
+        #     # 'blobs',
+        #     'adult',
+        #     'mnist',
+        #     'song',
+        #     'cover_type',
+        #     'census',
+        # ]
         # Coreset size plots
         # make_scores_over_datasets_plot(
         #     results,
@@ -372,19 +375,62 @@ if __name__ == '__main__':
 
 
         ### COMPARING FAST-KMEANS++ TO KMEANS++ SENSITIVITY SAMPLING
-        methods = ['fast_coreset', 'sens_sampling']
+        # methods = ['sens_sampling', 'fast_coreset']
+        # results, params = read_outputs(
+        #     'outputs',
+        #     npy_file='metrics',
+        #     filter_strs=methods,
+        #     print_dict=True
+        # )
+        # k_values = ['50', '100', '200', '400']
+        # k_pattern_dict = { '10': 'k=10',
+        #     '50': 'k=50',
+        #     '100': 'k=100',
+        #     '200': 'k=200',
+        # }
+        # datasets = [
+        #     'artificial',
+        #     'geometric',
+        #     'benchmark',
+        #     'blobs',
+        #     'adult',
+        #     'mnist',
+        # ]
+        # m_scalar_values = ['40', '60', '80']
+        # make_scores_over_datasets_plot(
+        #     results,
+        #     methods,
+        #     datasets,
+        #     'm_scalar',
+        #     norm,
+        #     m_scalar_values,
+        #     m_scalar_pattern_dict,
+        #     y_lim=[1, 10000],
+        #     figure_title='m_scalar_for_sens_sampling'
+        # )
+        # make_scores_over_datasets_plot(
+        #     results,
+        #     methods,
+        #     datasets,
+        #     'k',
+        #     norm,
+        #     k_values,
+        #     k_pattern_dict,
+        #     y_lim=[1, 10000],
+        #     figure_title='Effect_of_k_for_sens_sampling'
+        # )
+
+
+        ### Composition results
+        methods = ['uniform_sampling', 'semi_uniform', 'fast_coreset']
         results, params = read_outputs(
             'outputs',
             npy_file='metrics',
             filter_strs=methods,
             print_dict=True
         )
-        k_values = ['50', '100', '200', '400']
-        k_pattern_dict = { '10': 'k=10',
-            '50': 'k=50',
-            '100': 'k=100',
-            '200': 'k=200',
-        }
+        comp_values = ['True', 'False']
+        comp_pattern_dict = {'True': 'True', 'False': 'False'}
         datasets = [
             'artificial',
             'geometric',
@@ -393,30 +439,17 @@ if __name__ == '__main__':
             'adult',
             'mnist',
         ]
-        m_scalar_values = ['40', '60', '80']
         make_scores_over_datasets_plot(
             results,
             methods,
             datasets,
-            'm_scalar',
+            'composition',
             norm,
-            m_scalar_values,
-            m_scalar_pattern_dict,
-            y_lim=[1, 10000],
-            figure_title='m_scalar_for_sens_sampling'
+            comp_values,
+            comp_pattern_dict,
+            y_lim=[1, 500],
+            figure_title='composition'
         )
-        make_scores_over_datasets_plot(
-            results,
-            methods,
-            datasets,
-            'k',
-            norm,
-            k_values,
-            k_pattern_dict,
-            y_lim=[1, 10000],
-            figure_title='Effect_of_k_for_sens_sampling'
-        )
-
 
 
         # ### DOES USING 3 HST'S HELP?

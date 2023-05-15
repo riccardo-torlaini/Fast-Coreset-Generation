@@ -23,18 +23,17 @@ def get_experiment_params(default_values, norm, param, val):
 def run_sweeps():
     results = {}
     datasets = [
-        # 'blobs',
-        # 'artificial',
-        # 'geometric',
-        # 'benchmark',
-        # 'mnist',
+        'blobs',
+        'artificial',
+        'geometric',
+        'benchmark',
+        'mnist',
         # 'adult',
         # 'song',
-        'census',
-        'cover_type'
+        # 'census',
+        # 'cover_type'
     ]
-    # methods = ['fast_coreset', 'semi_uniform', 'uniform_sampling', 'sens_sampling', 'lightweight', 'bico']
-    methods = ['fast_coreset']
+    methods = ['fast_coreset', 'semi_uniform', 'uniform_sampling', 'lightweight']
 
     # Only apply for Gaussian mixture and 1-outlier datasets
     n_points = 50000
@@ -67,10 +66,10 @@ def run_sweeps():
     small_sweep_params = {
         # Params to sweep for all coreset algorithms
         # 'k': [50, 100, 200, 400],
-        # 'composition': [True, False],
+        'composition': [True, False],
         # 'j_func': ['2', '10', 'log', 'sqrt'],
         # 'sample_method': ['sens', 'uniform'],
-        'm_scalar': [40, 60, 80],
+        # 'm_scalar': [40, 60, 80],
         # 'allotted_time': [0, 0.5, 1, 3, 5, 7, 10, 20],
         # 'hst_count_from_norm': [True, False], # Only applies to fast_coreset algorithm
     }

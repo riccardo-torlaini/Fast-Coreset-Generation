@@ -122,6 +122,7 @@ def get_results(
         if dataset in RANDOM_DATASETS or i == 0:
             # Load in dataset each time if it's random and once if it's not
             points, _ = get_dataset(dataset, n_points, D, num_centers)
+            np.random.shuffle(points)
         start = time()
         if params['composition']:
             q_points, q_weights = run_composition_experiments(points, coreset_alg, params)

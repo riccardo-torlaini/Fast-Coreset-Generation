@@ -1,6 +1,5 @@
 \section{Proof of \cref{sec:theory}}\label{app:theory}
 
-
 We formalize the proof that the \cref{alg:main} produces an $\eps$-coreset in time $\tilde O(nd \log \Delta)$
 \begin{proof}
 %We show that \cref{alg:main} has the desired guarantees.
@@ -38,6 +37,7 @@ where the last inequality stems from Cauchy-Schwarz. Therefore, $\calS$ is a $nc
 
 
 \subsection{Estimation of the Optimal Cost in a Tree}
+\label{app:apx-tree-proof}
 
 \begin{proof}[proof of \cref{lem:apxTree}]
 If the input is spread in $k+1$ distinct cell at level $i$, then in any solution there is at least one of those cells with no center. In the tree metric, points lying in this cell have therefore connexion cost at least $\sqrt{d}2^{-i+1} \cdot \boxsize$, and thus the left-hand-side of the inequality holds.

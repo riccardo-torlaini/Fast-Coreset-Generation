@@ -131,7 +131,7 @@
 \usepackage{algpseudocode}
 
 
-\title{Fast Coresets for Clustering, Even in Practice}
+\title{Settling Time vs. Accuracy Tradeoffs for Clustering Big Data}
 
 
 % The \author macro works with any number of authors. There are two commands
@@ -181,19 +181,23 @@
 \maketitle
 
 
-% \begin{abstract}
-% 
-% 
-% We study compression algorithms for Euclidean spaces with respect to center-based clustering objectives.  The strongest guarantee a compression algorithm can
-% satisfy is the coreset guarantee, which states that the cost of any candidate set of centers on the coreset and original data set are equal up to $(1\pm
-% \varepsilon)$ factors. Unfortunately, despite extensive efforts, computing coresets is expensive.  For this reason, a number of computationally
-% simpler methods have been proposed, the simplest of which consists of uniform sampling which does not even have to read the entire dataset.
-% 
-% In this paper, we show how to construct a coreset for Euclidean $k$-median and $k$-means in near linear time $\tilde O (nd)$. Moreover, no sublinear time
-% algorithm is possible, making this result essentially optimal with respect to the running time, while retaining the space guarantee of any offline coreset
-% construction.  We implement this algorithm and illustrate its efficiency on real-life datasets.  In particular, it is faster than any known coreset algorithm
-% with provable guarantees.
-% \end{abstract}
+\begin{abstract}
+
+We study the theoretical and practical limits of $k$-means and $k$-median clustering on large datasets. Since the reader's favorite clustering method is likely
+slower than $\tilde{O}(nd)$ time, the general approach is to compress the data and perform the clustering on the compressed representation. Towards this goal,
+the number of features can be reduced in effectively linear time with guaranteed accuracy using random projections. Unfortunately, there is no such universal
+best choice for compressing the number of points -- while random sampling runs in sublinear time and coresets provide theoretical guarantees, the former does
+not enforce accuracy while the latter is too slow as $n$ and $k$ grow. Indeed, it has been conjectured that any sensitivity-based coreset construction
+necessitates $\tilde{O}(nd + nk)$ time.
+
+We examine this relationship by first showing that there does exist an algorithm that obtains coresets via sensitivity sampling in $\tilde{O}(nd)$ time --
+within log-factors of the time it takes to read the data.  Any approach that significantly improves on this must then resort to practical heuristics, leading us
+to consider the spectrum of sampling strategies across both real and artificial datasets in the static and streaming settings. Through this, we show the
+conditions in which coresets are necessary for preserving cluster validity as well as the settings in which faster, cruder sampling strategies are sufficient.
+As a result, we provide a comprehensive theoretical and practical blueprint for clustering effectively regardless of data size.  Our (anonymized) code is
+publicly available at \_\_\_\_.
+
+\end{abstract}
 
 
 \input{introduction}
