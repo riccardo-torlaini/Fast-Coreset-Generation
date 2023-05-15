@@ -26,14 +26,14 @@ $k$-means ($z=2$) (Lemma 3.1 in \cite{cohen2020fast} for $z=2$, the discussion a
 
 The second property is crucial for us: the algorithm does not only compute centers, but also assignments in $\tilde{O}(nd\log \Delta)$ time.  We use it, in
 combination with sensitivity sampling, as described in \cref{alg:main}.  This algorithm computes an $\eps$-coreset in time $\tilde O(nd \log \Delta)$: we prove
-formally the statement in \cref{app:theory} Thus, it is easy to combine existing results to obtain an $\eps$-coreset without an $\tilde{O}(nk)$ time-dependency.
-However, our method thus far has only replaced the $\tilde{O}(nd + nk)$ with an $\tilde{O}(nd \log \Delta)$. Indeed, the spirit of the issue remains -- this is
-not log-linear in the input dimension. 
+formally the statement in \cref{app:theory}.
 
-We verify this by devising a dataset that has $n - n'$ points uniformly in the $[-1, 1]^2$ square. Then, for $r \in \mathbb{Z}^+$, we produce a sequence of
-points at $(0, 1), (0, 0.5), \cdots, (0, 0.5^r)$ and copy this sequence $n' / r$ times, each time with a different $x$ coordinate. The result is a dataset of
-size $n$ where the HST always has constant breadth but the branch depths (and correspondingly $\log \Delta$) grow linearly with $r$. The results can be seen in
-Table \ref{tbl:logdelta}, where the runtime grows linearly with the ratio of the maximum and minimum distance.
+Thus, it is easy to combine existing results to obtain an $\eps$-coreset without an $\tilde{O}(nk)$ time-dependency.  However, our method thus far has only
+replaced the $\tilde{O}(nd + nk)$ runtime by $\tilde{O}(nd \log \Delta)$. Indeed, the spirit of the issue remains -- this is not log-linear in the input size.  We
+verify this by devising a dataset that has $n - n'$ points uniformly in the $[-1, 1]^2$ square. Then, for $r \in \mathbb{Z}^+$, we produce a sequence of points
+at $(0, 1), (0, 0.5), \cdots, (0, 0.5^r)$ and copy this sequence $n' / r$ times, each time with a different $x$ coordinate. The result is a dataset of size $n$
+where the HST always has constant breadth but the branch depths (and correspondingly $\log \Delta$) grow linearly with $r$. The results can be seen in Table
+\ref{tbl:logdelta}, where the runtime grows linearly with the ratio of the maximum and minimum distance.
 
 \begin{algorithm}[tb]
    \caption{Fast-Coreset($P, k, \eps, S$)}
@@ -70,35 +70,26 @@ Table \ref{tbl:logdelta}, where the runtime grows linearly with the ratio of the
 \label{sec:logdelta}
 \newcommand{\boxsize}{\textsc{MaxDist}}
 
-It is well known that, for $k$-median, embedding the input into a tree using the quadtree decomposition loses only an $O(d \log \Delta)$ factor but that
-building this embedding takes time $O(nd \log \Delta)$. However, we will show that we only need to build a fraction of it, allowing for a running time $O(nd
-\log \log \Delta)$. 
-
-We preface the discussion by giving an overview of the quadtree embedding algorithm. The first step is to obtain a box enclosing all input points, centered at
-zero, with all side lengths equal to $\boxsize$.\footnote{This can be done as follows: select an arbitrary input point, and translate the dataset so that this
-point is at the origin. Then, use $O(nd)$ time to set $\boxsize$ to be the maximum distance from any point to the origin. \andrew{it should be times 2, right?}}
-Then, add a random shift $s \leq \boxsize$ is to all the points' coordinates so that the input is now in the box $[-2\boxsize, 2\boxsize]^d$. This
-transformation does not change any distances and therefore preserves the $k$-median cost.  The $i$-th level of the tree (for $i \in \lbra 0, ..., \log \Delta
-\rbra$) is constructed by centering a grid of side length $2^{-i} \cdot 2\boxsize$ at $0$, making each grid-cell a node in the tree.  The parent of a cell $c$
-is simply the cell at level $i-1$ that contains $c$, and the distance between $c$ and its parent is set to $2^{-i} \cdot 2\boxsize \cdot \sqrt{d}$ (the length
-of the hypercube's diagonal).
- 
-This tree has $O(\log \Delta)$ levels, and it is known that for any solution $\calS$, its cost in the tree metric is within a factor $O(\sqrt d \log \Delta)$ of
-its cost for the original metric. Therefore, it is enough for us to find an approximation in the tree metric. We let $\opt_T$ be the optimal solution in the
-tree metric.
- 
+\subsection{Overview of the Approach}
 To remove the $\log\Delta$ dependency, we proceed in two steps: first, we compute a very crude upper-bound on the cost $U$ of the optimal
 solution -- up to a $\poly(n)$ factor.  If $U$ is a $c$-approximation of the optimal cost, the natural strategy to reduce the aspect-ratio is to round all
 coordinates to multiples of $g = U/(cn)$, giving us a minimum distance of no less than $g$; it is then enough to reduce the diameter to $\poly(n) U$. We proceed as
 follows: we place a grid with cell length $O(n \cdot U)$, so that two points from the same cluster in $\opt$ fall into the same cell w.h.p. That way, the
 distinct cells do not interact with each other in any reasonable solution.  Then, we compress the input by "moving" non-empty cells closer to each other.
 
+We focus here on the simpler $k$-median problem\footnote{\cref{app:redKM} shows how to reduce $k$-means to this case} and a description of the tree
+construction can be found in \cref{app:quadtree}.
+
+Given a quadtree embedding, any solution $\calS$'s cost in the tree metric is within a factor $O(\sqrt d \log \Delta)$ of its cost for the original metric.
+Therefore, it is enough for us to find an approximation in the tree and we define $\opt_T$ as the optimal solution in the quadtree.  We now show that (1) we
+only need to build a fraction of the tree, allowing for a running time $O(nd \log \log \Delta)$, and (2) once the tree $T$ is built, there is a corresponding
+tree $T'$ that has a similar optimal $k$-median cost but where $\Delta \in \poly(n, d)$.
+
 \subsection{Computing a crude upper-bound}
 
-As described, we start by computing an approximate solution $U$ such that $U \leq \poly(n) \cdot \cost(\opt)$ on an.  We focus here on the simpler $k$-median
-problem, and show in \cref{app:redKM} how to reduce $k$-means to this case. Our first step is embedding the input into a quadtree as described above. In this
-tree, our first lemma shows the necessary approximation exists at the first level for which the input lies in $k+1$ disjoint subtrees. The algorithm to find
-this is then a simple binary search through the levels of the tree.
+As described, we start by computing an approximate solution $U$ such that $U \leq \poly(n) \cdot \cost(\opt)$ on a tree embedded dataset.  Our first lemma shows
+that the necessary approximation exists at the first level for which the input lies in $k+1$ disjoint subtrees. The algorithm to find this is then a simple binary
+search through the levels of the tree.
 
 \begin{lemma}\label{lem:apxTree}
 Let $i$ be the first level of the decomposition such that at least $k+1$ cells at level $i$ contains any point. Then, $\sqrt{d}2^{-i+1} \cdot \boxsize \leq
@@ -107,7 +98,7 @@ Let $i$ be the first level of the decomposition such that at least $k+1$ cells a
 
 We prove this in Section \ref{app:apx-tree-proof} of the appendix. A direct consequence of this lemma is that the first level of the tree for which at least
 $k+1$ cells are non empty provides an $O(n)$-approximation. To count the number of non-empty cells at a given level $i$, one can merely iterate over all
-points, for each point identify the cell that contains it (using modulo operation), and store all those cells into a hash table to count the number of elements.
+points, for each point, identify the cell that contains it (using a modulo operation), and store all those cells into a hash table to count the number of elements.
 This is done in time $O(nd)$.  Using a binary search on the $O(\log \Delta)$ many levels then concludes this section with the following result:
 
 \begin{lemma}\label{lem:crudeApx}

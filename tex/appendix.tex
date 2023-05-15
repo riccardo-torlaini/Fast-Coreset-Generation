@@ -1,3 +1,15 @@
+\section{Overview of Quadtree Construction}
+\label{app:quadtree}
+
+The first step is to obtain a box enclosing all input points, centered at zero, with all side lengths equal to
+$\boxsize$. This can be done as follows: select an arbitrary input point, and translate the dataset so that this point is at the origin. Then, using
+$O(nd)$ time, set $\boxsize$ to be the maximum distance from any point to the origin. Having obtained this box, add a random shift $s \leq \boxsize$ is to all the points'
+coordinates so that the input is now in the box $[-2\boxsize, 2\boxsize]^d$. This transformation does not change any distances and therefore preserves the
+$k$-median cost.  The $i$-th level of the tree (for $i \in \lbra 0, ..., \log \Delta \rbra$) is constructed by centering a grid of side length $2^{-i} \cdot
+2\boxsize$ at $0$, making each grid-cell a node in the tree.  The parent of a cell $c$ is simply the cell at level $i-1$ that contains $c$, and the distance
+between $c$ and its parent is set to $2^{-i} \cdot 2\boxsize \cdot \sqrt{d}$ (the length of the hypercube's diagonal). This embedding takes $O(nd \log \Delta)$
+time to construct, where $\log \Delta$ is the depth of the tree.
+
 \section{Proof of \cref{sec:theory}}\label{app:theory}
 
 We formalize the proof that the \cref{alg:main} produces an $\eps$-coreset in time $\tilde O(nd \log \Delta)$
