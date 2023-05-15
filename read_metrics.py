@@ -313,7 +313,7 @@ def make_scores_over_datasets_plot(
 
 if __name__ == '__main__':
     # Comment out to read optimization_times for uniform_umap
-    outputs_dir = 'final_outputs'
+    outputs_dir = 'outputs'
     results, params = read_outputs(
         outputs_dir,
         npy_file='metrics',
@@ -327,19 +327,11 @@ if __name__ == '__main__':
     j_func_values = ['2', 'log', '10', 'sqrt', 'half']
     sample_method_values = ['sens', 'uniform']
 
-    norm = '2'
-    # List of datasets --- ['blobs', 'benchmark', 'mnist', 'artificial', 'census']
-
-    dataset = 'census'
-    # make_scores_vs_param_plot(results, dataset, 'j_func', norm, j_func_values)
-    # make_scores_vs_param_plot(results, dataset, 'sample_method', norm, sample_method_values)
-
-
     ### LOOKING AT EFFECT OF CORESET SIZE ON CORESET QUALITY
     # for norm in ['1', '2']:
     for norm in ['2']:
         # methods = ['semi_uniform', 'fast_coreset', 'uniform_sampling', 'lightweight', 'bico']
-        methods = ['fast_coreset', 'uniform_sampling', 'semi_uniform', 'lightweight']
+        methods = ['fast_coreset', 'uniform_sampling', 'semi_uniform']
         results, params = read_outputs(
             outputs_dir,
             npy_file='metrics',
@@ -380,8 +372,7 @@ if __name__ == '__main__':
 
 
         ### COMPARING FAST-KMEANS++ TO KMEANS++ SENSITIVITY SAMPLING
-        # methods = ['fast_coreset', 'sens_sampling']
-        methods = ['fast_coreset', 'sens_sampling', 'uniform_sampling', 'lightweight', 'semi_uniform']
+        methods = ['fast_coreset', 'sens_sampling']
         results, params = read_outputs(
             'outputs',
             npy_file='metrics',
@@ -411,7 +402,7 @@ if __name__ == '__main__':
             norm,
             m_scalar_values,
             m_scalar_pattern_dict,
-            y_lim=[1, 1000],
+            y_lim=[1, 10000],
             figure_title='m_scalar_for_sens_sampling'
         )
         make_scores_over_datasets_plot(
@@ -422,45 +413,45 @@ if __name__ == '__main__':
             norm,
             k_values,
             k_pattern_dict,
-            y_lim=[1, 1000],
+            y_lim=[1, 10000],
             figure_title='Effect_of_k_for_sens_sampling'
         )
 
 
 
-        ### DOES USING 3 HST'S HELP?
-        methods = ['fast_coreset']
-        results, params = read_outputs(
-            'outputs',
-            npy_file='metrics',
-            filter_strs=methods,
-            print_dict=True
-        )
-        datasets = [
-            'artificial',
-            # 'geometric',
-            'benchmark',
-            # 'blobs',
-            # 'adult',
-            # 'mnist',
-            # 'song',
-            # 'cover_type',
-            # 'census',
-        ]
-        hst_count_values = ['True', 'False']
-        hst_count_pattern_dict = {
-            'True': 'Norm + 1 HST\'s',
-            'False': '1 HST',
-        }
-        make_scores_over_datasets_plot(
-            results,
-            methods,
-            datasets,
-            'hst_count_from_norm',
-            norm,
-            hst_count_values,
-            hst_count_pattern_dict,
-            y_lim=[1, 1.3],
-            figure_title='3_HSTs_vs_1_HST'
-        )
+        # ### DOES USING 3 HST'S HELP?
+        # methods = ['fast_coreset']
+        # results, params = read_outputs(
+        #     'outputs',
+        #     npy_file='metrics',
+        #     filter_strs=methods,
+        #     print_dict=True
+        # )
+        # datasets = [
+        #     'artificial',
+        #     # 'geometric',
+        #     'benchmark',
+        #     # 'blobs',
+        #     # 'adult',
+        #     # 'mnist',
+        #     # 'song',
+        #     # 'cover_type',
+        #     # 'census',
+        # ]
+        # hst_count_values = ['True', 'False']
+        # hst_count_pattern_dict = {
+        #     'True': 'Norm + 1 HST\'s',
+        #     'False': '1 HST',
+        # }
+        # make_scores_over_datasets_plot(
+        #     results,
+        #     methods,
+        #     datasets,
+        #     'hst_count_from_norm',
+        #     norm,
+        #     hst_count_values,
+        #     hst_count_pattern_dict,
+        #     y_lim=[1, 1.3],
+        #     figure_title='3_HSTs_vs_1_HST'
+        # )
 
