@@ -21,7 +21,7 @@ For completeness, we also measure the absolute cost incurred by $calC_S$ on the 
 \subsubsection{Algorithms}
 \label{ssec:algorithms}
 
-We compare our method (Algorithm~\ref{alg:main}) against 4 different benchmark sampling strategies that span the space between optimal sublinear time and
+We compare Fast-Coresets (Algorithm~\ref{alg:main}) against 4 different benchmark sampling strategies that span the space between optimal sublinear time and
 optimal accuracy guarantees.
 \begin{itemize}
         \item \emph{Standard uniform sampling}. Weights are all equal to $n / m$, where $m$ is the size of the sample.
@@ -71,12 +71,11 @@ To complement those, we use several artificial datasets to highlight specific se
         default to $c = 100$ and $r=2$.
 
     \item \emph{Gaussian mixture}. A set of scattered Gaussian clusters of varying density. These clusters are sequentially defined, with the size of the first
-        cluster defined by $\frac{n}{\kappa} \exp \left( \gamma \rho_0 \right)$, where $\kappa$ is the number of Gaussian clusters, $\rho_0$ is
-        uniformly chosen from $[-0.5, 0.5]$, and $\gamma$ is a hyperparameter that affects the distribution of cluster sizes. 
-        Then, given clusters $\{c_1, \cdots, c_i\}$, we obtain the size of the $(i+1)$-st cluster by 
-        \[|c_{i+1}| = \frac{n - \sum_i |c_i|}{\kappa - i}\exp \left( \gamma \rho_{i+1} \right).\]
-        This has the property $\gamma = 0$ gives only clusters of size $n / k$ and, as $\gamma$ grows, the cluster sizes diverge in size at an exponential rate.
-        We note that this is a well-clusterable instance with respect to cost stability conditions, see \cite{AwS12,Cohen-AddadS17,KuK10,ORSS12}.
+        cluster defined by $\frac{n}{\kappa} \exp \left( \gamma \cdot \rho_0 \right)$, where $\kappa$ is the number of Gaussian clusters, $\rho_0$ is uniformly
+        chosen from $[-0.5, 0.5]$, and $\gamma$ is a hyperparameter that affects the distribution of cluster sizes.  Then, given clusters $\{c_1, \cdots,
+        c_i\}$, we obtain the size of the $(i+1)$-st cluster by \[|c_{i+1}| = \frac{n - \sum_i |c_i|}{\kappa - i}\exp \left( \gamma \cdot \rho_{i+1} \right).\]
+        This has the property that all clusters have size $n / k$ when $\gamma = 0$ and, as $\gamma$ grows, the cluster sizes diverge in size at an exponential
+        rate.  We note that this is a well-clusterable instance with respect to cost stability conditions, see \cite{AwS12,Cohen-AddadS17,KuK10,ORSS12}.
 
     \item \emph{Benchmark}. A specific distribution of points introduced in \cite{chrisESA} as a good testbed for coreset algorithms.  It has the property that
         all reasonable $k$-means solutions are of equal quality but are maximally far apart in the solution space. Thus, the dataset is fully determined by the
@@ -158,7 +157,7 @@ before it provides good compression.
         MNIST & 12450 & 12379 & 12512 & 12449 \\
         Adult & 24982 & 24935 & 24944 & 25013 \\
         Song & 16753 & 16612 & 16950 & 17010 \\
-        Census & 36697 & \_ & \_ & \_ \\
+        Census & 36697 & 35577 & 37379 & \_ \\
         Cover-Type & \_ & \_ & \_ & \_ \\
         \hline
     \end{tabular}
