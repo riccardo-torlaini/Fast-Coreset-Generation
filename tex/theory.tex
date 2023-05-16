@@ -28,6 +28,20 @@ The second property is crucial for us: the algorithm does not only compute cente
 combination with sensitivity sampling, as described in \cref{alg:main}.  This algorithm computes an $\eps$-coreset in time $\tilde O(nd \log \Delta)$: we prove
 formally the statement in \cref{app:theory}.
 
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{lrrrr}
+        \hline
+        Value of $r$ & 20 & 30 & 40 & 50 \\
+        Runtime (s) & 13.5 & 14.3 & 15.7 & 16.1 \\
+        \hline
+        \vspace*{0.1cm}
+    \end{tabular}
+    \caption{Mean runtime in seconds of the \fkmeans algorithm as a function of $r$ on the dataset described in Section \ref{sec:theory}. The mean is taken over
+    5 runs.}
+    \label{tbl:logdelta}
+\end{table}
+
 Thus, it is easy to combine existing results to obtain an $\eps$-coreset without an $\tilde{O}(nk)$ time-dependency.  However, our method thus far has only
 replaced the $\tilde{O}(nd + nk)$ runtime by $\tilde{O}(nd \log \Delta)$. Indeed, the spirit of the issue remains -- this is not log-linear in the input size.  We
 verify this by devising a dataset that has $n - n'$ points uniformly in the $[-1, 1]^2$ square. Then, for $r \in \mathbb{Z}^+$, we produce a sequence of points
@@ -50,21 +64,6 @@ where the HST always has constant breadth but the branch depths (and correspondi
    \State {\bfseries Output:} the coreset $\coreset$, with weights $w(p) = \frac{\sum_{p' \in P}s(p')}{s(p)S} \lpar (1+\eps)|\calC_i| - |\hat \calC_i|\rpar$
 \end{algorithmic}
 \end{algorithm}
-
-\begin{table}[htbp]
-    \centering
-    \begin{tabular}{lrrrr}
-        \hline
-        Value of $r$ & 20 & 30 & 40 & 50 \\
-        Runtime (s) & 13.5 & 14.3 & 15.7 & 16.1 \\
-        \hline
-        \vspace*{0.1cm}
-    \end{tabular}
-    \caption{Mean runtime in seconds of the \fkmeans algorithm as a function of $r$ on the $\log \Delta$-testbed dataset described in Section
-    \ref{sssec:datasets}. The mean is taken over 5 runs.  Since $\log \Delta$ grows linearly with $r$, this evidences that \fkmeans indeed has a linear
-    time-dependency on $\log \Delta$.}
-    \label{tbl:logdelta}
-\end{table}
 
 \section{Reducing the Impact of the Spread}
 \label{sec:logdelta}
