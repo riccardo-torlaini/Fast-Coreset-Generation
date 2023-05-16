@@ -1,6 +1,10 @@
 import os
+from time import time
 import numpy as np
 import matplotlib.pyplot as plt
+import sklearn.cluster as KMeans
+
+from experiment_utils.get_data import get_dataset
 
 DATA_NAMES = {
     'artificial': r'$c$-outlier',
@@ -53,8 +57,15 @@ def update_results_dict(results_dict, directory, metrics):
         results_dict[method][dataset][norm][param] = {}
     if value not in results_dict[method][dataset][norm][param]:
         results_dict[method][dataset][norm][param][value] = {}
-    results_dict[method][dataset][norm][param][value]['time'] = metrics['time']
-    results_dict[method][dataset][norm][param][value]['acc'] = metrics['acc']
+    if 'time' in metrics:
+        # Load in the coreset construction scores
+        assert 'acc' in metrics
+        results_dict[method][dataset][norm][param][value]['time'] = metrics['time']
+        results_dict[method][dataset][norm][param][value]['acc'] = metrics['acc']
+    else:
+        # Load in the coreset itself
+        results_dict[method][dataset][norm][param][value]['points'] = metrics['coreset_points']
+        results_dict[method][dataset][norm][param][value]['weights'] = metrics['coreset_weights']
 
     return results_dict, param
 
@@ -168,6 +179,16 @@ def make_scores_vs_param_plot(results, dataset, param, norm, value_list):
     plt.show()
 
 
+def get_score(points, weights, centers):
+    cost = 0
+    for point, weight in zip(points, weights):
+        min_dist = 1000000000000
+        for center in centers:
+            dist = np.sum(np.square(point - center))
+            if dist < min_dist:
+                min_dist = dist
+        cost += min_dist * weight
+    return cost
 
 def make_scores_over_datasets_plot(
     results,
@@ -178,31 +199,56 @@ def make_scores_over_datasets_plot(
     value_list,
     pattern_dict,
     y_lim,
-    figure_title
+    figure_title,
+    num_centers=50
 ):
     metrics = {}
     for dataset in datasets:
+        print('\n' + dataset)
         if dataset not in metrics:
             metrics[dataset] = {}
+        full_dataset, _ = get_dataset(dataset)
+        init_centers = None
         # get runtimes and accuracies for k parameter on this dataset under the 1 norm
         for method in methods:
+            print(method)
             if method not in metrics[dataset]:
                 metrics[dataset][method] = {}
             # If we dind't run this method on this dataset, don't try to read the results
             if dataset not in results[method]:
                 continue
             for param_value, scores in results[method][dataset][norm][param].items():
+                if param_value not in value_list:
+                    continue
                 metrics[dataset][method][param_value] = {}
                 metrics[dataset][method][param_value]['means'] = [0, 0]
                 metrics[dataset][method][param_value]['vars'] = [0, 0]
-                metrics[dataset][method][param_value]['means'][0] = np.mean(scores['acc'])
-                metrics[dataset][method][param_value]['means'][1] = np.mean(scores['time'])
-                metrics[dataset][method][param_value]['vars'][0] = np.var(scores['acc'])
-                metrics[dataset][method][param_value]['vars'][1] = np.var(scores['time'])
-                print(dataset, method, param_value)
-                print(metrics[dataset][method][param_value]['means'])
-                print(metrics[dataset][method][param_value]['vars'])
-                print()
+                if 'points' in scores:
+                    # We loaded in the coresets themselves and need to run kmeans on them
+                    points = scores['points']
+                    weights = scores['weights']
+                    if init_centers is None:
+                        # If we are going to run kmeans on a coreset here, we want to initialize with the same start across all coresets
+                        min_val = np.min(points)
+                        max_val = np.max(points)
+                        init_centers = np.random.uniform(min_val, max_val, [num_centers, int(points.shape[1])])
+                    start = time()
+                    kmeans_model = KMeans.KMeans(num_centers, init=init_centers, n_init=1).fit(points, sample_weight=weights)
+                    cost = get_score(full_dataset, np.ones(len(full_dataset)), kmeans_model.cluster_centers_)
+                    print(cost)
+                    metrics[dataset][method][param_value]['means'][0] = cost
+                    metrics[dataset][method][param_value]['means'][1] = time() - start
+                    metrics[dataset][method][param_value]['vars'][0] = 0
+                    metrics[dataset][method][param_value]['vars'][1] = 0
+                else:
+                    metrics[dataset][method][param_value]['means'][0] = np.mean(scores['acc'])
+                    metrics[dataset][method][param_value]['means'][1] = np.mean(scores['time'])
+                    metrics[dataset][method][param_value]['vars'][0] = np.var(scores['acc'])
+                    metrics[dataset][method][param_value]['vars'][1] = np.var(scores['time'])
+                    print(dataset, method, param_value)
+                    print(metrics[dataset][method][param_value]['means'])
+                    print(metrics[dataset][method][param_value]['vars'])
+                    print()
 
     print(metrics)
 
@@ -318,14 +364,13 @@ def make_scores_over_datasets_plot(
 
 
 if __name__ == '__main__':
-    # Comment out to read optimization_times for uniform_umap
     outputs_dir = 'outputs'
-    results, params = read_outputs(
-        outputs_dir,
-        npy_file='metrics',
-        filter_strs=['m_scalar'],
-        print_dict=True
-    )
+    # results, params = read_outputs(
+    #     outputs_dir,
+    #     npy_file='metrics',
+    #     filter_strs=['m_scalar'],
+    #     print_dict=True
+    # )
 
     # m_scalar_values = ['20', '40', '60', '80']
     m_scalar_values = ['40', '60', '80']
@@ -337,12 +382,12 @@ if __name__ == '__main__':
     # for norm in ['1', '2']:
     for norm in ['2']:
         methods = ['uniform_sampling', 'lightweight', 'semi_uniform', 'fast_coreset']
-        results, params = read_outputs(
-            outputs_dir,
-            npy_file='metrics',
-            filter_strs=methods,
-            print_dict=True
-        )
+        # results, params = read_outputs(
+        #     outputs_dir,
+        #     npy_file='metrics',
+        #     filter_strs=methods,
+        #     print_dict=True
+        # )
         m_scalar_pattern_dict = {
             '20': 'm=20k',
             '40': 'm=40k',
@@ -350,27 +395,27 @@ if __name__ == '__main__':
             '80': 'm = 80k',
         }
         datasets = [
-            'artificial',
-            'geometric',
-            'benchmark',
-            'blobs',
+            # 'artificial',
+            # 'geometric',
+            # 'benchmark',
+            # 'blobs',
             'adult',
             'mnist',
             'song',
             'cover_type',
             'census',
         ]
-        make_scores_over_datasets_plot(
-            results,
-            methods,
-            datasets,
-            'm_scalar',
-            norm,
-            m_scalar_values,
-            m_scalar_pattern_dict,
-            y_lim=[1, 10],
-            figure_title='m_scalar_across_all_algorithms'
-        )
+        # make_scores_over_datasets_plot(
+        #     results,
+        #     methods,
+        #     datasets,
+        #     'm_scalar',
+        #     norm,
+        #     m_scalar_values,
+        #     m_scalar_pattern_dict,
+        #     y_lim=[1, 10],
+        #     figure_title='m_scalar_across_all_algorithms'
+        # )
 
 
         ### COMPARING FAST-KMEANS++ TO KMEANS++ SENSITIVITY SAMPLING
@@ -486,4 +531,25 @@ if __name__ == '__main__':
         #     y_lim=[1, 1.3],
         #     figure_title='3_HSTs_vs_1_HST'
       # )
+
+    # Run Lloyd's on coresets
+    methods = ['uniform_sampling', 'lightweight', 'semi_uniform', 'fast_coreset']
+    results, params = read_outputs(
+        'outputs',
+        npy_file='coreset',
+        filter_strs=methods,
+        print_dict=False
+    )
+    m_scalar_values = ['40']
+    make_scores_over_datasets_plot(
+        results,
+        methods,
+        datasets,
+        'm_scalar',
+        '2',
+        m_scalar_values,
+        m_scalar_pattern_dict,
+        y_lim=[1, 10000000000],
+        figure_title='kmeans_costs'
+    )
 

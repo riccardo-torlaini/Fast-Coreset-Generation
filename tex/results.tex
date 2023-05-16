@@ -151,6 +151,28 @@ before it provides good compression.
 \begin{table*}
     \centering
     \tiny
+    \begin{tabular}{|c|cccc|}
+        \hline
+        & \multicolumn{4}{c|}{Method} \\
+        \cline{2-5} & Uniform Sampling & Lightweight & Welterweight & Fast Coreset \\
+        MNIST & 12450 & 12379 & 12512 & 12449 \\
+        Adult & 24982 & 24935 & 24944 & 25013 \\
+        Song & 16753 & 16612 & 16950 & 17010 \\
+        Census & 36697 & \_ & \_ & \_ \\
+        Cover-Type & \_ & \_ & \_ & \_ \\
+        \hline
+    \end{tabular}
+
+    \caption{Cost with respect to the original dataset of a solution found by Lloyd's algorithm. Lloyd's was run over a sample of size $m=4000$ for MNIST and
+    Adult and $m=20000$ for Song, Census and Cover-type. All initializations are identical within each row. We only show the first 5 digits of the
+    cost for readability, but orders of magnitude are equal within each row.}
+
+    \label{tbl:composition}
+\end{table*}
+
+\begin{table*}
+    \centering
+    \tiny
     \begin{tabular}{|c|cc|cc|cc|cc|}
         \hline
         & \multicolumn{8}{c|}{Method} \\
