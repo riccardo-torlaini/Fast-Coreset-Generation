@@ -1,8 +1,25 @@
 \begin{figure}
-\centering
-\begin{tabular}{c}
-    \includegraphics[width=.95\linewidth]{images/2/coreset_runtime-Effect_of_k_for_sens_sampling.pdf}
-\end{tabular}
-\caption{the effect of the $m$-scalar parameter on the runtime for standard sensitivity sampling and Fast-Coresets. Bars are $m=40k, 60k, 80k$.}
-\label{fig:coreset_size_on_sens_quality}
+\begin{minipage}{0.65\linewidth}
+    \centering
+    \begin{tabular}{c}
+        \includegraphics[width=.95\linewidth]{images/2/coreset_runtime-Effect_of_k_for_sens_sampling.pdf}
+    \end{tabular}
+    \caption{Mean runtime over five runs as we vary $k$ for sensitivity sampling and Fast-Coresets. Bars are $k=50, 100, 200, 400$; y-axis is log-scale.}
+    \label{fig:coreset_size_on_sens_quality}
+\end{minipage}
+\hspace{0.35cm}
+\begin{minipage}{0.27\linewidth}
+    \centering
+    \begin{tabular}{cc}
+        Value of $r$ & Runtime \\
+        \hline
+        \vspace*{-0.2cm}\\
+        20 & 13.5 \\
+        30 & 14.3 \\
+        40 & 15.7 \\
+        50 & 16.1 \\
+    \end{tabular}
+    \captionof{table}{Mean runtime in seconds for \fkmeans as a function of $r \sim \log \Delta$, taken over five runs.}
+    \label{tbl:logdelta}
+\end{minipage}
 \end{figure}

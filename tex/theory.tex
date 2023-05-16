@@ -1,53 +1,5 @@
-\section{Coreset Algorithms}
+\section{Fast-Coresets}
 \label{sec:theory}
-
-In this section, we first combine two existing results to produce a strong coreset in time $\tilde{O}(nd \log \Delta)$, where $\Delta$ is the aspect-ratio of
-the input.  We show afterwards how to reduce the dependency in $\Delta$ to $\log \log \Delta$, giving the desired nearly-linear runtime.
-
-Our method is based on the following observations about the group sampling \cite{stoc21} and sensitivity sampling \cite{FeldmanL11} coreset construction
-algorithms. Both start by computing a solution $\calC$. When $\calC$ is a $c$-approximation, they compute a $c \eps$-coreset of size $\tilde O\lpar
-k \eps^{-z-2}\rpar$ and $\tilde O\lpar k \eps^{-2z -2}\rpar$, respectively. Hence, by rescaling, they provide an $\eps$-coreset with size $\tilde O\lpar
-k (\eps/c)^{-z-2}\rpar$ and $\tilde O\lpar k (\eps/c)^{-2z-2}\rpar$. 
-
-This leads to the following fact:
-\begin{fact}\label{fact:logApprox}
-Let $\calC$ be an $O\lpar \log^{O(1)} k\rpar$ approximation to $k$-median or $k$-means.
-Then, group sampling using solution $\calC$ computes a coreset of size $\tilde O\lpar
-k \eps^{-z-2}\rpar$, and sensitivity sampling one of size $\tilde O\lpar k \eps^{-2z-2}\rpar$. 
-Both runs in time $\tilde O(nd)$, provided $\calC$.
-\end{fact}
-
-To turn \cref{fact:logApprox} into an algorithm, we use the \fkmeans approximation algorithm from \cite{cohen2020fast}, which has the two following key properties: 
-\begin{itemize}
-\item \fkmeans runs in $\tilde O\lpar n d \log \Delta\rpar$ time (Corollary 4.3 in \cite{cohen2020fast}), and
-\item \fkmeans computes an assignment from input point to centers that is a $O\lpar d^z \log k\rpar$ approximation to $k$-median ($z=1$) and
-$k$-means ($z=2$) (Lemma 3.1 in \cite{cohen2020fast} for $z=2$, the discussion above for $z=1$). Applying dimension reduction techniques \cite{MakarychevMR19}, the dimension $d$ may be replaced by a $\log k$. This results in a $O\lpar\log^{z+1} k\rpar$ approximation.
-\end{itemize}
-
-The second property is crucial for us: the algorithm does not only compute centers, but also assignments in $\tilde{O}(nd\log \Delta)$ time.  We use it, in
-combination with sensitivity sampling, as described in \cref{alg:main}.  This algorithm computes an $\eps$-coreset in time $\tilde O(nd \log \Delta)$: we prove
-formally the statement in \cref{app:theory}.
-
-\begin{table}[htbp]
-    \centering
-    \begin{tabular}{lrrrr}
-        \hline
-        Value of $r$ & 20 & 30 & 40 & 50 \\
-        Runtime (s) & 13.5 & 14.3 & 15.7 & 16.1 \\
-        \hline
-        \vspace*{0.1cm}
-    \end{tabular}
-    \caption{Mean runtime in seconds of the \fkmeans algorithm as a function of $r$ on the dataset described at the end of Section \ref{sec:theory}. The mean is
-    taken over 5 runs.}
-    \label{tbl:logdelta}
-\end{table}
-
-Thus, it is easy to combine existing results to obtain an $\eps$-coreset without an $\tilde{O}(nk)$ time-dependency.  However, our method thus far has only
-replaced the $\tilde{O}(nd + nk)$ runtime by $\tilde{O}(nd \log \Delta)$. Indeed, the spirit of the issue remains -- this is not log-linear in the input size.
-We verify this by devising a dataset that has $n - n'$ points uniformly in the $[-1, 1]^2$ square. Then, for $r \in \mathbb{Z}^+$, we produce a sequence of
-points at $(0, 1), (0, 0.5), \cdots, (0, 0.5^r)$ and copy this sequence $n' / r$ times, each time with a different $x$ coordinate. The result is a dataset of
-size $n$ where a quadtree embedding always has constant breadth but the branch depths (and correspondingly $\log \Delta$) grow linearly with $r$. The results
-can be seen in Table \ref{tbl:logdelta}, where the runtime grows linearly with the ratio of the maximum and minimum distance.
 
 \begin{algorithm}[tb]
    \caption{Fast-Coreset($P, k, \eps, S$)}
@@ -65,6 +17,43 @@ can be seen in Table \ref{tbl:logdelta}, where the runtime grows linearly with t
 \end{algorithmic}
 \end{algorithm}
 
+
+In this section, we first combine two existing results to produce a strong coreset in time $\tilde{O}(nd \log \Delta)$, where $\Delta$ is the aspect-ratio of
+the input.  We show afterwards how to reduce the dependency in $\Delta$ to $\log \log \Delta$, giving the desired nearly-linear runtime.
+
+Our method is based on the following observations about the group sampling \cite{stoc21} and sensitivity sampling \cite{FeldmanL11} coreset construction
+algorithms. Both start by computing a solution $\calC$. When $\calC$ is a $c$-approximation, they compute a $c \eps$-coreset of size $\tilde O\lpar
+k \eps^{-z-2}\rpar$ and $\tilde O\lpar k \eps^{-2z -2}\rpar$, respectively. Hence, by rescaling, they provide an $\eps$-coreset with size $\tilde O\lpar
+k (\eps/c)^{-z-2}\rpar$ and $\tilde O\lpar k (\eps/c)^{-2z-2}\rpar$. 
+
+This leads to the following fact:
+\begin{fact}\label{fact:logApprox}
+Let $\calC$ be an $O\lpar \log^{O(1)} k\rpar$ approximation to $k$-median or $k$-means.
+Then, group sampling using solution $\calC$ computes a coreset of size $\tilde O\lpar
+k \eps^{-z-2}\rpar$, and sensitivity sampling one of size $\tilde O\lpar k \eps^{-2z-2}\rpar$. 
+Both run in time $\tilde O(nd)$, provided $\calC$.
+\end{fact}
+
+To turn \cref{fact:logApprox} into an algorithm, we use the quadtree-based \fkmeans approximation algorithm from \cite{cohen2020fast}, which has two key
+properties: 
+\begin{enumerate}
+\item \fkmeans runs in $\tilde O\lpar n d \log \Delta\rpar$ time (Corollary 4.3 in \cite{cohen2020fast}), and
+\item \fkmeans computes an assignment from input points to centers that is an $O\lpar d^z \log k\rpar$ approximation to $k$-median ($z=1$) and $k$-means ($z=2$)
+    (Lemma 3.1 in \cite{cohen2020fast} for $z=2$, the discussion above for $z=1$). Applying dimension reduction techniques \cite{MakarychevMR19}, the dimension
+    $d$ may be replaced by a $\log k$. This results in a $O\lpar\log^{z+1} k\rpar$ approximation.
+\end{enumerate}
+
+The second property is crucial for us: the algorithm does not only compute centers, but also assignments in $\tilde{O}(nd\log \Delta)$ time.  We describe how to
+combine it with sensitivity sampling in \cref{alg:main} and prove in \cref{app:theory} that this computes an $\eps$-coreset in time $\tilde O(nd \log \Delta)$.
+Furthermore, we generalize \cref{alg:main} to other fast $k$-median approaches in \cref{app:extensions}.
+
+Thus, it is easy to combine existing results to obtain an $\eps$-coreset without an $\tilde{O}(nk)$ time-dependency.  However, our method thus far has only
+replaced the $\tilde{O}(nd + nk)$ runtime by $\tilde{O}(nd \log \Delta)$. Indeed, the spirit of the issue remains -- this is not log-linear in the input size.
+We verify this by devising a dataset that has $n - n'$ points uniformly in the $[-1, 1]^2$ square. Then, for $r \in \mathbb{Z}^+$, we produce a sequence of
+points at $(0, 1), (0, 0.5), \cdots, (0, 0.5^r)$ and copy this sequence $n' / r$ times, each time with a different $x$ coordinate. The result is a dataset of
+size $n$ where a quadtree embedding always has constant breadth but the branch depths (and correspondingly $\log \Delta$) grow linearly with $r$. The resulting
+linear time-dependency can then be seen in Table \ref{tbl:logdelta}.
+
 \section{Reducing the Impact of the Spread}
 \label{sec:logdelta}
 \newcommand{\boxsize}{\textsc{MaxDist}}
@@ -75,15 +64,14 @@ To remove the $\log\Delta$ dependency, we proceed in two steps: first, we comput
 a $\poly(n)$ factor.  If $U$ is a $c$-approximation of the optimal cost, the natural strategy to reduce the aspect-ratio is to round all coordinates to
 multiples of $g = U/(cn)$, giving us a minimum distance of no less than $g$; it is then enough to reduce the diameter to $\poly(n) U$.  Thus, we place a grid
 with cell length $O(n \cdot U)$, so that two points from the same cluster in $\opt$ fall into the same cell w.h.p., implying that distinct cells do not interact
-with each other in any reasonable solution.  Then, we compress the input by "moving" non-empty cells closer to each other.
+with each other in any reasonable solution.  Then, we compress the input by "moving" non-empty cells closer to each other. We will focus this section on the
+simpler $k$-median problem but show how to reduce $k$-means to this case in \cref{app:redKM}.
 
-We focus here on the simpler $k$-median problem\footnote{\cref{app:redKM} shows how to reduce $k$-means to this case} and a description of the tree
-construction can be found in \cref{app:quadtree}.
-
-Given a quadtree embedding, any solution $\calS$'s cost in the tree metric is within a factor $O(\sqrt d \log \Delta)$ of its cost for the original metric.
-Therefore, it is enough for us to find an approximation in the tree and we use $\opt_T$ to refer to the optimal solution in the quadtree.  We now show that (1)
-we only need to build a fraction of the tree, allowing for a running time $O(nd \log \log \Delta)$, and (2) once the tree $T$ is built, there is a corresponding
-tree $T'$ that has a similar optimal $k$-median cost but where $\Delta \in \poly(n, d)$.
+We note that the quadtree structure directly facilitates the discussed grid and, given a tree embedding, the cost of any $k$-median solution $\calS$ in the tree
+metric is within a factor $O(\sqrt d \log \Delta)$ of its cost for the original metric.  Therefore, it is enough for us to find an approximation in the tree and
+we use $\opt_T$ to refer to the optimal solution in the quadtree.  We now show that (1) we only need to build a fraction of the tree, allowing for a running
+time $O(nd \log \log \Delta)$, and (2) once the tree $T$ is built, there is a corresponding tree $T'$ that has a similar optimal $k$-median cost but where
+$\Delta \in \poly(n, d)$.
 
 \subsection{Computing a crude upper-bound}
 
@@ -147,19 +135,4 @@ First, since distances in $P'$ are smaller than in $P$, the optimal solution for
 (i.e., at distance more than $d n^2\cdot U$) are not in the same cluster of $\calS'$ -- as otherwise $\calS'$ would not be a $c'$-approximation.  Let $\calS$ be
 the solution obtained from $\calS'$ by reversing the construction of $P'$. Since this construction preserves adjacency, for all clusters of the solution, all
 distances are the same in $P$ and $P'$. Therefore, the costs are equal.
-
 \end{proof}
-
-\subsection*{Extensions.} 
-We conclude this section with a few remarks that allow us to generalize \cref{alg:main}.
-
-Consider that \cref{alg:main}  only needs to be provided with an assignment to a solution that is a $O(\polylog k)$ approximationone, implying that one could
-compute the solution $\calC$ via any algorithm that satisfies this.  This initial solution may as well be an $O\lpar\polylog \lnor P \rnor_0 \rpar$
-approximation: using the iterative coreset construction from \cite{BravermanJKW21}, one could then derive a near-optimal coreset size, only suffering
-a $O(\log^* n)$ loss in the running time.
-
-As an example, we illustrate a different approach for $k$-median. One could first embed the input into a hierarchically separated tree (HST) with expected
-distortion $O(\log \lnor P \rnor_0)$ \cite{FakcharoenpholRT03}. On such tree metrics, solving $k$-median can be done in linear time using dedicated algorithms
-(see e.g. \cite{Cohen-AddadLNSS21}). Using the solution from the HST metric, one can compute a coreset, and iterate using the previous argument.  This embedding
-into HST is very similar to what is done by the \fkmeans algorithm, but can be actually performed in \emph{any} metric space, not only Euclidean.  For instance,
-in a metric described by a graph with $m$ edges, the running time of this construction would be near linear-time $\tilde O(m)$.

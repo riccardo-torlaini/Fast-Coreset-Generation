@@ -419,50 +419,37 @@ if __name__ == '__main__':
 
 
         ### COMPARING FAST-KMEANS++ TO KMEANS++ SENSITIVITY SAMPLING
-        # methods = ['sens_sampling', 'fast_coreset']
-        # results, params = read_outputs(
-        #     'outputs',
-        #     npy_file='metrics',
-        #     filter_strs=methods,
-        #     print_dict=True
-        # )
-        # k_values = ['50', '100', '200', '400']
-        # k_pattern_dict = { '10': 'k=10',
-        #     '50': 'k=50',
-        #     '100': 'k=100',
-        #     '200': 'k=200',
-        # }
-        # datasets = [
-        #     'geometric',
-        #     'benchmark',
-        #     'artificial',
-        #     'blobs',
-        #     'adult',
-        #     'mnist',
-        # ]
-        # m_scalar_values = ['40', '60', '80']
-        # make_scores_over_datasets_plot(
-        #     results,
-        #     methods,
-        #     datasets,
-        #     'm_scalar',
-        #     norm,
-        #     m_scalar_values,
-        #     m_scalar_pattern_dict,
-        #     y_lim=[1, 10000],
-        #     figure_title='m_scalar_for_sens_sampling'
-        # )
-        # make_scores_over_datasets_plot(
-        #     results,
-        #     methods,
-        #     datasets,
-        #     'k',
-        #     norm,
-        #     k_values,
-        #     k_pattern_dict,
-        #     y_lim=[1, 10000],
-        #     figure_title='Effect_of_k_for_sens_sampling'
-        # )
+        methods = ['sens_sampling', 'fast_coreset']
+        results, params = read_outputs(
+            'outputs',
+            npy_file='metrics',
+            filter_strs=methods,
+            print_dict=True
+        )
+        k_values = ['50', '100', '200', '400']
+        k_pattern_dict = { '10': 'k=10',
+            '50': 'k=50',
+            '100': 'k=100',
+            '200': 'k=200',
+        }
+        datasets = [
+            'geometric',
+            'benchmark',
+            'artificial',
+            'blobs',
+            'adult',
+        ]
+        make_scores_over_datasets_plot(
+            results,
+            methods,
+            datasets,
+            'k',
+            norm,
+            k_values,
+            k_pattern_dict,
+            y_lim=[1, 10000],
+            figure_title='Effect_of_k_for_sens_sampling'
+        )
 
 
         ### Composition results
@@ -533,23 +520,23 @@ if __name__ == '__main__':
       # )
 
     # Run Lloyd's on coresets
-    methods = ['uniform_sampling', 'lightweight', 'semi_uniform', 'fast_coreset']
-    results, params = read_outputs(
-        'outputs',
-        npy_file='coreset',
-        filter_strs=methods,
-        print_dict=False
-    )
-    m_scalar_values = ['40']
-    make_scores_over_datasets_plot(
-        results,
-        methods,
-        datasets,
-        'm_scalar',
-        '2',
-        m_scalar_values,
-        m_scalar_pattern_dict,
-        y_lim=[1, 10000000000],
-        figure_title='kmeans_costs'
-    )
+    # methods = ['uniform_sampling', 'lightweight', 'semi_uniform', 'fast_coreset']
+    # results, params = read_outputs(
+    #     'outputs',
+    #     npy_file='coreset',
+    #     filter_strs=methods,
+    #     print_dict=False
+    # )
+    # m_scalar_values = ['40']
+    # make_scores_over_datasets_plot(
+    #     results,
+    #     methods,
+    #     datasets,
+    #     'm_scalar',
+    #     '2',
+    #     m_scalar_values,
+    #     m_scalar_pattern_dict,
+    #     y_lim=[1, 10000000000],
+    #     figure_title='kmeans_costs'
+    # )
 

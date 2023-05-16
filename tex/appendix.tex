@@ -1,3 +1,16 @@
+\section{Extensions to \cref{alg:main}} 
+\label{app:extensions}
+Consider that \cref{alg:main}  only needs to be provided with an assignment to a solution that is a $O(\polylog k)$ approximationone, implying that one could
+compute the solution $\calC$ via any algorithm that satisfies this.  This initial solution may as well be an $O\lpar\polylog \lnor P \rnor_0 \rpar$
+approximation: using the iterative coreset construction from \cite{BravermanJKW21}, one could then derive a near-optimal coreset size, only suffering
+a $O(\log^* n)$ loss in the running time.
+
+As an example, we illustrate a different approach for $k$-median. One could first embed the input into a hierarchically separated tree (HST) with expected
+distortion $O(\log \lnor P \rnor_0)$ \cite{FakcharoenpholRT03}. On such tree metrics, solving $k$-median can be done in linear time using dedicated algorithms
+(see e.g. \cite{Cohen-AddadLNSS21}). Using the solution from the HST metric, one can compute a coreset, and iterate using the previous argument.  This embedding
+into HST is very similar to what is done by the \fkmeans algorithm, but can be actually performed in \emph{any} metric space, not only Euclidean.  For instance,
+in a metric described by a graph with $m$ edges, the running time of this construction would be near linear-time $\tilde O(m)$.
+
 \section{Overview of Quadtree Construction}
 \label{app:quadtree}
 
@@ -58,3 +71,21 @@ On the other hand, if the input is contained into $k$ cells at level $i-1$, then
 \end{proof}
 
 \input{figures/lightweight_breaks.tex}
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{lrr}
+        Dataset & Points & Dim \\
+        \hline
+        \emph{Adult} & 48\,842 & 14 \\
+        \emph{MNIST} & 60\,000 & 784 \\
+        \emph{Song} & 515\,345 & 90 \\
+        \emph{Cover Type} & 581\,012 & 54 \\
+        \emph{Census} & 2\,458\,285 & 68 \\
+        \hline
+        \vspace*{0.1cm}
+    \end{tabular}
+    \caption{Description of real world datasets}
+    \label{tbl:datasets}
+\end{table}
+

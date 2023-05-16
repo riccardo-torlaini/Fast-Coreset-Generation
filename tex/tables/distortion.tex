@@ -1,0 +1,26 @@
+\begin{table*}
+    \centering
+    \tiny
+    \begin{tabular}{|c|cc|cc|cc|cc|}
+        \hline
+        & \multicolumn{8}{c|}{Method} \\
+        \cline{2-9} & \multicolumn{2}{c|}{Uniform Sampling} & \multicolumn{2}{c|}{Lightweight} & \multicolumn{2}{c|}{Welterweight} & \multicolumn{2}{c|}{Fast Coreset} \\
+        & $m=40k$ & $m=80k$ & $m=40k$ & $m=80k$ & $m=40k$ & $m=80k$ & $m=40k$ & $m=80k$ \\
+        \cline{2-9}
+        $c$-outlier & 405 $\pm$ 24K & 159 $\pm$ 20K & 1.07 $\pm$ 0.0 & 5.63 $\pm$ 84.6 & 9.44 $\pm$ 105 & 1.03 $\pm$ 0.0 & 1.12 $\pm$ 0.0 & 1.05 $\pm$ 0.0 \\
+        Geometric & 86.3 $\pm$ 8.4K & 21.8 $\pm$ 652 & 1.05 $\pm$ 0.0 & 11.6 $\pm$ 452 & 1.11 $\pm$ 0.0 & 1.03 $\pm$ 0.0 & 1.11 $\pm$ 0.0 & 1.05 $\pm$ 0.0 \\
+        Gaussian Mix. & 3.17 $\pm$ 3.42 & 1.43 $\pm$ 0.25 & 2.64 $\pm$ 1.61 & 1.81 $\pm$ 0.58 & 2.26 $\pm$ 1.55 & 1.28 $\pm$ 0.07 & 1.24 $\pm$ 0.0 & 1.13 $\pm$
+        0.0 \\
+        \makecell{Benchmark\\---} & \makecell{1.07 $\pm$ 0.0\\---} & \makecell{1.03 $\pm$ 0.0\\---} & \makecell{1.11 $\pm$ 0.0\\---} & \makecell{1.05 $\pm$
+        0.0\\---} & \makecell{1.10 $\pm$ 0.0\\---} & \makecell{1.04 $\pm$ 0.0\\---} & \makecell{1.15 $\pm$ 0.0\\---} & \makecell{1.06 $\pm$ 0.0\\---} \\
+        MNIST & 1.08 $\pm$ 0.0 & 1.03 $\pm$ 0.0 & 1.08 $\pm$ 0.0 & 1.03 $\pm$ 0.0 & 1.08 $\pm$ 0.0 & 1.04 $\pm$ 0.0 & 1.08 $\pm$ 0.0 & 1.04 $\pm$ 0.0 \\
+        Adult & 1.08 $\pm$ 0.0 & 1.04 $\pm$ 0.0 & 1.09 $\pm$ 0.0 & 1.04 $\pm$ 0.0 & 1.32 $\pm$ 0.0 & 1.17 $\pm$ 0.0 & 1.17 $\pm$ 0.0 & 1.07 $\pm$ 0.0 \\
+        Song & 1.30 $\pm$ 0.0 & 1.14 $\pm$ 0.0 & 1.13 $\pm$ 0.0 & 1.12 $\pm$ 0.0 & 1.18 $\pm$ 0.0 & 1.16 $\pm$ 0.0 & 1.50 $\pm$ 0.0 & 1.29 $\pm$ 0.0 \\
+        Census & 1.15 $\pm$ 0.0 & 1.07 $\pm$ 0.0 & 1.12 $\pm$ 0.0 & 1.06 $\pm$ 0.0 & 1.14 $\pm$ 0.0 & 1.06 $\pm$ 0.0 & 1.13 $\pm$ 0.0 & 1.07 $\pm$ 0.0 \\
+        Cover-Type & 1.12 $\pm$ 0.0 & 1.05 $\pm$ 0.0 & 1.11 $\pm$ 0.0 & 1.06 $\pm$ 0.0 & 1.17 $\pm$ 0.0 & 1.08 $\pm$ 0.0 & 1.11 $\pm$ 0.0 & 1.04 $\pm$ 0.0 \\
+        \hline
+    \end{tabular}
+    \caption{Distortion means and variances for different sample sizes across datasets.}
+    \label{tbl:distortion}
+\end{table*}
+
