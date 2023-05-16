@@ -37,17 +37,17 @@ formally the statement in \cref{app:theory}.
         \hline
         \vspace*{0.1cm}
     \end{tabular}
-    \caption{Mean runtime in seconds of the \fkmeans algorithm as a function of $r$ on the dataset described in Section \ref{sec:theory}. The mean is taken over
-    5 runs.}
+    \caption{Mean runtime in seconds of the \fkmeans algorithm as a function of $r$ on the dataset described at the end of Section \ref{sec:theory}. The mean is
+    taken over 5 runs.}
     \label{tbl:logdelta}
 \end{table}
 
 Thus, it is easy to combine existing results to obtain an $\eps$-coreset without an $\tilde{O}(nk)$ time-dependency.  However, our method thus far has only
-replaced the $\tilde{O}(nd + nk)$ runtime by $\tilde{O}(nd \log \Delta)$. Indeed, the spirit of the issue remains -- this is not log-linear in the input size.  We
-verify this by devising a dataset that has $n - n'$ points uniformly in the $[-1, 1]^2$ square. Then, for $r \in \mathbb{Z}^+$, we produce a sequence of points
-at $(0, 1), (0, 0.5), \cdots, (0, 0.5^r)$ and copy this sequence $n' / r$ times, each time with a different $x$ coordinate. The result is a dataset of size $n$
-where the HST always has constant breadth but the branch depths (and correspondingly $\log \Delta$) grow linearly with $r$. The results can be seen in Table
-\ref{tbl:logdelta}, where the runtime grows linearly with the ratio of the maximum and minimum distance.
+replaced the $\tilde{O}(nd + nk)$ runtime by $\tilde{O}(nd \log \Delta)$. Indeed, the spirit of the issue remains -- this is not log-linear in the input size.
+We verify this by devising a dataset that has $n - n'$ points uniformly in the $[-1, 1]^2$ square. Then, for $r \in \mathbb{Z}^+$, we produce a sequence of
+points at $(0, 1), (0, 0.5), \cdots, (0, 0.5^r)$ and copy this sequence $n' / r$ times, each time with a different $x$ coordinate. The result is a dataset of
+size $n$ where a quadtree embedding always has constant breadth but the branch depths (and correspondingly $\log \Delta$) grow linearly with $r$. The results
+can be seen in Table \ref{tbl:logdelta}, where the runtime grows linearly with the ratio of the maximum and minimum distance.
 
 \begin{algorithm}[tb]
    \caption{Fast-Coreset($P, k, \eps, S$)}

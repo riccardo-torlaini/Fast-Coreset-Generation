@@ -199,6 +199,10 @@ def make_scores_over_datasets_plot(
                 metrics[dataset][method][param_value]['means'][1] = np.mean(scores['time'])
                 metrics[dataset][method][param_value]['vars'][0] = np.var(scores['acc'])
                 metrics[dataset][method][param_value]['vars'][1] = np.var(scores['time'])
+                print(dataset, method, param_value)
+                print(metrics[dataset][method][param_value]['means'])
+                print(metrics[dataset][method][param_value]['vars'])
+                print()
 
     print(metrics)
 
@@ -252,13 +256,13 @@ def make_scores_over_datasets_plot(
                             edgecolor='black',
                             hatch=pattern_dict[value]
                         )
-                        axis.errorbar(
-                            loc_dict[value] + horizontal_shift,
-                            metrics[dataset][method][value]['means'][index],
-                            metrics[dataset][method][value]['vars'][index],
-                            capsize=5,
-                            color='black',
-                        )
+                        # axis.errorbar(
+                        #     loc_dict[value] + horizontal_shift,
+                        #     metrics[dataset][method][value]['means'][index],
+                        #     metrics[dataset][method][value]['vars'][index],
+                        #     capsize=5,
+                        #     color='black',
+                        # )
                     except KeyError:
                         continue
             axis.set_ylabel(ylabel)
@@ -301,14 +305,13 @@ def make_scores_over_datasets_plot(
             labelsize=10,
             labelrotation=45
         )
-        color_legend = last_axis.legend(color_handles, color_labels, loc='upper right')
+        color_legend = last_axis.legend(color_handles, color_labels, loc='upper right', prop={'size': 13})
         ax = last_axis.add_artist(color_legend)
-        pattern_legend = first_axis.legend(pattern_handles, value_list, loc='upper left')
+        # pattern_legend = first_axis.legend(pattern_handles, value_list, loc='lower center')
         if index == 0:
             save_path = 'coreset_distortion-' + figure_title
         else:
             save_path = 'coreset_runtime-' + figure_title
-        plt.show()
         save_path = os.path.join(image_dir, save_path)
         plt.savefig(save_path, bbox_inches='tight', pad_inches=0.1)
 
@@ -333,45 +336,41 @@ if __name__ == '__main__':
     ### LOOKING AT EFFECT OF CORESET SIZE ON CORESET QUALITY
     # for norm in ['1', '2']:
     for norm in ['2']:
-        # methods = ['semi_uniform', 'fast_coreset', 'uniform_sampling', 'lightweight', 'bico']
-        # methods = ['fast_coreset', 'uniform_sampling', 'semi_uniform']
-        # results, params = read_outputs(
-        #     outputs_dir,
-        #     npy_file='metrics',
-        #     filter_strs=methods,
-        #     print_dict=True
-        # )
-        # m_scalar_pattern_dict = {
-        #     '5': 'm=5k',
-        #     '10': 'm=10k',
-        #     '20': 'm=20k',
-        #     '40': 'm=40k',
-        #     '60': 'm=60k',
-        #     '80': 'm = 80k',
-        # }
-        # datasets = [
-        #     # 'artificial',
-        #     # 'geometric',
-        #     # 'benchmark',
-        #     # 'blobs',
-        #     'adult',
-        #     'mnist',
-        #     'song',
-        #     'cover_type',
-        #     'census',
-        # ]
-        # Coreset size plots
-        # make_scores_over_datasets_plot(
-        #     results,
-        #     methods,
-        #     datasets,
-        #     'm_scalar',
-        #     norm,
-        #     m_scalar_values,
-        #     m_scalar_pattern_dict,
-        #     y_lim=[1, 1.35],
-        #     figure_title='m_scalar_across_all_algorithms'
-        # )
+        methods = ['uniform_sampling', 'lightweight', 'semi_uniform', 'fast_coreset']
+        results, params = read_outputs(
+            outputs_dir,
+            npy_file='metrics',
+            filter_strs=methods,
+            print_dict=True
+        )
+        m_scalar_pattern_dict = {
+            '20': 'm=20k',
+            '40': 'm=40k',
+            '60': 'm=60k',
+            '80': 'm = 80k',
+        }
+        datasets = [
+            'artificial',
+            'geometric',
+            'benchmark',
+            'blobs',
+            'adult',
+            'mnist',
+            'song',
+            'cover_type',
+            'census',
+        ]
+        make_scores_over_datasets_plot(
+            results,
+            methods,
+            datasets,
+            'm_scalar',
+            norm,
+            m_scalar_values,
+            m_scalar_pattern_dict,
+            y_lim=[1, 10],
+            figure_title='m_scalar_across_all_algorithms'
+        )
 
 
         ### COMPARING FAST-KMEANS++ TO KMEANS++ SENSITIVITY SAMPLING
@@ -389,9 +388,9 @@ if __name__ == '__main__':
         #     '200': 'k=200',
         # }
         # datasets = [
-        #     'artificial',
         #     'geometric',
         #     'benchmark',
+        #     'artificial',
         #     'blobs',
         #     'adult',
         #     'mnist',
@@ -422,34 +421,34 @@ if __name__ == '__main__':
 
 
         ### Composition results
-        methods = ['uniform_sampling', 'semi_uniform', 'fast_coreset']
-        results, params = read_outputs(
-            'outputs',
-            npy_file='metrics',
-            filter_strs=methods,
-            print_dict=True
-        )
-        comp_values = ['True', 'False']
-        comp_pattern_dict = {'True': 'True', 'False': 'False'}
-        datasets = [
-            'artificial',
-            'geometric',
-            'benchmark',
-            'blobs',
-            'adult',
-            'mnist',
-        ]
-        make_scores_over_datasets_plot(
-            results,
-            methods,
-            datasets,
-            'composition',
-            norm,
-            comp_values,
-            comp_pattern_dict,
-            y_lim=[1, 500],
-            figure_title='composition'
-        )
+        # methods = ['uniform_sampling', 'lightweight', 'semi_uniform', 'fast_coreset']
+        # results, params = read_outputs(
+        #     'outputs',
+        #     npy_file='metrics',
+        #     filter_strs=methods,
+        #     print_dict=True
+        # )
+        # comp_values = ['True', 'False']
+        # comp_pattern_dict = {'True': 'True', 'False': 'False'}
+        # datasets = [
+        #     'artificial',
+        #     'geometric',
+        #     'benchmark',
+        #     'blobs',
+        #     'adult',
+        #     'mnist',
+        # ]
+        # make_scores_over_datasets_plot(
+        #     results,
+        #     methods,
+        #     datasets,
+        #     'composition',
+        #     norm,
+        #     comp_values,
+        #     comp_pattern_dict,
+        #     y_lim=[1, 500],
+        #     figure_title='composition'
+        # )
 
 
         # ### DOES USING 3 HST'S HELP?
@@ -486,5 +485,5 @@ if __name__ == '__main__':
         #     hst_count_pattern_dict,
         #     y_lim=[1, 1.3],
         #     figure_title='3_HSTs_vs_1_HST'
-        # )
+      # )
 
