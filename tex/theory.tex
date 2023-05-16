@@ -70,18 +70,19 @@ where the HST always has constant breadth but the branch depths (and correspondi
 \newcommand{\boxsize}{\textsc{MaxDist}}
 
 \subsection{Overview of the Approach}
-To remove the $\log\Delta$ dependency, we proceed in two steps: first, we compute a very crude upper-bound on the cost $U$ of the optimal
-solution -- up to a $\poly(n)$ factor.  If $U$ is a $c$-approximation of the optimal cost, the natural strategy to reduce the aspect-ratio is to round all
-coordinates to multiples of $g = U/(cn)$, giving us a minimum distance of no less than $g$; it is then enough to reduce the diameter to $\poly(n) U$. We proceed as
-follows: we place a grid with cell length $O(n \cdot U)$, so that two points from the same cluster in $\opt$ fall into the same cell w.h.p. That way, the
-distinct cells do not interact with each other in any reasonable solution.  Then, we compress the input by "moving" non-empty cells closer to each other.
+
+To remove the $\log\Delta$ dependency, we proceed in two steps: first, we compute a very crude upper-bound on the cost $U$ of the optimal solution -- up to
+a $\poly(n)$ factor.  If $U$ is a $c$-approximation of the optimal cost, the natural strategy to reduce the aspect-ratio is to round all coordinates to
+multiples of $g = U/(cn)$, giving us a minimum distance of no less than $g$; it is then enough to reduce the diameter to $\poly(n) U$.  Thus, we place a grid
+with cell length $O(n \cdot U)$, so that two points from the same cluster in $\opt$ fall into the same cell w.h.p., implying that distinct cells do not interact
+with each other in any reasonable solution.  Then, we compress the input by "moving" non-empty cells closer to each other.
 
 We focus here on the simpler $k$-median problem\footnote{\cref{app:redKM} shows how to reduce $k$-means to this case} and a description of the tree
 construction can be found in \cref{app:quadtree}.
 
 Given a quadtree embedding, any solution $\calS$'s cost in the tree metric is within a factor $O(\sqrt d \log \Delta)$ of its cost for the original metric.
-Therefore, it is enough for us to find an approximation in the tree and we define $\opt_T$ as the optimal solution in the quadtree.  We now show that (1) we
-only need to build a fraction of the tree, allowing for a running time $O(nd \log \log \Delta)$, and (2) once the tree $T$ is built, there is a corresponding
+Therefore, it is enough for us to find an approximation in the tree and we use $\opt_T$ to refer to the optimal solution in the quadtree.  We now show that (1)
+we only need to build a fraction of the tree, allowing for a running time $O(nd \log \log \Delta)$, and (2) once the tree $T$ is built, there is a corresponding
 tree $T'$ that has a similar optimal $k$-median cost but where $\Delta \in \poly(n, d)$.
 
 \subsection{Computing a crude upper-bound}
@@ -120,7 +121,7 @@ its center.  For each coordinate $i \in \lbra 1, ..., d \rbra$, sort (in time $O
 each $j \in \lbra 1, ..., k\rbra$, let $c^i_j$ and $c^i_{j+1}$ be the $i$-th coordinate of centers of the $j$-th and $(j+1)$-th boxes. If $c^i_{j+1} - c^i_j
 \geq 2d n^2\cdot U$, then for all cells $j'$ with $j' > j$, shift the points of $j'$ by $c^i_{j+1} - c^i_j - 2d n^2\cdot U$ in the $i$-th coordinate.
 
-This can be implemented with a linear scan, and has two effects: first, the diameter of the input is now $\sqrt{d} \cdot 2d n^2\cdot U \cdot k$, as along any
+This can be implemented with a linear scan and has two effects: first, the diameter of the input is now $\sqrt{d} \cdot 2d n^2\cdot U \cdot k$, as along any
 coordinate the maximal distance is $2d n^2\cdot U \cdot k$. Second, two boxes that were adjacent are still adjacent and two boxes that were non-adjacent are
 still non-adjacent.
 
@@ -137,7 +138,8 @@ shift to centers of $\calS'$ allows us to transform it to a solution $\calS$. We
 change. This is formalized in the next lemma.
 
 \begin{lemma}
-Let $\calS'$ be a $c'$-approximation for  $k$-median (resp. $k$-means) on $P'$, where $c' \leq nc$ and $c$ is the approximation guarantee from \cref{lem:crudeApx}. Then, one can compute a solution for $P$ for $k$-median (resp. $k$-means) on $P$, with same cost as $\calS'$ for $P'$, in time $O(nd)$.
+Let $\calS'$ be a $c'$-approximation for  $k$-median (resp. $k$-means) on $P'$, where $c' \leq nc$ and $c$ is the approximation guarantee from
+\cref{lem:crudeApx}. Then, one can compute a solution for $P$ for $k$-median (resp. $k$-means) on $P$, with same cost as $\calS'$ for $P'$, in time $O(nd)$.
 \end{lemma}
 \begin{proof}
 
