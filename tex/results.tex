@@ -96,9 +96,7 @@ In all real and artificial datasets, we add random uniform noise $\eta$ with $0 
 Unless specifically varying these parameters, we default all algorithms in~\ref{ssec:algorithms} to $k=100$ for the Adult, MNIST, and artificial datasets and
 $k=500$ for the Song, Cover Type, and Census datasets. Our default coreset size is then $m = 40k$. We refer to the coreset size scalar as the \emph{$m$-scalar}.
 We only run the dimension-reduction step on the MNIST dataset, as the remaining datasets already have sufficiently low dimensionality. We run our experiments on
-a \andrew{server stats}.
-
-%\andrew{Add implementation details, machine specifics, etc.}
+an Intel Core i9 10940X 3.3GHz 14-Core processor without parallelization.
 
 \subsection{Evaluating Sampling Strategies}
 \label{ssec:alg_qualities}
