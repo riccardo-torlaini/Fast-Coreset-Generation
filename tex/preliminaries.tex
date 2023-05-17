@@ -3,19 +3,20 @@
 \subsection{On Sampling Strategies.}
 \label{ssec:sens_sampling}
 
-As discussed, we focus our study on linear- and sublinear-time sampling strategies. Specifically, given a dataset $P \in \R^{n \times d}$, we want to sample $S
-\in \R^{m \times d} \subset P$ such that $m \ll n$ along with a weights vector $w \in \R^m$. The goal is then that for some solution $\calC$, $S$
-provides us with an idea of the solution's quality with respect to the original dataset, i.e. $\sum_{p \in S} w_p \cost(p, \calC) \sim \sum_{p \in P} \cost(p,
-\calC)$. 
-The quickest sampling strategy, running in sublinear time, is uniform sampling. It is clear, however, that this cannot provide any cost-preservation guarantee
-as missing a single extreme outlier will cause the sampling strategy to fail. Thus, any approach that outperforms this strategy must read in the entire dataset
-and therefore run in at least linear time. Indeed, sublinear algorithms always require some assumption on the input to provide guarantees, see \cite{Ben-David07,czumaj2007sublinear,HJJ23,meyerson2004k}.
+As discussed, we focus our study on linear- and sublinear-time sampling strategies. Specifically, given a dataset $P \in \R^{n \times d}$, we want to sample
+$\Omega \in \R^{m \times d} \subset P$ such that $m \ll n$ along with a weights vector $w \in \R^m$. The goal is then that for some solution $\calC$, $\Omega$
+provides us with an idea of the solution's quality with respect to the original dataset, i.e. $\sum_{p \in \Omega} w_p \cost(p, \calC) \sim \sum_{p \in P}
+\cost(p, \calC)$.  The quickest sampling strategy, running in sublinear time, is uniform sampling. It is clear, however, that this cannot provide any
+cost-preservation guarantee as missing a single extreme outlier will cause the sampling strategy to fail. Thus, any approach that outperforms this strategy must
+read in the entire dataset and therefore run in at least linear time. Indeed, sublinear algorithms always require some assumption on the input to provide
+guarantees, see \cite{Ben-David07,czumaj2007sublinear,HJJ23,meyerson2004k}.
 
-Among these more sophisticated sampling strategies, one cannot do better than the strong coreset guarantee. Specifically, a strong $\eps$-coreset is a subset $S
-\subseteq P$ with weights $\tilde w$ such that for \emph{any} solution $\calC$, \[\sum_{p \in S} \tilde w_p \cost(p, \calC) \in (1 \pm \eps) \cost(P, \calC)\] with
+Among these more sophisticated sampling strategies, one cannot do better than the strong coreset guarantee. Specifically, a strong $\eps$-coreset is a subset
+$\Omega
+\subseteq P$ with weights $\tilde w$ such that for \emph{any} solution $\calC$, \[\sum_{p \in \Omega} \tilde w_p \cost(p, \calC) \in (1 \pm \eps) \cost(P, \calC)\] with
 high probability.  Going forward, we will discuss this in the context of the $k$-median and $k$-means cost functions: for a dataset $P \in \R^d$ with weights $w
 : P \rightarrow \R^+$, and any $k$-tuple $\calC$ in $\R^d$, \[\cost_z(P, \calC) := \sum_{p \in P} \tilde w(p) \dist^z(p, \calC),\] with
-$z=1$ for $k$-median and $z=2$ for $k$-means. We use $\opt$ to denote $\min_{\calS} \cost_z(P, \calC)$.
+$z=1$ for $k$-median and $z=2$ for $k$-means. We use $\opt$ to denote $\min_{\Omega} \cost_z(P, \calC)$.
 
 Recently, sampling with respect to sensitivity values has grown to prominence due to its simplicity and coreset guarantee.  True sensitivity values are defined
 as $\sup_{\calC} \frac{\dist^z(p, \calC)}{\cost_z(P, \calC)}$, where the supremum is taken over all possible solutions $\calC$. Intuitively, this is a measure
@@ -28,11 +29,11 @@ Given a solution to a clustering problem $\calC$, importance scores are defined 
 \end{equation}
 where $\calC_p$ is the cluster that $p$ belongs to. This is always an upper-bound on the sensitivity values, see \cite{FL11,FeldmanSS20}.
 
-The coreset $S$ then consists of $m$ points sampled proportionate to $\sigma$ with weights defined as follows. First, for any sampled point $p$, define $w_p :=
-\frac{1}{\Pr[p \in S]} = \frac{\sum_{p'} s_\calC(p')}{m s_\calC(p)}$. For a cluster $C_i$, let $|\hat{C_i}|$ be the number of points in $C_i$ estimated by the
-sample, i.e. $C_i \cap S$ weighted with $w_p$. A sampled point $p$ in $C_i$ is
+The coreset $\Omega$ then consists of $m$ points sampled proportionate to $\sigma$ with weights defined as follows. First, for any sampled point $p$, define $w_p :=
+\frac{1}{\Pr[p \in \Omega]} = \frac{\sum_{p'} s_\calC(p')}{m s_\calC(p)}$. For a cluster $C_i$, let $|\hat{C_i}|$ be the number of points in $C_i$ estimated by the
+sample, i.e. $C_i \cap \Omega$ weighted with $w_p$. A sampled point $p$ in $C_i$ is
 weighted $\tilde w(p) = \tilde w_1(p) \lpar (1+\eps)|C_i| - |\hat{C_i}|\rpar$.  \cite{FeldmanL11} and subsequent works showed that, when $\calC$ is
-a $O(1)$-approximation, sampling $S = \tilde O\lpar k \eps^{-2z-2}\rpar$ many points was enough to ensure concentration, namely, $S$ is a coreset with
+a $O(1)$-approximation, sampling $\Omega = \tilde O\lpar k \eps^{-2z-2}\rpar$ many points was enough to ensure concentration, namely, $\Omega$ is a coreset with
 probability at least $2/3$.
 
 To perform this algorithm, the bottleneck in the running time lies in computing the solution $\calC$ as well as then obtaining costs of every point to its
@@ -51,11 +52,9 @@ Much of the advancements regarding coresets have sought the smallest coreset pos
 examples are in Euclidean space \cite{BadoiuHI02, HaM04, Chen09, HuangV20, stoc22}, with much of the focus on obtaining the optimal size in the $k$-means and
 $k$-median setting. Recently, a lower bound \cite{huangLB} showed that the group sampling algorithm developed in \cite{stoc21, stoc22} is optimal.
 
-Although this algorithm yields a coreset of size $\tilde{O}(k\cdot \varepsilon^{-2}
-\min(k^{z/(z+2)},\varepsilon^{-z}))$ \cite{CLSSS22} and provides theoretically smaller coresets than sensitivity sampling, the experiments of \cite{chrisESA}
-showed that the latter is often more efficient in practice. We also note that one could use virtually any coreset construction as many are linear-time once
-provided with an initial solution $\calC$ and assignment $\sigma$.  Therefore, our algorithm could use as a subroutine any coreset construction, if in the
-future one is developed that is preferable to sensitivity and group sampling.
+Although this algorithm's coresets of ize $\tilde{O}(k\cdot \varepsilon^{-2} \min(k^{z/(z+2)},\varepsilon^{-z}))$ \cite{CLSSS22} are theoretically smaller than
+those obtained by sensitivity sampling, the experiments of \cite{chrisESA} showed that the latter is often more efficient in practice. We also note that one
+could use virtually any coreset construction as many are linear-time once provided with an initial solution $\calC$ and assignment $\sigma$.
 
 In terms of other linear-time methods, we are only aware of the lightweight coresets approach\cite{BachemL018}, wherein one performs sensitivity
 sampling with respect to a solution $\calC=\{\mu\}$, i.e. the mean of the data set. This runs in $O(nd)$ time but provides a weaker guarantee -- one incurs an
@@ -64,13 +63,12 @@ than $k$ centers. Since the lightweight coreset construction uses the $1$-means 
 $k$-means/median solution, it is natural to investigate the relationship between the approximation quality and coreset quality. We discuss this in more depth in
 Section \ref{ssec:algorithms}.
 
-All efficient coreset constructions are probabilistic. This comes with a disadvantage of coresets being difficult to evaluate. For example, it is
-co-NP-hard to check whether a candidate compression is a weak coreset \cite{chrisESA} \footnote{A weak coreset guarantee only requires that a $(1+\varepsilon)$
-approximation computed on the coreset yields a $(1+\varepsilon)$ on the entire point set.}. Therefore, although coreset algorithms succeed with some high
-probability, it is unclear how to computationally verify this.  This posed a considerable difficulty for previous experimental evaluations,
-where researchers would typically focus on the cost of a solution computed on the designated coreset instead. We refer to \cite{chrisESA} for further discussion
-on this topic and discuss our metrics in Section \ref{sssec:metrics}.
-
+All efficient coreset constructions are probabilistic. This comes with a disadvantage of coresets being difficult to evaluate. For example, it is co-NP-hard to
+check whether a candidate compression is a weak coreset \cite{chrisESA} \footnote{A weak coreset guarantee only requires that a $(1+\varepsilon)$ approximation
+computed on the coreset yields a $(1+\varepsilon)$ on the entire point set.}. Therefore, although coreset algorithms succeed with some high probability, it is
+unclear how to computationally verify this.  This has posed a considerable difficulty for previous experimental evaluations and researchers would typically
+focus on the cost of a solution computed on the coreset instead. We refer to \cite{chrisESA} for further discussion on this topic and discuss our metrics in
+Section \ref{sssec:metrics}.
 
 \subsection{Quadtree Embeddings}
 
