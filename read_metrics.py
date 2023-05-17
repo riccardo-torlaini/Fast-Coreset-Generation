@@ -351,8 +351,8 @@ def make_scores_over_datasets_plot(
             labelsize=10,
             labelrotation=45
         )
-        color_legend = last_axis.legend(color_handles, color_labels, loc='upper right', prop={'size': 13})
-        ax = last_axis.add_artist(color_legend)
+        color_legend = first_axis.legend(color_handles, color_labels, loc='upper left', prop={'size': 13})
+        # ax = last_axis.add_artist(color_legend)
         # pattern_legend = first_axis.legend(pattern_handles, value_list, loc='lower center')
         if index == 0:
             save_path = 'coreset_distortion-' + figure_title
@@ -419,68 +419,71 @@ if __name__ == '__main__':
 
 
         ### COMPARING FAST-KMEANS++ TO KMEANS++ SENSITIVITY SAMPLING
-        methods = ['sens_sampling', 'fast_coreset']
-        results, params = read_outputs(
-            'outputs',
-            npy_file='metrics',
-            filter_strs=methods,
-            print_dict=True
-        )
-        k_values = ['50', '100', '200', '400']
-        k_pattern_dict = { '10': 'k=10',
-            '50': 'k=50',
-            '100': 'k=100',
-            '200': 'k=200',
-        }
-        datasets = [
-            'geometric',
-            'benchmark',
-            'artificial',
-            'blobs',
-            'adult',
-        ]
-        make_scores_over_datasets_plot(
-            results,
-            methods,
-            datasets,
-            'k',
-            norm,
-            k_values,
-            k_pattern_dict,
-            y_lim=[1, 10000],
-            figure_title='Effect_of_k_for_sens_sampling'
-        )
-
-
-        ### Composition results
-        # methods = ['uniform_sampling', 'lightweight', 'semi_uniform', 'fast_coreset']
+        # methods = ['sens_sampling', 'fast_coreset']
         # results, params = read_outputs(
         #     'outputs',
         #     npy_file='metrics',
         #     filter_strs=methods,
         #     print_dict=True
         # )
-        # comp_values = ['True', 'False']
-        # comp_pattern_dict = {'True': 'True', 'False': 'False'}
+        # k_values = ['50', '100', '200', '400']
+        # k_pattern_dict = { '10': 'k=10',
+        #     '50': 'k=50',
+        #     '100': 'k=100',
+        #     '200': 'k=200',
+        # }
         # datasets = [
-        #     'artificial',
         #     'geometric',
         #     'benchmark',
+        #     'artificial',
         #     'blobs',
         #     'adult',
-        #     'mnist',
         # ]
         # make_scores_over_datasets_plot(
         #     results,
         #     methods,
         #     datasets,
-        #     'composition',
+        #     'k',
         #     norm,
-        #     comp_values,
-        #     comp_pattern_dict,
-        #     y_lim=[1, 500],
-        #     figure_title='composition'
+        #     k_values,
+        #     k_pattern_dict,
+        #     y_lim=[1, 10000],
+        #     figure_title='Effect_of_k_for_sens_sampling'
         # )
+
+
+        ### Composition results
+        methods = ['uniform_sampling', 'lightweight', 'semi_uniform', 'fast_coreset']
+        results, params = read_outputs(
+            'outputs',
+            npy_file='metrics',
+            filter_strs=methods,
+            print_dict=True
+        )
+        comp_values = ['True', 'False']
+        comp_pattern_dict = {'True': 'True', 'False': 'False'}
+        datasets = [
+            'artificial',
+            'geometric',
+            'benchmark',
+            'blobs',
+            'adult',
+            'mnist',
+            # 'song',
+            # 'cover_type',
+            # 'census',
+        ]
+        make_scores_over_datasets_plot(
+            results,
+            methods,
+            datasets,
+            'composition',
+            norm,
+            comp_values,
+            comp_pattern_dict,
+            y_lim=[1, 500],
+            figure_title='composition'
+        )
 
 
         # ### DOES USING 3 HST'S HELP?
@@ -519,7 +522,7 @@ if __name__ == '__main__':
         #     figure_title='3_HSTs_vs_1_HST'
       # )
 
-    # Run Lloyd's on coresets
+    # # Run Lloyd's on coresets
     # methods = ['uniform_sampling', 'lightweight', 'semi_uniform', 'fast_coreset']
     # results, params = read_outputs(
     #     'outputs',

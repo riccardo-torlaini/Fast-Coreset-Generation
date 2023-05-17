@@ -2,18 +2,20 @@
 \label{sec:theory}
 
 \begin{algorithm}[tb]
-   \caption{Fast-Coreset($P, k, \eps, S$)}
+   \caption{Fast-Coreset($P, k, \eps, m$)}
    \label{alg:main}
 \begin{algorithmic}[1]
-   \State {\bfseries Input:} data $P$, number of clusters $k$, precision $\eps$ and target size $S$
-   \State Use a Johnson-Lindenstrauss  embedding to compute the embedding $\tilde P$ of $P$ into $\tilde d = O(\log k)$ dimensions
-   \State Compute an approximate solution $\tilde \calC = \lbra \tilde c_1, ..., \tilde c_k\rbra $ for $\tilde P$, and an assignment $\tilde \sigma : \tilde P \rightarrow \tilde \calC$ using \fkmeans.	
+   \State {\bfseries Input:} data $P$, number of clusters $k$, precision $\eps$ and target size $m$
+   \State Use a Johnson-Lindenstrauss embedding to embed $\tilde P$ of $P$ into $\tilde d = O(\log k)$ dimensions
+   \State Find approx. solution $\tilde \calC = \lbra \tilde c_1, ..., \tilde c_k\rbra $ on $\tilde P$ and assignment $\tilde \sigma : \tilde P \rightarrow
+   \tilde \calC$ by \fkmeans.	
    \State Let $\calC_i = \tilde \sigma^{-1}(c_i)$. Compute the $1$-median (or $1$-mean) $c_i$ of each $\calC_i$ in $\R^d$.%, and define $\sigma(p) := c_i$ for all $p \in \calC_i$.
    \State For each point $p \in \calC_i$, define
    $s(p) = \frac{\dist^z(p, c_i)}{\cost(\calC_i, c_i)}+ \frac{1}{|\calC_i|}$.
-   \State Compute a set $\coreset$ of $S$ points randomly sampled from $P$ proportionate to $s$.
-   \State For each $\calC_i$, define $|\hat \calC_i|$ the estimated weight of $\calC_i$ by $\coreset$, namely $|\hat \calC_i| := \sum_{p \in \calC_i \cap \coreset} \frac{\sum_{p' \in P}s(p')}{s(p)S}$.
-   \State {\bfseries Output:} the coreset $\coreset$, with weights $w(p) = \frac{\sum_{p' \in P}s(p')}{s(p)S} \lpar (1+\eps)|\calC_i| - |\hat \calC_i|\rpar$
+   \State Compute a set $\coreset$ of $m$ points randomly sampled from $P$ proportionate to $s$.
+   \State For each $\calC_i$, define $|\hat \calC_i|$ the estimated weight of $\calC_i$ by $\coreset$, namely $|\hat \calC_i| := \sum_{p \in \calC_i \cap
+   \coreset} \frac{\sum_{p' \in P}s(p')}{s(p)m}$.
+   \State {\bfseries Output:} the coreset $\coreset$, with weights $w(p) = \frac{\sum_{p' \in P}s(p')}{s(p)m} \lpar (1+\eps)|\calC_i| - |\hat \calC_i|\rpar$
 \end{algorithmic}
 \end{algorithm}
 
@@ -61,11 +63,11 @@ linear time-dependency can then be seen in Table \ref{tbl:logdelta}.
 \subsection{Overview of the Approach}
 
 To remove the $\log\Delta$ dependency, we proceed in two steps: first, we compute a very crude upper-bound on the cost $U$ of the optimal solution -- up to
-a $\poly(n)$ factor.  If $U$ is a $c$-approximation of the optimal cost, the natural strategy to reduce the aspect-ratio is to round all coordinates to
-multiples of $g = U/(cn)$, giving us a minimum distance of no less than $g$; it is then enough to reduce the diameter to $\poly(n) U$.  Thus, we place a grid
-with cell length $O(n \cdot U)$, so that two points from the same cluster in $\opt$ fall into the same cell w.h.p., implying that distinct cells do not interact
-with each other in any reasonable solution.  Then, we compress the input by "moving" non-empty cells closer to each other. We will focus this section on the
-simpler $k$-median problem but show how to reduce $k$-means to this case in \cref{app:redKM}.
+a $\poly(n)$ factor.  If $U$ is a $c$-approximation of the optimal cost then the aspect-ratio can be reduced by rounding all coordinates to multiples of $g
+= U/(cn)$, giving us a minimum distance of no less than $g$; it is then enough to reduce the diameter to $\poly(n) U$.  Thus, we place a grid with cell length
+$O(n \cdot U)$, so that two points from the same cluster in $\opt$ fall into the same cell w.h.p., implying that distinct cells do not interact with each other
+in any reasonable solution.  Then, we compress the input by "moving" non-empty cells closer to each other. We will focus this section on the simpler $k$-median
+problem but show how to reduce $k$-means to this case in \cref{app:redKM}.
 
 
 

@@ -1,13 +1,16 @@
 \begin{table}[htbp]
     \centering
+    \small
     \begin{tabular}{lcccc}
         Algorithm & $\gamma = 0$ & $\gamma = 1$ & $\gamma = 3$ & $\gamma = 5$\\
         \hline
+        \vspace*{-0.15cm}\\
         LW Coreset & 1.03 & 1.03 & 1.36 & 2.17\\
         $j=2$ & 1.04 & 1.04 & 1.04 & 1.92\\
         $j=\log k$ & 1.04 & 1.04 & 1.04 & 1.95\\
         $j=\sqrt{k}$ & 1.05 & 1.06 & 1.04 & 1.18\\
-        Fast Coreset & 1.03 & 1.03 & 1.04 & 1.12
+        Fast Coreset & 1.03 & 1.03 & 1.04 & 1.12\\
+        \vspace*{-0.15cm}\\
     \end{tabular}
     \caption{The effect of $\gamma$ in the Gaussian mixture dataset on the coreset distortion. We report the means over 5 random dataset generations.
     Each generation had 50\,000 points in 50 dimensions, with 50 Gaussian clusters and coresets of size 4\,000. We set $k=100$.}
