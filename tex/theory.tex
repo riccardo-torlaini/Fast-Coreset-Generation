@@ -70,24 +70,11 @@ in any reasonable solution.  Then, we compress the input by "moving" non-empty c
 problem but show how to reduce $k$-means to this case in \cref{app:redKM}.
 
 
-
-
-%We note that the quadtree structure directly facilitates the discussed grid and, given a tree embedding, the cost of any $k$-median solution $\calS$ in the tree
-%metric is within a factor $O(\sqrt d \log \Delta)$ of its cost for the original metric.  Therefore, it is enough for us to find an approximation in the tree and
-%we use $\opt_T$ to refer to the optimal solution in the quadtree.  We now show that (1) we only need to build a fraction of the tree, allowing for a running
-%time $O(nd \log \log \Delta)$, and (2) once the tree $T$ is built, there is a corresponding tree $T'$ that has a similar optimal $k$-median cost but where
-$\Delta \in \poly(n, d)$.
-
-
-
-
 \subsection{Computing a crude upper-bound}
 
-As described, we start by computing an approximate solution $U$ such that $U \leq \poly(n) \cdot \cost(\opt)$. For this, the first step is to embed the input into a quadtree: this gives a lot of structure to the input, and preserves the cost up to a factor $O(d \log \Delta)$ for $k$-median.
-  Our first lemma shows
+As described, we start by computing an approximate solution $U$ such that $U \leq \poly(n) \cdot \cost(\opt)$. For this, the first step is to embed the input
+into a quadtree: this gives a lot of structure to the input, and preserves the cost up to a factor $O(d \log \Delta)$ for $k$-median.  Our first lemma shows
 that the necessary approximation exists at the first level for which the input lies in $k+1$ disjoint subtrees. 
-%The algorithm to find this is then a simple binary
-%search through the levels of the tree.
 
 \begin{lemma}\label{lem:apxTree}
 Let $i$ be the first level of the decomposition such that at least $k+1$ cells at level $i$ contains any point. Then, $\sqrt{d}2^{-i+1} \cdot \boxsize \leq
