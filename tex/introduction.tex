@@ -18,11 +18,12 @@ Surprisingly, many coreset constructions can remove the dependency on $n$, signi
 We study both paradigms with respect to a classic problem -- what are the limits and possibilities of compression for the $k$-means and $k$-median objectives?
 Whereas uniform sampling provides optimal speed but no accuracy guarantee, coreset constructions have
 unclear runtime bounds despite their tight bounds on the minimum number of samples required for accurate compression. Although there is little to study with respect to random
-sampling, the lack of clarity regarding linear-time coreset constructions throws into question their ability to facilitate clustering on large datasets.
-Indeed, it has been conjectured in \cite{DSWY22} that producing a $k$-means or $k$-median coreset necessitates an $\tilde{O}(nd + nk)$ runtime.
-Since the issue of determining an optimal coreset size has been recently resolved \cite{CSS21,CLSSS22,HLW23}, this is arguably the main open problem in coreset research for center-based clustering. We resolve this problem by showing that
-there exists an easy-to-implement algorithm that constructs coresets in $\tilde{O}(nd)$ time -- only logarithmic factors away from the time it takes to read
-in the dataset.
+sampling, the lack of clarity regarding linear-time coreset constructions throws into question their ability to facilitate clustering on large datasets. Indeed,
+previous attempts to obtain a linear-time algorithm include \emph{lightweight coresets} \cite{BachemL018} which obtain an additive error and \cite{DSWY22} which
+run in $\tilde{O}(nd + nk)$ time. Furthermore, \cite{DSWY22} conjectured that producing a $k$-means or $k$-median coreset necessitates an $\tilde{O}(nd + nk)$ runtime.
+Since the issue of determining an optimal coreset size has been recently resolved \cite{CSS21,CLSSS22,HLW23}, this is arguably the main open problem in coreset
+research for center-based clustering. We resolve this by showing that there exists an easy-to-implement algorithm that constructs coresets in $\tilde{O}(nd)$
+time -- only logarithmic factors away from the time it takes to read in the dataset.
 
 Nonetheless, this does not fully illuminate the landscape between the sampling paradigms for clustering algorithms when applying them in practice. Although our algorithm achieves an optimal
 running time, it is certainly possible that other, cruder methods may be just as viable on most real world data sets despite having no worst case guarantees. Other than uniform
