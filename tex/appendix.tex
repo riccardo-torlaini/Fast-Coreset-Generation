@@ -70,7 +70,15 @@ If the input is spread in $k+1$ distinct cell at level $i$, then in any solution
 On the other hand, if the input is contained into $k$ cells at level $i-1$, then placing arbitrarily a center in each cell yields a solution with cost at most $n \cdot \sqrt{d}2^{-i+4} \cdot \boxsize$: indeed, the distance from any point to its closest center is at most $2 \cdot \sum_{j \geq i-1} \sqrt{d}2^{-j} \cdot 2\boxsize \leq 4 \sqrt{d}2^{-i+2} \cdot \boxsize$ (summing the edge length from the point to the cell at level $i$, and then going down to the center). This concludes.
 \end{proof}
 
-\input{figures/lightweight_breaks.tex}
+\input{figures/lightweight_breaks}
+\input{figures/streaming_runtimes}
+
+\section{Data Parameters}
+\label{app:data_params}
+In all real and artificial datasets, we add random uniform noise $\eta$ with $0 \leq \eta_i \leq 0.001$ in each dimension in order to make all points unique.
+Unless specifically varying these parameters, we default all algorithms in~\ref{ssec:algorithms} to $k=100$ for the Adult, MNIST, and artificial datasets and
+$k=500$ for the Song, Cover Type, and Census datasets. Our default coreset size is then $m = 40k$. We refer to the coreset size scalar as the \emph{$m$-scalar}.
+We only run the dimension-reduction step on the MNIST dataset, as the remaining datasets already have sufficiently low dimensionality.
 
 \begin{table}[htbp]
     \centering
