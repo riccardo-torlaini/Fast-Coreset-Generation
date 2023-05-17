@@ -1,6 +1,7 @@
 \section{Preliminaries and Related Work}
+\label{sec:preliminaries}
 
-\subsection{On Sampling Strategies.}
+\paragraph*{On Sampling Strategies.}
 \label{ssec:sens_sampling}
 
 As discussed, we focus our study on linear- and sublinear-time sampling strategies. Specifically, given a dataset $P \in \R^{n \times d}$, we want to sample
@@ -46,7 +47,7 @@ centers from the bicriteria seems to require $\Omega(nk)$ running time.
 
 \input{figures/coreset_size_on_sens_quality.tex}
 
-\subsection{Other Coreset Strategies}
+\paragraph*{Other Coreset Strategies}
 \label{ssec:clustering_prelim}
 
 Much of the advancements regarding coresets have sought the smallest coreset possible across metric spaces and downstream objectives. The most prominent
@@ -71,7 +72,7 @@ unclear how to computationally verify this.  This has posed a considerable diffi
 focus on the cost of a solution computed on the coreset instead. We refer to \cite{chrisESA} for further discussion on this topic and discuss our metrics in
 Section \ref{sssec:metrics}.
 
-\subsection{Quadtree Embeddings}
+\paragraph*{Quadtree Embeddings}
 
 To design fast algorithms, one of the common technique is to embed the Euclidean space into a tree metric.
 We give a brief description of the quadtree metric embedding procedure here and refer to \cref{app:quadtree} for a more formal explanation.  The central idea is

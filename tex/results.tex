@@ -24,7 +24,7 @@ We compare Fast-Coresets (Algorithm~\ref{alg:main}) against 4 different benchmar
 accuracy.
 \begin{itemize}
         \item \emph{Standard uniform sampling}. Each point is sampled with equal probability and weights are set to $n / m$, where $m$ is the size of the sample.
-        \item \emph{Standard sensitivity sampling \cite{LS10}}. We refer to Section~\ref{ssec:sens_sampling}.
+        \item \emph{Standard sensitivity sampling \cite{LS10}}. We refer to Section~\ref{sec:preliminaries}.
         \item \emph{Lightweight coresets \cite{bachem2018scalable}}. Obtain a coreset by sampling sensitivity values with respect to the $1$-means solution,
             i.e. sensitivities are given by $\hat{s}(p) = 1/|P| + \cost(p, \mu) / \cost(P, \mu)$, where $\mu$ is the dataset mean.
         \item \emph{Welterweight coresets}. For any $j \in \{1,..., k\}$, we compute a coreset using sensitivity sampling with respect to a candidate
