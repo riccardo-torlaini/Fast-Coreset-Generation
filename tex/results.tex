@@ -12,8 +12,8 @@ downstream clustering tasks.
 \label{sssec:metrics}
 
 We analyze the sampling methods along two metrics -- compression accuracy and construction time. Although measuring runtime is standard, it is unclear how to
-confirm that a subset of points satisfies the coreset property over all solutions. To this end, we use the distortion measure introduced in~\cite{chrisESA} \[
-\max \left( \dfrac{\cost(P, \calC_{\Omega})}{\cost(\Omega, \calC_{\Omega})}, \dfrac{\cost(\Omega, \calC_{\Omega})}{\cost(P, \calC_{\Omega})} \right),\] where
+confirm that a subset of points satisfies the coreset property over all solutions. To this end, we use the distortion measure introduced in~\cite{chrisESA} $
+\max \left( \dfrac{\cost(P, \calC_{\Omega})}{\cost(\Omega, \calC_{\Omega})}, \dfrac{\cost(\Omega, \calC_{\Omega})}{\cost(P, \calC_{\Omega})} \right),$ where
 $\calC_{\Omega}$ is a candidate solution that was computed over the coreset $\Omega$. This will be within $1+\varepsilon$ if the coreset guarantee is satisfied
 but may be unbounded otherwise.  We refer to this metric as the \emph{coreset distortion}.
 
@@ -31,7 +31,7 @@ accuracy.
             $j$-means++ solution.
 \end{itemize}
 
-We take a moment here to motivate the welterweight coreset algorithm.  Consider that lightweight coresets are simply solving $1$-means to obtain sensitivity
+We take a moment here to motivate the welterweight coreset algorithm.  Consider that lightweight coresets are solving $1$-means to obtain sensitivity
 values whereas sensitivity sampling is solving the $k$-means problem. Given that sensitivity values are estimated via $ \sigma_\calC(p) = \dfrac{\cost(p,
 \calC)}{\cost(\calC_{p}, \calC)} + \dfrac{1}{|\calC_p|},$ changing the value of $j$ affects the cluster sizes $|\calC_p|$ and therefore acts as a direct
 interpolation between uniform and sensitivity sampling.  We default to $j = \log k$ unless stated otherwise. We will use the term `accelerated sampling methods'
@@ -55,7 +55,8 @@ We complement these with artificial datasets and default to $n = 50\,000$ and $d
     \item \emph{Gaussian mixture}. A set of scattered Gaussian clusters of varying density. These clusters are sequentially defined, with the size of the first
         cluster defined by $\frac{n}{\kappa} \exp \left( \gamma \cdot \rho_0 \right)$, where $\kappa$ is the number of Gaussian clusters, $\rho_0$ is uniformly
         chosen from $[-0.5, 0.5]$, and $\gamma$ is a hyperparameter that affects the distribution of cluster sizes.  Then, given clusters $\{c_1, \cdots,
-        c_i\}$, we obtain the size of the $(i+1)$-st cluster by \[|c_{i+1}| = \frac{n - \sum_i |c_i|}{\kappa - i}\exp \left( \gamma \cdot \rho_{i+1} \right).\]
+        c_i\}$, we obtain the size of the $(i+1)$-st cluster by $|c_{i+1}| = \frac{n - \sum_i |c_i|}{\kappa - i}\exp \left( \gamma \cdot \rho_{i+1} \right).$
+
         This has the property that all clusters have size $n / k$ when $\gamma = 0$ and, as $\gamma$ grows, the cluster sizes diverge at an exponential rate.
         We note that this is a well-clusterable instance with respect to cost stability conditions, see \cite{AwS12,Cohen-AddadS17,KuK10,ORSS12}.
 
@@ -100,11 +101,9 @@ distributions grows, the accelerated sampling methods have difficulty capturing 
 to be brittle, it may be less obvious what causes light- and welterweight coresets to break. Consider that the lightweight coreset is biased towards points that
 are far from the mean and, as a simple counterexample, is likely to miss a small cluster that is close to $\mu$.  Now let $\calC_j$ be the approximation
 obtained during welterweight coresets and observe that the sum of importance values of the points belonging to center $c_i \in \calC_j$ is
-\begin{equation*}
-    \sum_{p \in c_i} \left[ \dfrac{\cost(p, c_i)}{\cost(c_i, \calC_j)} + \dfrac{1}{|c_i|} \right]
-    = \dfrac{\sum_{p \in c_i} \cost(p, c_i)}{\cost(c_i, \calC_j)} + 1
-    = 2
-\end{equation*}
+$\sum_{p \in c_i} \left[ \dfrac{\cost(p, c_i)}{\cost(c_i, \calC_j)} + \dfrac{1}{|c_i|} \right] = \dfrac{\sum_{p \in c_i} \cost(p,
+    c_i)}{\cost(c_i, \calC_j)} + 1 = 2$
+
 Thus, our probability mass is distributed across the clusters that have been found in the approximate solution. Naturally, if $j < k$ and we missed a cluster
 from $\opt$, there is some set of points that have not received an appropriate probability mass and may therefore be missed.
 
@@ -118,8 +117,8 @@ sensitivity sampling's reliance on the initial solution but we see that, despite
 before it provides good compression. We lastly show how these compressions facilitate fast clustering on large datasets in Table~\ref{tbl:lloyds}. We see that
 running Lloyd's algorithm on the samples obtains a consistent cost value on the full datasets.
 
-\input{tables/lloyds}
-\input{tables/composition}
+%\input{tables/lloyds}
+%\input{tables/composition}
 
 \subsection{Streaming Setting}
 \label{ssec:streaming}
