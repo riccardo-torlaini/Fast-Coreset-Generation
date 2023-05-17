@@ -11,7 +11,7 @@ The quickest sampling strategy, running in sublinear time, is uniform sampling. 
 as missing a single extreme outlier will cause the sampling strategy to fail. Thus, any approach that outperforms this strategy must read in the entire dataset
 and therefore run in at least linear time. Indeed, sublinear algorithms always require some assumption on the input to provide guarantees, see \cite{Ben-David07,czumaj2007sublinear,HJJ23,meyerson2004k}.
 
-Among these more sophisticated sampling strategies, one cannot do better than the strong coreset guarantee. Specifically, a strong $\eps$-coreset is a subset $S
+Among these more sophisticated sampling strategies, coresets offer the strongest compression guarantee. Specifically, a strong $\eps$-coreset is a subset $S
 \subseteq P$ with weights $\tilde w$ such that for \emph{any} solution $\calC$, \[\sum_{p \in S} \tilde w_p \cost(p, \calC) \in (1 \pm \eps) \cost(P, \calC)\] with
 high probability.  Going forward, we will discuss this in the context of the $k$-median and $k$-means cost functions: for a dataset $P \in \R^d$ with weights $w
 : P \rightarrow \R^+$, and any $k$-tuple $\calC$ in $\R^d$, \[\cost_z(P, \calC) := \sum_{p \in P} \tilde w(p) \dist^z(p, \calC),\] with

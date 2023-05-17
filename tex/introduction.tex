@@ -20,14 +20,14 @@ Whereas uniform sampling provides optimal speed but no accuracy guarantee, cores
 unclear runtime bounds despite their tight bounds on the minimum number of samples required for accurate compression. Although there is little to study with respect to random
 sampling, the lack of clarity regarding linear-time coreset constructions throws into question their ability to facilitate clustering on large datasets.
 Indeed, it has been conjectured in \cite{DSWY22} that producing a $k$-means or $k$-median coreset necessitates an $\tilde{O}(nd + nk)$ runtime.
-Since the issue of optimal coreset sizes has been resolved \cite{CSS21,CLSSS22,HLW23}, this is arguably the main open problem regarding center-based coresets. To this end, we show that
-there does exist an easy-to-implement algorithm that constructs coresets in $\tilde{O}(nd)$ time -- only logarithmic factors away from the time it takes to read
+Since the issue of determining an optimal coreset size has been recently resolved \cite{CSS21,CLSSS22,HLW23}, this is arguably the main open problem in coreset research for center-based clustering. We resolve this problem by showing that
+there exists an easy-to-implement algorithm that constructs coresets in $\tilde{O}(nd)$ time -- only logarithmic factors away from the time it takes to read
 in the dataset.
 
-Nonetheless, this does not fully illuminate the landscape between the sampling paradigms for clustering algorithms. Although our algorithm achieves an optimal
-runtime, it is certainly possible that other, cruder methods are equally viable in practice despite being faster and easier to implement. Other than uniform
+Nonetheless, this does not fully illuminate the landscape between the sampling paradigms for clustering algorithms when applying them in practice. Although our algorithm achieves an optimal
+running time, it is certainly possible that other, cruder methods may be just as viable on most real world data sets despite having no worst case guarantees. Other than uniform
 sampling, this includes methods such as Lightweight Coresets, which do not satisfy the strong coreset guarantee and simply use the distance to the mean
-of the dataset. Thus, there is a natural spectrum within the linear-time algorithms where obtaining more information about the dataset allows for a better
+of the dataset. Thus, there is a natural spectrum within linear-time algorithms where obtaining more information about the dataset allows for a better
 sampling strategy at the expense of sublinear factors in speed. We state this formally in the following question: When are optimal $k$-means and $k$-median
 coresets necessary and what is the practical tradeoff between coreset speed and accuracy? To this end, we show that while many practical settings do not require
 the full coreset guarantee, one cannot cut corners if one wants to be confident in their compression. We also
