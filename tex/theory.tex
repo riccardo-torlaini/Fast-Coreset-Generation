@@ -26,9 +26,8 @@ the input.  We show afterwards how to reduce the dependency in $\Delta$ to $\log
 Our method is based on the following observations about the group sampling \cite{stoc21} and sensitivity sampling \cite{FeldmanL11} coreset construction
 algorithms. Both start by computing a solution $\calC$. When $\calC$ is a $c$-approximation, they compute a $c \eps$-coreset of size $\tilde O\lpar
 k \eps^{-z-2}\rpar$ and $\tilde O\lpar k \eps^{-2z -2}\rpar$, respectively. Hence, by rescaling, they provide an $\eps$-coreset with size $\tilde O\lpar
-k (\eps/c)^{-z-2}\rpar$ and $\tilde O\lpar k (\eps/c)^{-2z-2}\rpar$. 
+k (\eps/c)^{-z-2}\rpar$ and $\tilde O\lpar k (\eps/c)^{-2z-2}\rpar$.  This leads to the following fact:
 
-This leads to the following fact:
 \begin{fact}\label{fact:logApprox}
 Let $\calC$ be an $O\lpar \log^{O(1)} k\rpar$ approximation to $k$-median or $k$-means.
 Then, group sampling using solution $\calC$ computes a coreset of size $\tilde O\lpar
@@ -60,7 +59,7 @@ linear time-dependency can then be seen in Table \ref{tbl:logdelta}.
 \label{sec:logdelta}
 \newcommand{\boxsize}{\textsc{MaxDist}}
 
-\subsection{Overview of the Approach}
+\paragraph*{Overview of the Approach}
 
 To remove the $\log\Delta$ dependency, we proceed in two steps: first, we compute a very crude upper-bound on the cost $U$ of the optimal solution -- up to
 a $\poly(n)$ factor.  If $U$ is a $c$-approximation of the optimal cost then the aspect-ratio can be reduced by rounding all coordinates to multiples of $g
@@ -70,10 +69,10 @@ in any reasonable solution.  Then, we compress the input by "moving" non-empty c
 problem but show how to reduce $k$-means to this case in \cref{app:redKM}.
 
 
-\subsection{Computing a crude upper-bound}
+\paragraph*{Computing a crude upper-bound}
 
 As described, we start by computing an approximate solution $U$ such that $U \leq \poly(n) \cdot \cost(\opt)$. For this, the first step is to embed the input
-into a quadtree: this gives a lot of structure to the input, and preserves the cost up to a factor $O(d \log \Delta)$ for $k$-median.  Our first lemma shows
+into a quadtree: this gives a lot of structure to the input, and preserves the cost up to a factor $O(d \log n \log \Delta)$ for $k$-median.  Our first lemma shows
 that the necessary approximation exists at the first level for which the input lies in $k+1$ disjoint subtrees. 
 
 \begin{lemma}\label{lem:apxTree}
@@ -90,7 +89,7 @@ This is done in time $O(nd)$.  Using a binary search on the $O(\log \Delta)$ man
 There is an algorithm running in time $O(nd \log \log \Delta)$ that computes an  $O(n^2 d \log \Delta)$-approximation to $k$-median or $k$-means.
 \end{lemma}
 
-\subsection{From Approximate Solution to Small Aspect-Ratio}
+\paragraph*{From Approximate Solution to Small Aspect-Ratio}
 Let $U$ be an upper-bound on the optimal cost that is a $c$-approximation, computed via \cref{lem:crudeApx}. We place a grid with side length $d n^2\cdot U$.
 The following folklore lemma ensures that with high probability, no cluster of the optimal solution is spread on several grid cells.
 
@@ -112,15 +111,15 @@ still non-adjacent.
 
 The first property allows us to reduce the aspect-ratio to $(nd \log \Delta)^{O(1)}$.  Indeed, one can round all coordinates to the closest multiple of
 $g = \frac{U}{n^4 d^{2} \log \Delta}$. Since every point has moved by at most $g$ and, using \cref{lem:crudeApx}, $U
-\leq n^2 d \log(\Delta) \opt$, it is clear that the distance between any point and its rounding is at most $\frac{\opt}{n^2}$. Summing this error over all points,
+\leq n^2 d \log(\Delta) \opt$, it is clear that the distance between any point and its rounding is at most $\frac{\opt}{n^2}$. Summing over all points,
 any solution computed on the gridded data has cost within an additive factor $\pm \frac{\opt}{n}$ of the true cost. Furthermore, the smallest
 non-zero distance is $g = \frac{U}{n^4 d^{2} \log \Delta}$, implying that the aspect-ratio of the new metric is $(nd \log \Delta)^{O(1)}$,
 as claimed.
 
 The second property, on the other hand, ensures that we can transform a solution $\calS'$ for $P'$ to a solution with exactly the same cost for $P$: in any
-(reasonable) solution, points from two non-adjacent boxes will not be in the same cluster in either $P'$ or $P$. Therefore, simply adding back the corresponding
-shift to centers of $\calS'$ allows us to transform it to a solution $\calS$. We note that the distance between any point and its closest center does not
-change. This is formalized in the next lemma.
+(reasonable) solution, points from two non-adjacent boxes will not be in the same cluster in either $P'$ or $P$. Therefore, simply adding back the shift to
+centers of $\calS'$ allows us to transform it to a solution $\calS$. We note that the distance between any point and its closest center does not change. This is
+formalized in the next lemma.
 
 \begin{lemma}
 Let $\calS'$ be a $c'$-approximation for  $k$-median (resp. $k$-means) on $P'$, where $c' \leq nc$ and $c$ is the approximation guarantee from
@@ -129,7 +128,7 @@ Let $\calS'$ be a $c'$-approximation for  $k$-median (resp. $k$-means) on $P'$, 
 \begin{proof}
 
 First, since distances in $P'$ are smaller than in $P$, the optimal solution for $P'$ has cost at most $U$. Therefore, two points that are in non-adjacent boxes
-(i.e., at distance more than $d n^2\cdot U$) are not in the same cluster of $\calS'$ -- as otherwise $\calS'$ would not be a $c'$-approximation.  Let $\calS$ be
-the solution obtained from $\calS'$ by reversing the construction of $P'$. Since this construction preserves adjacency, for all clusters of the solution, all
+(i.e., at distance more than $d n^2\cdot U$) are not in the same cluster of $\calS'$ as otherwise $\calS'$ would not be a $c'$-approximation.  Let $\calS$ be
+the solution obtained from $\calS'$ by reversing the construction of $P'$. Since adjacency is preserved for all clusters, all
 distances are the same in $P$ and $P'$. Therefore, the costs are equal.
 \end{proof}

@@ -8,65 +8,60 @@ describing our experimental setup before showing results in both the static and 
 downstream clustering tasks.
 
 \subsection{Experimental Setup}
-\subsubsection{Metrics}
+\paragraph*{Metrics}
 \label{sssec:metrics}
 
 We analyze the sampling methods along two metrics -- compression accuracy and construction time. Although measuring runtime is standard, it is unclear how to
 confirm that a subset of points satisfies the coreset property over all solutions. To this end, we use the distortion measure introduced in~\cite{chrisESA} $
 \max \left( \dfrac{\cost(P, \calC_{\Omega})}{\cost(\Omega, \calC_{\Omega})}, \dfrac{\cost(\Omega, \calC_{\Omega})}{\cost(P, \calC_{\Omega})} \right),$ where
-$\calC_{\Omega}$ is a candidate solution that was computed over the coreset $\Omega$. This will be within $1+\varepsilon$ if the coreset guarantee is satisfied
-but may be unbounded otherwise.  We refer to this metric as the \emph{coreset distortion}.
+$\calC_{\Omega}$ is a candidate solution computed over the coreset $\Omega$. This will be within $1+\varepsilon$ if the coreset guarantee is satisfied
+but may be unbounded otherwise.  We refer to this as the \emph{coreset distortion}.
 
-\subsubsection{Algorithms}
+\paragraph*{Algorithms}
 \label{ssec:algorithms}
 
 We compare Fast-Coresets (Algorithm~\ref{alg:main}) against 4 different benchmark sampling strategies that span the space between optimal time and optimal
 accuracy.
-\begin{itemize}
-        \item \emph{Standard uniform sampling}. Each point is sampled with equal probability and weights are set to $n / m$, where $m$ is the size of the sample.
-        \item \emph{Standard sensitivity sampling \cite{LS10}}. We refer to Section~\ref{sec:preliminaries}.
-        \item \emph{Lightweight coresets \cite{bachem2018scalable}}. Obtain a coreset by sampling sensitivity values with respect to the $1$-means solution,
+\begin{description}
+        \item \emph{- Standard uniform sampling}. Each point is sampled with equal probability and weights are set to $n / m$, where $m$ is the size of the sample.
+        \item \emph{- Standard sensitivity sampling \cite{LS10}}. We refer to Section~\ref{sec:preliminaries}.
+        \item \emph{- Lightweight coresets \cite{bachem2018scalable}}. Obtain a coreset by sampling sensitivity values with respect to the $1$-means solution,
             i.e. sensitivities are given by $\hat{s}(p) = 1/|P| + \cost(p, \mu) / \cost(P, \mu)$, where $\mu$ is the dataset mean.
-        \item \emph{Welterweight coresets}. For any $j \in \{1,..., k\}$, we compute a coreset using sensitivity sampling with respect to a candidate
+        \item \emph{- Welterweight coresets}. For any $j \in \{1,..., k\}$, we compute a coreset using sensitivity sampling with respect to a candidate
             $j$-means++ solution.
-\end{itemize}
+\end{description}
 
-We take a moment here to motivate the welterweight coreset algorithm.  Consider that lightweight coresets are solving $1$-means to obtain sensitivity
-values whereas sensitivity sampling is solving the $k$-means problem. Given that sensitivity values are estimated via $ \sigma_\calC(p) = \dfrac{\cost(p,
-\calC)}{\cost(\calC_{p}, \calC)} + \dfrac{1}{|\calC_p|},$ changing the value of $j$ affects the cluster sizes $|\calC_p|$ and therefore acts as a direct
-interpolation between uniform and sensitivity sampling.  We default to $j = \log k$ unless stated otherwise. We will use the term `accelerated sampling methods'
-when referring to uniform, lightweight and welterweight coresets as a group.
+We take a moment here to motivate the welterweight coreset algorithm.  Consider that lightweight coresets are solving $1$-means to obtain sensitivity values
+whereas sensitivity sampling is solving $k$-means. Given that sensitivity values are estimated via~\cref{eq:sensitivity}, changing the value of $j$
+affects the cluster sizes $|\calC_p|$ and therefore acts as a direct interpolation between uniform and sensitivity sampling.  We default to $j = \log k$ unless
+stated otherwise. We will use the term `accelerated sampling methods' when referring to uniform, lightweight and welterweight coresets as a group.
 
-\subsubsection{Datasets}
+\paragraph*{Datasets}
 \label{sssec:datasets}
 
 We employ several real and artificial datasets to evaluate the quality of a coreset.  For our real-world data, we utilize the Adult~\cite{Dua:2019},
 MNIST~\cite{mnist}, Song~\cite{song}, Census~\cite{census}, and Cover Type~\cite{covtype} datasets, whose characteristics are summarized in
 Table~\ref{tbl:datasets} in the Appendix. These are standard datasets for coreset and clustering evaluations.
 We complement these with artificial datasets and default to $n = 50\,000$ and $d=50$ unless stated otherwise.
-\begin{itemize}
-
-    \item \emph{c-outlier}. Place $n-c$ points in a single location and $c$ points a large distance away.
-
-    \item \emph{Geometric}. Place $c k$ points at $(1, 0, 0, \cdots)$, $\frac{ck}{r}$ points at $(0, 1, 0, \cdots)$, $\frac{ck}{r^2}$ points
+\begin{description}
+    \item \emph{- c-outlier}. Place $n-c$ points in a single location and $c$ points a large distance away.
+    \item \emph{- Geometric}. Place $c k$ points at $(1, 0, 0, \cdots)$, $\frac{ck}{r}$ points at $(0, 1, 0, \cdots)$, $\frac{ck}{r^2}$ points
         at $(0, 0, 1, \cdots)$, and so on for $\log_r (ck)$ rounds. Thus, the data creates a high-dimensional simplex with uneven weights across the vertices. We
         default to $c = 100$ and $r=2$.
-
-    \item \emph{Gaussian mixture}. A set of scattered Gaussian clusters of varying density. These clusters are sequentially defined, with the size of the first
+    \item \emph{- Gaussian mixture}. A set of scattered Gaussian clusters of varying density. These clusters are sequentially defined, with the size of the first
         cluster defined by $\frac{n}{\kappa} \exp \left( \gamma \cdot \rho_0 \right)$, where $\kappa$ is the number of Gaussian clusters, $\rho_0$ is uniformly
         chosen from $[-0.5, 0.5]$, and $\gamma$ is a hyperparameter that affects the distribution of cluster sizes.  Then, given clusters $\{c_1, \cdots,
         c_i\}$, we obtain the size of the $(i+1)$-st cluster by $|c_{i+1}| = \frac{n - \sum_i |c_i|}{\kappa - i}\exp \left( \gamma \cdot \rho_{i+1} \right).$
 
         This has the property that all clusters have size $n / k$ when $\gamma = 0$ and, as $\gamma$ grows, the cluster sizes diverge at an exponential rate.
         We note that this is a well-clusterable instance with respect to cost stability conditions, see \cite{AwS12,Cohen-AddadS17,KuK10,ORSS12}.
-
-    \item \emph{Benchmark}. A specific distribution of points introduced in \cite{chrisESA} as a testbed for coreset algorithms.  It has the property that
+    \item \emph{- Benchmark}. A specific distribution of points introduced in \cite{chrisESA} as a testbed for coreset algorithms.  It has the property that
         all reasonable $k$-means solutions are of equal quality but are maximally far apart in the solution space. Thus, the dataset is fully determined by the
         number of centers $k$. We follow the advice in the benchmark's original presentation and produce three benchmark datasets of varying size before
         applying random offsets to each. We choose the sizes by $k_1 = \frac{k}{c_1}$, $k_2 = \frac{k - k_1}{c_2}$, and $k_3 = k - k_1 - k_2$ for $c_1, c_2 \in
         \mathbb{R}^+$.
 
-\end{itemize}
+\end{description}
 
 The artificial datasets are constructed to emphasize strengths and weaknesses of the various sampling schemas. For example, the $c$-outlier problem contains
 very little information and, as such, should be simple for any sampling strategy that builds a reasonable representation of its input. The geometric dataset
@@ -126,7 +121,7 @@ running Lloyd's algorithm on the samples obtains a consistent cost value on the 
 One of the most common use-cases for big-data algorithms is the streaming setting, where one receives input in batches and must maintain a compression that is
 representative of the dataset. Although there is a wealth of sampling and coreset methods in the streaming paradigm, we require consistency
 across algorithms and therefore assume a black-box sampling procedure. Since the coreset property is preserved under composition, we utilize the merge-\&-reduce
-strategy originally proposed by \cite{BS80} and first applied to maintaining clustering coresets in stream by \cite{HaM01}. The idea is to first partition the
+strategy originally proposed by \cite{BS80} and first applied to maintaining clustering coresets in stream by \cite{HaM04}. The idea is to first partition the
 input into $b$ blocks and then perform sampling and composition along them until a single compression is obtained. Specifically, we start by obtaining
 a coreset\footnote{Although we use the word coreset here, this process can also be applied to the other sampling procedures.} on each block. Then, combining
 samples using a complete binary tree, we (1) recursively re-sample from the children until there is at least one coreset for each level\footnote{If there are

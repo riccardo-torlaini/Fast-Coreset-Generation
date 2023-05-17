@@ -13,10 +13,10 @@ read in the entire dataset and therefore run in at least linear time. Indeed, su
 guarantees, see \cite{Ben-David07,czumaj2007sublinear,HJJ23,meyerson2004k}.
 
 
-Among these more sophisticated sampling strategies, coresets offer the strongest compression guarantee. Specifically, a strong $\eps$-coreset is a subset
+Among these more sophisticated sampling strategies, coresets offer the strongest compression guarantee. Specifically, a strong $\eps$-coreset is an 
 $\Omega
 \subseteq P$ with weights $\tilde w$ such that for \emph{any} solution $\calC$, \[\sum_{p \in \Omega} \tilde w_p \cost(p, \calC) \in (1 \pm \eps) \cost(P, \calC)\] with
-high probability.  Going forward, we will discuss this in the context of the $k$-median and $k$-means cost functions: for a dataset $P \in \R^d$ with weights $w
+high probability.  Going forward, we will discuss this in the context of the $k$-median and $k$-means cost functions: for dataset $P \in \R^d$ with weights $w
 : P \rightarrow \R^+$, and any $k$-tuple $\calC$ in $\R^d$, \[\cost_z(P, \calC) := \sum_{p \in P} \tilde w(p) \dist^z(p, \calC),\] with
 $z=1$ for $k$-median and $z=2$ for $k$-means. We use $\opt$ to denote $\min_{\Omega} \cost_z(P, \calC)$.
 
@@ -24,10 +24,10 @@ Recently, sampling with respect to sensitivity values has grown to prominence du
 as $\sup_{\calC} \frac{\dist^z(p, \calC)}{\cost_z(P, \calC)}$, where the supremum is taken over all possible solutions $\calC$. Intuitively, this is a measure
 of the maximum impact a point can have on a solution and is difficult to evaluate directly.
 Thus, the approximate sensitivity-sampling algorithm we consider is the following, as introduced in \cite{FeldmanL11}.
-Given a solution to a clustering problem $\calC$, importance scores are defined as
+Given an $\alpha$-approximate solution to a clustering problem $\calC$, importance scores are defined as
 \begin{equation}
 \label{eq:sensitivity}
-\sigma_\calC(p) = \dfrac{\cost(p, \calC)}{\cost(\calC_{p}, \calC)} + \dfrac{1}{|\calC_p|},
+\sigma_\calC(p) = \alpha \cdot \left( \dfrac{\cost(p, \calC)}{\cost(\calC_{p}, \calC)} + \dfrac{1}{|\calC_p|} \right),
 \end{equation}
 where $\calC_p$ is the cluster that $p$ belongs to. This is always an upper-bound on the sensitivity values, see \cite{FL11,FeldmanSS20}.
 
@@ -54,7 +54,7 @@ Much of the advancements regarding coresets have sought the smallest coreset pos
 examples are in Euclidean space \cite{BadoiuHI02, HaM04, Chen09, HuangV20, stoc22}, with much of the focus on obtaining the optimal size in the $k$-means and
 $k$-median setting. Recently, a lower bound \cite{huangLB} showed that the group sampling algorithm developed in \cite{stoc21, stoc22} is optimal.
 
-Although this algorithm's coresets of ize $\tilde{O}(k\cdot \varepsilon^{-2} \min(k^{z/(z+2)},\varepsilon^{-z}))$ \cite{CLSSS22} are theoretically smaller than
+Although this algorithm's coresets have size $\tilde{O}(k\cdot \varepsilon^{-2} \min(k^{z/(z+2)},\varepsilon^{-z}))$ \cite{CLSSS22} are theoretically smaller than
 those obtained by sensitivity sampling, the experiments of \cite{chrisESA} showed that the latter is often more efficient in practice. We also note that one
 could use virtually any coreset construction as many are linear-time once provided with an initial solution $\calC$ and assignment $\sigma$.
 
@@ -66,8 +66,8 @@ $k$-means/median solution, it is natural to investigate the relationship between
 Section \ref{ssec:algorithms}.
 
 All efficient coreset constructions are probabilistic. This comes with a disadvantage of coresets being difficult to evaluate. For example, it is co-NP-hard to
-check whether a candidate compression is a weak coreset \cite{chrisESA} \footnote{A weak coreset guarantee only requires that a $(1+\varepsilon)$ approximation
-computed on the coreset yields a $(1+\varepsilon)$ on the entire point set.}. Therefore, although coreset algorithms succeed with some high probability, it is
+check whether a candidate compression is a weak coreset \footnote{A weak coreset guarantee only requires that a $(1+\varepsilon)$ approximation
+computed on the coreset yields a $(1+\varepsilon)$ on the entire point set \cite{chrisESA}.}. Therefore, although coreset algorithms succeed with some high probability, it is
 unclear how to computationally verify this.  This has posed a considerable difficulty for previous experimental evaluations and researchers would typically
 focus on the cost of a solution computed on the coreset instead. We refer to \cite{chrisESA} for further discussion on this topic and discuss our metrics in
 Section \ref{sssec:metrics}.
@@ -78,5 +78,5 @@ To design fast algorithms, one of the common technique is to embed the Euclidean
 We give a brief description of the quadtree metric embedding procedure here and refer to \cref{app:quadtree} for a more formal explanation.  The central idea is
 that each hypercube in the input space can be split into $2^d$ sub-cubes and that this can be represented in a tree structure. Setting the weight of each branch
 equal to the length of the parent node's diagonal then guarantees that the expected distance in the tree is within a factor $O(\log n \sqrt{d} \log
-\Delta)$\andrew{There's a $\log n$ on the expected distortion, right? This should also hold for the $k$-median setting?} of the distance in the original space,
+\Delta)$ of the distance in the original space,
 where $\log \Delta$ is the maximum depth of the tree. Lastly, this tree can be constructed in $\tilde{O}(nd \log \Delta)$ time.
