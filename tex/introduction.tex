@@ -26,10 +26,9 @@ research for center-based clustering. We resolve this by showing that there exis
 time -- only logarithmic factors away from the time it takes to read in the dataset.
 
 Nonetheless, this does not fully illuminate the landscape between the sampling paradigms for clustering algorithms when applying them in practice. Although our algorithm achieves an optimal
-running time, it is certainly possible that other, cruder methods may be just as viable on most real world data sets despite having no worst case guarantees. Other than uniform
-sampling, this includes methods such as Lightweight Coresets, which do not satisfy the strong coreset guarantee and simply use the distance to the mean
-of the dataset. Thus, there is a natural spectrum within linear-time algorithms where obtaining more information about the dataset allows for a better
+running time, it is certainly possible that other, cruder methods may be just as viable on most real world data sets despite having no worst case guarantees.
+Thus, there is a natural spectrum within linear-time algorithms where obtaining more information about the dataset allows for a better
 sampling strategy at the expense of sublinear factors in speed. We state this formally in the following question: When are optimal $k$-means and $k$-median
 coresets necessary and what is the practical tradeoff between coreset speed and accuracy? To this end, we show that while many practical settings do not require
 the full coreset guarantee, one cannot cut corners if one wants to be confident in their compression. We also
-show that this extends to the streaming data paradigm and applies across downstream $k$-means and $k$-median approaches.
+show that this extends to the streaming data paradigm and applies to downstream clustering approaches.
