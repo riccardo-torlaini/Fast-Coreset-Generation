@@ -72,16 +72,16 @@ problem but show how to reduce $k$-means to this case in \cref{app:redKM}.
 \paragraph*{Computing a crude upper-bound}
 
 As described, we start by computing an approximate solution $U$ such that $U \leq \poly(n) \cdot \cost(\opt)$. For this, the first step is to embed the input
-into a quadtree: this gives a lot of structure to the input, and preserves the cost up to a factor $O(d \log n \log \Delta)$ for $k$-median.  Our first lemma shows
+into a quadtree: this gives a lot of structure to the input, and preserves the cost up to a factor $O(d \log \Delta)$ for $k$-median.  Our first lemma shows
 that the necessary approximation exists at the first level for which the input lies in $k+1$ disjoint subtrees. 
 
 \begin{lemma}\label{lem:apxTree}
-Let $i$ be the first level of the decomposition such that at least $k+1$ cells at level $i$ contains any point. Then, $\sqrt{d}2^{-i+1} \cdot \boxsize \leq
+Let $i$ be the first level of the tree such that at least $k+1$ subtrees at level $i$ contain any point. Then, $\sqrt{d}2^{-i+1} \cdot \boxsize \leq
 \opt_T \leq n \cdot \sqrt{d}2^{-i+4} \cdot \boxsize$.
 \end{lemma}
 
 We prove this in Section \ref{app:apx-tree-proof} of the appendix. A direct consequence of this lemma is that the first level of the tree for which at least
-$k+1$ cells are non empty provides an $O(n)$-approximation. To count the number of non-empty cells at a given level $i$, one can merely iterate over all
+$k+1$ cells are non empty allows to compute easily an $O(n)$-approximation. To count the number of non-empty cells at a given level $i$, one can merely iterate over all
 points, and, for each point, identify the cell that contains it (using modulo operations), and store all those cells into a hash table to count the number of elements.
 This is done in time $O(nd)$.  Using a binary search on the $O(\log \Delta)$ many levels then concludes this section with the following result:
 

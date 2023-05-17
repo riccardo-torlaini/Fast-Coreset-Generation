@@ -23,6 +23,9 @@ $k$-median cost.  The $i$-th level of the tree (for $i \in \lbra 0, ..., \log \D
 between $c$ and its parent is set to $2^{-i} \cdot 2\boxsize \cdot \sqrt{d}$ (the length of the hypercube's diagonal). This embedding takes $O(nd \log \Delta)$
 time to construct, where $\log \Delta$ is the depth of the tree.
 
+The distances in the tree metric $d_T$ satisfy
+$\forall p,q, \|p-q\| \leq \mathbb{E}[d_T(p, q)] \leq O(\sqrt{d} \log \Delta) \|p-q\|$, where the expectation is taken over the random shift $s$ of the decomposition.
+
 \section{Proof of \cref{sec:theory}}\label{app:theory}
 
 We formalize the proof that the \cref{alg:main} produces an $\eps$-coreset in time $\tilde O(nd \log \Delta)$
