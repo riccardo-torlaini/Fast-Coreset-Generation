@@ -6,7 +6,7 @@
    \label{alg:main}
 \begin{algorithmic}[1]
    \State {\bfseries Input:} data $P$, number of clusters $k$, precision $\eps$ and target size $S$
-   \State Use a Fast Johnson-Lindenstrauss \andrew{refs?} \chris{I don't know why we'd need a FJL embedding. A normal one does the job as well. I don't think we have to cite anything here.} embedding to compute the embedding $\tilde P$ of $P$ into $\tilde d = O(\log k)$ dimensions
+   \State Use a Johnson-Lindenstrauss  embedding to compute the embedding $\tilde P$ of $P$ into $\tilde d = O(\log k)$ dimensions
    \State Compute an approximate solution $\tilde \calC = \lbra \tilde c_1, ..., \tilde c_k\rbra $ for $\tilde P$, and an assignment $\tilde \sigma : \tilde P \rightarrow \tilde \calC$ using \fkmeans.	
    \State Let $\calC_i = \tilde \sigma^{-1}(c_i)$. Compute the $1$-median (or $1$-mean) $c_i$ of each $\calC_i$ in $\R^d$.%, and define $\sigma(p) := c_i$ for all $p \in \calC_i$.
    \State For each point $p \in \calC_i$, define
@@ -67,17 +67,25 @@ with cell length $O(n \cdot U)$, so that two points from the same cluster in $\o
 with each other in any reasonable solution.  Then, we compress the input by "moving" non-empty cells closer to each other. We will focus this section on the
 simpler $k$-median problem but show how to reduce $k$-means to this case in \cref{app:redKM}.
 
-We note that the quadtree structure directly facilitates the discussed grid and, given a tree embedding, the cost of any $k$-median solution $\calS$ in the tree
-metric is within a factor $O(\sqrt d \log \Delta)$ of its cost for the original metric.  Therefore, it is enough for us to find an approximation in the tree and
-we use $\opt_T$ to refer to the optimal solution in the quadtree.  We now show that (1) we only need to build a fraction of the tree, allowing for a running
-time $O(nd \log \log \Delta)$, and (2) once the tree $T$ is built, there is a corresponding tree $T'$ that has a similar optimal $k$-median cost but where
+
+
+
+%We note that the quadtree structure directly facilitates the discussed grid and, given a tree embedding, the cost of any $k$-median solution $\calS$ in the tree
+%metric is within a factor $O(\sqrt d \log \Delta)$ of its cost for the original metric.  Therefore, it is enough for us to find an approximation in the tree and
+%we use $\opt_T$ to refer to the optimal solution in the quadtree.  We now show that (1) we only need to build a fraction of the tree, allowing for a running
+%time $O(nd \log \log \Delta)$, and (2) once the tree $T$ is built, there is a corresponding tree $T'$ that has a similar optimal $k$-median cost but where
 $\Delta \in \poly(n, d)$.
+
+
+
 
 \subsection{Computing a crude upper-bound}
 
-As described, we start by computing an approximate solution $U$ such that $U \leq \poly(n) \cdot \cost(\opt)$ on a tree embedded dataset.  Our first lemma shows
-that the necessary approximation exists at the first level for which the input lies in $k+1$ disjoint subtrees. The algorithm to find this is then a simple binary
-search through the levels of the tree.
+As described, we start by computing an approximate solution $U$ such that $U \leq \poly(n) \cdot \cost(\opt)$. For this, the first step is to embed the input into a quadtree: this gives a lot of structure to the input, and preserves the cost up to a factor $O(d \log \Delta)$ for $k$-median.
+  Our first lemma shows
+that the necessary approximation exists at the first level for which the input lies in $k+1$ disjoint subtrees. 
+%The algorithm to find this is then a simple binary
+%search through the levels of the tree.
 
 \begin{lemma}\label{lem:apxTree}
 Let $i$ be the first level of the decomposition such that at least $k+1$ cells at level $i$ contains any point. Then, $\sqrt{d}2^{-i+1} \cdot \boxsize \leq
@@ -86,7 +94,7 @@ Let $i$ be the first level of the decomposition such that at least $k+1$ cells a
 
 We prove this in Section \ref{app:apx-tree-proof} of the appendix. A direct consequence of this lemma is that the first level of the tree for which at least
 $k+1$ cells are non empty provides an $O(n)$-approximation. To count the number of non-empty cells at a given level $i$, one can merely iterate over all
-points, for each point, identify the cell that contains it (using a modulo operation), and store all those cells into a hash table to count the number of elements.
+points, and, for each point, identify the cell that contains it (using modulo operations), and store all those cells into a hash table to count the number of elements.
 This is done in time $O(nd)$.  Using a binary search on the $O(\log \Delta)$ many levels then concludes this section with the following result:
 
 \begin{lemma}\label{lem:crudeApx}
