@@ -23,7 +23,7 @@ $k$-median cost.  The $i$-th level of the tree (for $i \in \lbra 0, ..., \log \D
 between $c$ and its parent is set to $2^{-i} \cdot 2\boxsize \cdot \sqrt{d}$ (the length of the hypercube's diagonal). This embedding takes $O(nd \log \Delta)$
 time to construct, where $\log \Delta$ is the depth of the tree.
 
-\section{Proof of \cref{sec:theory}}\label{app:theory}
+\section{Proofs of \cref{sec:theory}}\label{app:theory}
 
 We formalize the proof that the \cref{alg:main} produces an $\eps$-coreset in time $\tilde O(nd \log \Delta)$
 \begin{proof}
@@ -67,6 +67,15 @@ where the last inequality stems from Cauchy-Schwarz. Therefore, $\calS$ is a $nc
 If the input is spread in $k+1$ distinct cell at level $i$, then in any solution there is at least one of those cells with no center. In the tree metric, points lying in this cell have therefore connexion cost at least $\sqrt{d}2^{-i+1} \cdot \boxsize$, and thus the left-hand-side of the inequality holds.
 
 On the other hand, if the input is contained into $k$ cells at level $i-1$, then placing arbitrarily a center in each cell yields a solution with cost at most $n \cdot \sqrt{d}2^{-i+4} \cdot \boxsize$: indeed, the distance from any point to its closest center is at most $2 \cdot \sum_{j \geq i-1} \sqrt{d}2^{-j} \cdot 2\boxsize \leq 4 \sqrt{d}2^{-i+2} \cdot \boxsize$ (summing the edge length from the point to the cell at level $i$, and then going down to the center). This concludes.
+\end{proof}
+
+\subsection{$k$-median equivalence}
+\label{app:kmedian}
+\begin{proof}
+First, since distances in $P'$ are smaller than in $P$, the optimal solution for $P'$ has cost at most $U$. Therefore, two points that are in non-adjacent boxes
+(i.e., at distance more than $d n^2\cdot U$) are not in the same cluster of $\calS'$ as otherwise $\calS'$ would not be a $c'$-approximation.  Let $\calS$ be
+the solution obtained from $\calS'$ by reversing the construction of $P'$. Since adjacency is preserved for all clusters, all
+distances are the same in $P$ and $P'$. Therefore, the costs are equal.
 \end{proof}
 
 \input{figures/lightweight_breaks}

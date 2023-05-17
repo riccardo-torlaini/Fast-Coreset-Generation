@@ -31,6 +31,8 @@ accuracy.
             $j$-means++ solution.
 \end{description}
 
+\input{tables/distortion}
+
 We take a moment here to motivate the welterweight coreset algorithm.  Consider that lightweight coresets are solving $1$-means to obtain sensitivity values
 whereas sensitivity sampling is solving $k$-means. Given that sensitivity values are estimated via~\cref{eq:sensitivity}, changing the value of $j$
 affects the cluster sizes $|\calC_p|$ and therefore acts as a direct interpolation between uniform and sensitivity sampling.  We default to $j = \log k$ unless
@@ -55,26 +57,23 @@ We complement these with artificial datasets and default to $n = 50\,000$ and $d
 
         This has the property that all clusters have size $n / k$ when $\gamma = 0$ and, as $\gamma$ grows, the cluster sizes diverge at an exponential rate.
         We note that this is a well-clusterable instance with respect to cost stability conditions, see \cite{AwS12,Cohen-AddadS17,KuK10,ORSS12}.
-    \item \emph{- Benchmark}. A specific distribution of points introduced in \cite{chrisESA} as a testbed for coreset algorithms.  It has the property that
-        all reasonable $k$-means solutions are of equal quality but are maximally far apart in the solution space. Thus, the dataset is fully determined by the
-        number of centers $k$. We follow the advice in the benchmark's original presentation and produce three benchmark datasets of varying size before
-        applying random offsets to each. We choose the sizes by $k_1 = \frac{k}{c_1}$, $k_2 = \frac{k - k_1}{c_2}$, and $k_3 = k - k_1 - k_2$ for $c_1, c_2 \in
-        \mathbb{R}^+$.
+
+    \item \emph{- Benchmark}. A specific distribution of points introduced in \cite{chrisESA} as a testbed for coreset algorithms.  It has the property that all
+        reasonable $k$-means solutions are of equal quality but are maximally far apart in the solution space. Thus, the dataset is fully determined by the
+        number of centers $k$. As suggested, we produce three benchmark datasets of varying size before applying random offsets to each. We choose the sizes by
+        $k_1 = \frac{k}{c_1}$, $k_2 = \frac{k - k_1}{c_2}$, and $k_3 = k - k_1 - k_2$ for $c_1, c_2 \in \mathbb{R}^+$.
 
 \end{description}
 
 The artificial datasets are constructed to emphasize strengths and weaknesses of the various sampling schemas. For example, the $c$-outlier problem contains
 very little information and, as such, should be simple for any sampling strategy that builds a reasonable representation of its input. The geometric dataset
-then increases the difficulty by having $\log k$ clusters and, subsequently, more regions of interest that must be sampled. The Gaussian mixture dataset is
+then increases the difficulty by having more regions of interest that must be sampled. The Gaussian mixture dataset is
 harder still, as it incorporates uneven inter-cluster distances and inconsistent cluster sizes. Lastly, the benchmark dataset is devised to be a worst-case
 example for sensitivity sampling. We discuss the parameters and implementation specifics of the datasets in~\cref{app:data_params}. We run our experiments on
-an Intel Core i9 10940X 3.3GHz 14-Core processor without parallelization.
+an Intel Core i9 10940X 3.3GHz 14-Core processor.
 
 \subsection{Evaluating Sampling Strategies}
 \label{ssec:alg_qualities}
-
-\input{tables/distortion}
-\input{tables/class_imbalance}
 
 \paragraph*{Theoretically guaranteed methods.}
 
@@ -91,7 +90,7 @@ sweeping over $m$-scalar values. Despite the suboptimal theoretical guarantees o
 distortions to sensitivity sampling while also running faster than Fast-Coresets in practice. We attribute this to the well-behaved nature of the real-world
 datasets, where they have few outliers and classes of consistent sizes.
 
-To verify this, consider the results of these sampling strategies on the artificial datasets in Table~\ref{tbl:distortion} -- as disparity in cluster sizes and
+To verify this, consider the results of these sampling strategies on the artificial datasets in Table~\ref{tbl:distortion}: as disparity in cluster sizes and
 distributions grows, the accelerated sampling methods have difficulty capturing all of the outlying points in the dataset.  While uniform sampling is expected
 to be brittle, it may be less obvious what causes light- and welterweight coresets to break. Consider that the lightweight coreset is biased towards points that
 are far from the mean and, as a simple counterexample, is likely to miss a small cluster that is close to $\mu$.  Now let $\calC_j$ be the approximation
@@ -107,10 +106,10 @@ parameter and the Gaussian mixture dataset's $\gamma$ parameter. We can consider
 before sensitivity sampling can handle class imbalance?'' To this end, all the methods have low distortion for small values of $\gamma$ but, as $\gamma$ grows,
 only Fast-Coresets\footnote{And, to a lesser extent, welterweight coresets for larger values of $j$.} are guaranteed to have low distortion.
 
-This pattern changes in the benchmark dataset as it is devised so that maximally different $k$-means solutions give similar quality. Thus, it challenges
-sensitivity sampling's reliance on the initial solution but we see that, despite this, sensitivity sampling does not require significantly larger sample sizes
-before it provides good compression. We lastly show how these compressions facilitate fast clustering on large datasets in Table~\ref{tbl:lloyds}. We see that
-running Lloyd's algorithm on the samples obtains a consistent cost value on the full datasets.
+This pattern changes in the benchmark dataset as it is devised to challenge sensitivity sampling's reliance on the initial solution. Nonetheless, we see that
+sensitivity sampling does not require significantly larger sample sizes before it provides good compression on the benchmark. We lastly show how these
+compressions facilitate fast clustering on large datasets in Table~\ref{tbl:lloyds}. We see that running Lloyd's algorithm on the samples obtains a consistent
+cost value on the full datasets.
 
 %\input{tables/lloyds}
 %\input{tables/composition}
@@ -119,22 +118,23 @@ running Lloyd's algorithm on the samples obtains a consistent cost value on the 
 \label{ssec:streaming}
 
 One of the most common use-cases for big-data algorithms is the streaming setting, where one receives input in batches and must maintain a compression that is
-representative of the dataset. Although there is a wealth of sampling and coreset methods in the streaming paradigm, we require consistency
-across algorithms and therefore assume a black-box sampling procedure. Since the coreset property is preserved under composition, we utilize the merge-\&-reduce
-strategy originally proposed by \cite{BS80} and first applied to maintaining clustering coresets in stream by \cite{HaM04}. The idea is to first partition the
-input into $b$ blocks and then perform sampling and composition along them until a single compression is obtained. Specifically, we start by obtaining
-a coreset\footnote{Although we use the word coreset here, this process can also be applied to the other sampling procedures.} on each block. Then, combining
-samples using a complete binary tree, we (1) recursively re-sample from the children until there is at least one coreset for each level\footnote{If there are
-$b=8$ blocks, then there would be coresets corresponding to blocks $[[1], [2], [3, 4], [5, 6, 7, 8]]$} in the tree and then (2) concatenate these samples and
-obtain one final coreset from the composition. Since we are composing coresets from coresets, the errors stack and, in theory, we should require more samples
-to obtain a similar accuracy.
+representative of the dataset. Although there is a wealth of sampling and coreset methods in the streaming paradigm, we require consistency across algorithms
+and therefore assume a black-box sampling procedure. Since the coreset property is preserved under composition, we utilize the merge-\&-reduce strategy
+originally proposed by \cite{BS80} and first applied to maintaining clustering coresets in stream by \cite{HaM04}. The idea is to first partition the input into
+$b$ blocks and then perform sampling and composition along them until a single compression is obtained. Specifically, we start by obtaining a coreset on each
+block. Then, combining samples using a complete binary tree, we (1) recursively re-sample from the children until there is at least one coreset for each
+level\footnote{If there are $b=8$ blocks, then there would be coresets corresponding to blocks $[[1], [2], [3, 4], [5, 6, 7, 8]]$} in the tree and then (2)
+concatenate these samples and obtain one final coreset from the composition. Since we are composing coresets from coresets, the errors stack and, in theory, we
+should require more samples to obtain a similar accuracy.
 
 Despite this, we see the opposite result for many of our sampling strategies. Surprisingly, the accelerated sampling methods all perform \emph{better} under
 composition on the artificial datasets and do not suffer significant drops in accuracy or variance on the real datasets\footnote{We show the effect of
-composition on runtime in \ref{fig:streaming_runtimes} in the Appendix.}. Although inconsistent with the prevailing intuition, we must therefore conclude that
+composition on runtime in \cref{fig:streaming_runtimes} in the Appendix.}. Although inconsistent with the prevailing intuition, we must therefore conclude that
 the accelerated sampling methods are \emph{more} feasible in the streaming setting but that they still suffer from the lack of a full coreset guarantee.  We
 suspect that this is due to the non-uniformity imposed by the merge-\&-reduce algorithm. To see this, consider uniform sampling on the $c$-outlier dataset
 during the final step of the composition, where we are composing the samples corresponding to each layer of the tree. Assume first that our outlier points
 happened to fall in the first block. Then we have taken a sample of size $m$ from this block and immediately use this for the final composition. Thus, in this
 case the outliers are \emph{more} likely to be in our final sample than in the non-streaming setting. In the alternate setting where the outliers are less
 likely, consider that our expected error is already high, so missing the outlier `more' does not significantly affect our expected error. 
+
+\input{tables/class_imbalance}

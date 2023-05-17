@@ -19,8 +19,8 @@ We study both paradigms with respect to a classic problem -- what are the limits
 Whereas uniform sampling provides optimal speed but no accuracy guarantee, coreset constructions have
 unclear runtime bounds despite their tight bounds on the minimum number of samples required for accurate compression. Although there is little to study with respect to random
 sampling, the lack of clarity regarding linear-time coreset constructions throws into question their ability to facilitate clustering on large datasets. Indeed,
-available linear-time coreset via sensitivity sampling obtain an additive error \cite{BachemL018} while other fast sampling strategies
-\cite{kmeans_sublinear_bachem16} have weaker guarantees. Recently, \cite{DSWY22} proposed a sensitivity-based method for strong coresets that runs in time
+currently available fast sampling algorithms for clustering \cite{BachemL018} \cite{kmeans_sublinear_bachem16} cannot achieve coreset guarantees.
+Recently, \cite{DSWY22} proposed a sensitivity-based method for strong coresets that runs in time
 $\tilde{O}(nd + nk)$ and conjectured this to be optimal for $k$-median and $k$-means.  Since the issue of determining an optimal coreset size has recently
 been resolved \cite{CSS21,CLSSS22,HLW23}, this is arguably the main open problem in coreset research for center-based clustering. We resolve this by showing that
 there exists an easy-to-implement algorithm that constructs coresets in $\tilde{O}(nd)$ time -- only logarithmic factors away from the time it takes to read in
@@ -32,4 +32,4 @@ Thus, there is a natural spectrum within linear-time algorithms where obtaining 
 sampling strategy at the expense of sublinear factors in speed. We state this formally in the following question: When are optimal $k$-means and $k$-median
 coresets necessary and what is the practical tradeoff between coreset speed and accuracy? To this end, we show that while many practical settings do not require
 the full coreset guarantee, one cannot cut corners if one wants to be confident in their compression. We also
-show that this extends to the streaming data paradigm and applies to downstream clustering approaches.
+show that this extends to the streaming paradigm and applies to downstream clustering approaches.

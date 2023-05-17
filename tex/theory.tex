@@ -36,13 +36,10 @@ Both run in time $\tilde O(nd)$, provided $\calC$.
 \end{fact}
 
 To turn \cref{fact:logApprox} into an algorithm, we use the quadtree-based \fkmeans approximation algorithm from \cite{cohen2020fast}, which has two key
-properties: 
-\begin{enumerate}
-\item \fkmeans runs in $\tilde O\lpar n d \log \Delta\rpar$ time (Corollary 4.3 in \cite{cohen2020fast}), and
-\item \fkmeans computes an assignment from input points to centers that is an $O\lpar d^z \log k\rpar$ approximation to $k$-median ($z=1$) and $k$-means ($z=2$)
-    (Lemma 3.1 in \cite{cohen2020fast} for $z=2$, the discussion above for $z=1$). Applying dimension reduction techniques \cite{MakarychevMR19}, the dimension
-    $d$ may be replaced by a $\log k$. This results in a $O\lpar\log^{z+1} k\rpar$ approximation.
-\end{enumerate}
+properties. \underline{First}, \fkmeans runs in $\tilde O\lpar n d \log \Delta\rpar$ time (Corollary 4.3 in \cite{cohen2020fast}). \underline{Second}, \fkmeans
+computes an assignment from input points to centers that is an $O\lpar d^z \log k\rpar$ approximation to $k$-median ($z=1$) and $k$-means ($z=2$) (Lemma 3.1 in
+\cite{cohen2020fast} for $z=2$, the discussion above for $z=1$). Applying dimension reduction techniques \cite{MakarychevMR19}, the dimension $d$ may be
+replaced by a $\log k$. This results in a $O\lpar\log^{z+1} k\rpar$ approximation.
 
 The second property is crucial for us: the algorithm does not only compute centers, but also assignments in $\tilde{O}(nd\log \Delta)$ time.  We describe how to
 combine it with sensitivity sampling in \cref{alg:main} and prove in \cref{app:theory} that this computes an $\eps$-coreset in time $\tilde O(nd \log \Delta)$.
@@ -68,11 +65,10 @@ $O(n \cdot U)$, so that two points from the same cluster in $\opt$ fall into the
 in any reasonable solution.  Then, we compress the input by "moving" non-empty cells closer to each other. We will focus this section on the simpler $k$-median
 problem but show how to reduce $k$-means to this case in \cref{app:redKM}.
 
-
 \paragraph*{Computing a crude upper-bound}
 
 As described, we start by computing an approximate solution $U$ such that $U \leq \poly(n) \cdot \cost(\opt)$. For this, the first step is to embed the input
-into a quadtree: this gives a lot of structure to the input, and preserves the cost up to a factor $O(d \log n \log \Delta)$ for $k$-median.  Our first lemma shows
+into a quadtree: this gives a lot of structure to the input, and preserves the cost up to a factor $O(d n \log \Delta)$ for $k$-median.  Our first lemma shows
 that the necessary approximation exists at the first level for which the input lies in $k+1$ disjoint subtrees. 
 
 \begin{lemma}\label{lem:apxTree}
@@ -81,9 +77,9 @@ Let $i$ be the first level of the decomposition such that at least $k+1$ cells a
 \end{lemma}
 
 We prove this in Section \ref{app:apx-tree-proof} of the appendix. A direct consequence of this lemma is that the first level of the tree for which at least
-$k+1$ cells are non empty provides an $O(n)$-approximation. To count the number of non-empty cells at a given level $i$, one can merely iterate over all
-points, and, for each point, identify the cell that contains it (using modulo operations), and store all those cells into a hash table to count the number of elements.
-This is done in time $O(nd)$.  Using a binary search on the $O(\log \Delta)$ many levels then concludes this section with the following result:
+$k+1$ cells are non empty provides an $O(n)$-approximation. To count the number of non-empty cells at a given level $i$, one can merely iterate over all points,
+and, for each point, identify the cell that contains it (using modulo operations). One then stores all those cells into a hash table to count the number of
+elements, all in $O(nd)$ time.  Using a binary search on the $O(\log \Delta)$ many levels then concludes this section with the following result:
 
 \begin{lemma}\label{lem:crudeApx}
 There is an algorithm running in time $O(nd \log \log \Delta)$ that computes an  $O(n^2 d \log \Delta)$-approximation to $k$-median or $k$-means.
@@ -98,8 +94,7 @@ The probability that two points $p$ and $q$ are in different grid cells is $O\lp
 \end{lemma}
 
 Since $U$ is larger than the distance between any input point and its center in the optimal solution, a union-bound ensures that with probability $1-1/n$, no
-cluster of this solution is split among different cells.  In particular, there are at most $k$-non empty cells. We call those "boxes".
-
+cluster of this solution is split among different cells.  In particular, there are at most $k$-non empty cells which we call ``boxes''.
 From this input, we build a new set of points $P'$ as follows: first, identify the non empty cell (using a hash table as previously). We associate each box with
 its center.  For each coordinate $i \in \lbra 1, ..., d \rbra$, sort (in time $O(k \log k)$) the centers according to their value on coordinate $i$. Then, for
 each $j \in \lbra 1, ..., k\rbra$, let $c^i_j$ and $c^i_{j+1}$ be the $i$-th coordinate of centers of the $j$-th and $(j+1)$-th boxes. If $c^i_{j+1} - c^i_j
@@ -117,18 +112,11 @@ non-zero distance is $g = \frac{U}{n^4 d^{2} \log \Delta}$, implying that the as
 as claimed.
 
 The second property, on the other hand, ensures that we can transform a solution $\calS'$ for $P'$ to a solution with exactly the same cost for $P$: in any
-(reasonable) solution, points from two non-adjacent boxes will not be in the same cluster in either $P'$ or $P$. Therefore, simply adding back the shift to
-centers of $\calS'$ allows us to transform it to a solution $\calS$. We note that the distance between any point and its closest center does not change. This is
-formalized in the next lemma.
+(reasonable) solution, points from two non-adjacent boxes will not be in the same cluster in either $P'$ or $P$. Therefore, adding back the shift to centers of
+$\calS'$ allows us to transform it to a solution $\calS$. We note that the distance between any point and its closest center does not change. This is formalized
+in the next lemma and proven in \cref{app:kmedian}.
 
 \begin{lemma}
 Let $\calS'$ be a $c'$-approximation for  $k$-median (resp. $k$-means) on $P'$, where $c' \leq nc$ and $c$ is the approximation guarantee from
 \cref{lem:crudeApx}. Then, one can compute a solution for $P$ for $k$-median (resp. $k$-means) on $P$, with same cost as $\calS'$ for $P'$, in time $O(nd)$.
 \end{lemma}
-\begin{proof}
-
-First, since distances in $P'$ are smaller than in $P$, the optimal solution for $P'$ has cost at most $U$. Therefore, two points that are in non-adjacent boxes
-(i.e., at distance more than $d n^2\cdot U$) are not in the same cluster of $\calS'$ as otherwise $\calS'$ would not be a $c'$-approximation.  Let $\calS$ be
-the solution obtained from $\calS'$ by reversing the construction of $P'$. Since adjacency is preserved for all clusters, all
-distances are the same in $P$ and $P'$. Therefore, the costs are equal.
-\end{proof}
