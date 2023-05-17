@@ -11,12 +11,12 @@ downstream clustering tasks.
 \subsubsection{Metrics}
 \label{sssec:metrics}
 
-We analyze the sampling methods along two metrics -- compression accuracy and construction time. Although measuring runtime is standard, predicting coreset
-quality is a more difficult task. Specifically, it is unclear how to confirm that a subset of points satisfies the coreset property over all solutions. To this
-end, we use the following distortion measure introduced in~\cite{chrisESA} \[ \max \left( \dfrac{\cost(P, \calC_{S})}{\cost(S, \calC_{S})}, \dfrac{\cost(S,
-\calC_{S})}{\cost(P, \calC_{S})} \right),\] where $\calC_{S}$ is a candidate solution that was computed over the coreset $S$. This
-will be within $1+\varepsilon$ if the coreset guarantee is satisfied but may be unbounded otherwise.  We refer to this metric as the \emph{coreset distortion}.
-For completeness, we also measure the absolute cost incurred by $\calC_S$ on the original dataset and report these values in \cref{tbl:lloyds}.
+We analyze the sampling methods along two metrics -- compression accuracy and construction time. Although measuring runtime is standard, it is unclear how to
+confirm that a subset of points satisfies the coreset property over all solutions. To this end, we use the distortion measure introduced
+in~\cite{chrisESA} \[ \max \left( \dfrac{\cost(P, \calC_{\Omega})}{\cost(\Omega, \calC_{\Omega})}, \dfrac{\cost(\Omega, \calC_{\Omega})}{\cost(P, \calC_{\Omega})} \right),\] where
+$\calC_{\Omega}$ is a candidate solution that was computed over the coreset $\Omega$. This will be within $1+\varepsilon$ if the coreset guarantee is satisfied but may be
+unbounded otherwise.  We refer to this metric as the \emph{coreset distortion}.  For completeness, we also measure the absolute cost incurred by $\calC_\Omega$ on
+the original dataset and report these values in \cref{tbl:lloyds}.
 
 \subsubsection{Algorithms}
 \label{ssec:algorithms}
