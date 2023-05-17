@@ -145,7 +145,7 @@ high.
 One of the most common use-cases for big-data algorithms is the streaming setting, where one receives input in batches and must maintain a compression that is
 representative of the dataset. Although there is a wealth of sampling and coreset methods in the streaming paradigm \andrew{references}, we require consistency
 across algorithms and therefore assume a black-box sampling procedure. Since the coreset property is preserved under composition, we utilize the merge-\&-reduce
-strategy \andrew{citations?} wherein one first discretizes the input into $b$ blocks and performs sampling and composition along them until a single compression
+strategy originally proposed by \cite{BS80} and first applied to maintaining clustering coresets in stream by \cite{HaM01}. We first partition the input into $b$ blocks and performs sampling and composition along them until a single compression
 is obtained. Specifically, we start by obtaining a coreset\footnote{Although we use the word coreset here, this process can also be applied to the other
 sampling procedures.} on each block. Then, combining samples using a complete binary tree, we (1) recursively re-sample from the children until there is at
 least one coreset for each level\footnote{If there are $b=8$ blocks, then there would be coresets corresponding to blocks $[[1], [2], [3, 4], [5, 6, 7, 8]]$} in the

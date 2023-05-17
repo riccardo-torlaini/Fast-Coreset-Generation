@@ -9,7 +9,7 @@ provides us with an idea of the solution's quality with respect to the original 
 \calC)$. 
 The quickest sampling strategy, running in sublinear time, is uniform sampling. It is clear, however, that this cannot provide any cost-preservation guarantee
 as missing a single extreme outlier will cause the sampling strategy to fail. Thus, any approach that outperforms this strategy must read in the entire dataset
-and therefore run in at least linear time. \andrew{Is there more we can say or some references we can put in here?}
+and therefore run in at least linear time. Indeed, sublinear algorithms always require some assumption on the input to provide guarantees, see \cite{Ben-David07,czumaj2007sublinear,HJJ23,meyerson2004k}.
 
 Among these more sophisticated sampling strategies, one cannot do better than the strong coreset guarantee. Specifically, a strong $\eps$-coreset is a subset $S
 \subseteq P$ with weights $\tilde w$ such that for \emph{any} solution $\calC$, \[\sum_{p \in S} \tilde w_p \cost(p, \calC) \in (1 \pm \eps) \cost(P, \calC)\] with
@@ -26,11 +26,11 @@ Given a solution to a clustering problem $\calC$, importance scores are defined 
 \label{eq:sensitivity}
 \sigma_\calC(p) = \dfrac{\cost(p, \calC)}{\cost(\calC_{p}, \calC)} + \dfrac{1}{|\calC_p|},
 \end{equation}
-where $\calC_p$ is the cluster that $p$ belongs to. This is always an upper-bound on the sensitivity values \andrew{ref?}.
+where $\calC_p$ is the cluster that $p$ belongs to. This is always an upper-bound on the sensitivity values, see \cite{FL11,FeldmanSS20}.
 
 The coreset $S$ then consists of $m$ points sampled proportionate to $\sigma$ with weights defined as follows. First, for any sampled point $p$, define $w_p :=
-\frac{1}{\Pr[p \in S]} = \frac{\sum_{p'} s_\calC(p')}{m s_\calC(p)}$. For a cluster $C_i$, let $|\hat{C_i}|$ be the estimated number of points in $C_i$ via the
-sample, namely, the number of points in $C_i \cap S$ weighted with $w_p$ \andrew{I'm not sure what `via the sample' means}. A sampled point $p$ in $C_i$ is
+\frac{1}{\Pr[p \in S]} = \frac{\sum_{p'} s_\calC(p')}{m s_\calC(p)}$. For a cluster $C_i$, let $|\hat{C_i}|$ be the number of points in $C_i$ estimated by the
+sample, i.e. $C_i \cap S$ weighted with $w_p$. A sampled point $p$ in $C_i$ is
 weighted $\tilde w(p) = \tilde w_1(p) \lpar (1+\eps)|C_i| - |\hat{C_i}|\rpar$.  \cite{FeldmanL11} and subsequent works showed that, when $\calC$ is
 a $O(1)$-approximation, sampling $S = \tilde O\lpar k \eps^{-2z-2}\rpar$ many points was enough to ensure concentration, namely, $S$ is a coreset with
 probability at least $2/3$.
@@ -57,7 +57,7 @@ showed that the latter is often more efficient in practice. We also note that on
 provided with an initial solution $\calC$ and assignment $\sigma$.  Therefore, our algorithm could use as a subroutine any coreset construction, if in the
 future one is developed that is preferable to sensitivity and group sampling.
 
-In terms of other linear-time methods, we are only aware of the lightweight coresets approach\cite{BachemL018}\andrew{True?}, wherein one performs sensitivity
+In terms of other linear-time methods, we are only aware of the lightweight coresets approach\cite{BachemL018}\andrew{True?} \chris{True}, wherein one performs sensitivity
 sampling with respect to a solution $\calC=\{\mu\}$, i.e. the mean of the data set. This runs in $O(nd)$ time but provides a weaker guarantee -- one incurs an
 additive error of $\varepsilon\cdot \cost(P,\{\mu\})$.  We note that this can be generalized to performing sensitivity sampling using a $\calC$ that has fewer
 than $k$ centers. Since the lightweight coreset construction uses the $1$-means solution and sensitivity sampling uses an $O(1)$ approximation to the

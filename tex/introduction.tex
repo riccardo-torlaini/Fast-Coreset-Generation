@@ -20,7 +20,7 @@ Whereas uniform sampling provides optimal speed with no guarantees regarding siz
 unclear runtime bounds despite their tight guarantees on the minimum number of samples required. Although there is little to study with respect to random
 sampling, the lack of clarity regarding linear-time coreset constructions throws into question their ability to facilitate clustering on large datasets.
 Indeed, it has been conjectured in \cite{DSWY22} that producing a $k$-means or $k$-median coreset necessitates an $\tilde{O}(nd + nk)$ runtime.
-Since the issue of optimal coreset sizes has been resolved, this is one of the main open problems regarding center-based coresets. To this end, we show that
+Since the issue of optimal coreset sizes has been resolved \cite{CSS21,CLSSS22,HLW23}, this is arguably the main open problem regarding center-based coresets. To this end, we show that
 there does exist an easy-to-implement algorithm that constructs coresets in $\tilde{O}(nd)$ time -- only logarithmic factors away from the time it takes to read
 in the dataset.
 
