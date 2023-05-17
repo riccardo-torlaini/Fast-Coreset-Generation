@@ -57,7 +57,7 @@ showed that the latter is often more efficient in practice. We also note that on
 provided with an initial solution $\calC$ and assignment $\sigma$.  Therefore, our algorithm could use as a subroutine any coreset construction, if in the
 future one is developed that is preferable to sensitivity and group sampling.
 
-In terms of other linear-time methods, we are only aware of the lightweight coresets approach\cite{BachemL018}\andrew{True?} \chris{True}, wherein one performs sensitivity
+In terms of other linear-time methods, we are only aware of the lightweight coresets approach\cite{BachemL018}, wherein one performs sensitivity
 sampling with respect to a solution $\calC=\{\mu\}$, i.e. the mean of the data set. This runs in $O(nd)$ time but provides a weaker guarantee -- one incurs an
 additive error of $\varepsilon\cdot \cost(P,\{\mu\})$.  We note that this can be generalized to performing sensitivity sampling using a $\calC$ that has fewer
 than $k$ centers. Since the lightweight coreset construction uses the $1$-means solution and sensitivity sampling uses an $O(1)$ approximation to the
@@ -76,5 +76,6 @@ on this topic and discuss our metrics in Section \ref{sssec:metrics}.
 
 We give a brief description of the quadtree metric embedding procedure here and refer to \cref{app:quadtree} for a more formal explanation.  The central idea is
 that each hypercube in the input space can be split into $2^d$ sub-cubes and that this can be represented in a tree structure. Setting the weight of each branch
-equal to the length of the diagonal of the parent hypercube then guarantees that the distance in the tree is within a factor $O(\sqrt{d} \log \Delta)$ of the
-distance in the original space, where $\log \Delta$ is the maximum depth of the tree. Lastly, this tree can be constructed in $\tilde{O}(nd \log \Delta)$ time.
+equal to the length of the parent node's diagonal then guarantees that the expected distance in the tree is within a factor $O(\log n \sqrt{d} \log
+\Delta)$\andrew{There's a $\log n$ on the expected distortion, right? This should also hold for the $k$-median setting?} of the distance in the original space,
+where $\log \Delta$ is the maximum depth of the tree. Lastly, this tree can be constructed in $\tilde{O}(nd \log \Delta)$ time.

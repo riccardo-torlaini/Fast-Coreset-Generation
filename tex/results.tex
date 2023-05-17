@@ -145,21 +145,22 @@ high.
 One of the most common use-cases for big-data algorithms is the streaming setting, where one receives input in batches and must maintain a compression that is
 representative of the dataset. Although there is a wealth of sampling and coreset methods in the streaming paradigm \andrew{references}, we require consistency
 across algorithms and therefore assume a black-box sampling procedure. Since the coreset property is preserved under composition, we utilize the merge-\&-reduce
-strategy originally proposed by \cite{BS80} and first applied to maintaining clustering coresets in stream by \cite{HaM01}. We first partition the input into $b$ blocks and performs sampling and composition along them until a single compression
-is obtained. Specifically, we start by obtaining a coreset\footnote{Although we use the word coreset here, this process can also be applied to the other
-sampling procedures.} on each block. Then, combining samples using a complete binary tree, we (1) recursively re-sample from the children until there is at
-least one coreset for each level\footnote{If there are $b=8$ blocks, then there would be coresets corresponding to blocks $[[1], [2], [3, 4], [5, 6, 7, 8]]$} in the
-tree and then (2) concatenating these samples and obtaining one final coreset from the composition. Since we are composing coresets from coresets, the errors
-stack and, in theory, we should require more samples to obtain a similar accuracy. \andrew{Include error/variance bounds here}
+strategy originally proposed by \cite{BS80} and first applied to maintaining clustering coresets in stream by \cite{HaM01}. The idea is to first partition the
+input into $b$ blocks and then perform sampling and composition along them until a single compression is obtained. Specifically, we start by obtaining
+a coreset\footnote{Although we use the word coreset here, this process can also be applied to the other sampling procedures.} on each block. Then, combining
+samples using a complete binary tree, we (1) recursively re-sample from the children until there is at least one coreset for each level\footnote{If there are
+$b=8$ blocks, then there would be coresets corresponding to blocks $[[1], [2], [3, 4], [5, 6, 7, 8]]$} in the tree and then (2) concatenating these samples and
+obtaining one final coreset from the composition. Since we are composing coresets from coresets, the errors stack and, in theory, we should require more samples
+to obtain a similar accuracy. \andrew{Include error/variance bounds here}
 
 Despite this, we see the opposite result for many of our sampling strategies. Surprisingly, the accelerated sampling methods all perform \emph{better} under
 composition on the artificial datasets and do not suffer significant drops in accuracy or variance on the real datasets. We suspect that this is due to the
 non-uniformity imposed by the merge\&reduce algorithm. To see this, consider uniform sampling on the $c$-outlier dataset during the final step of the
 composition, where we are composing $\log b$ samples -- one for each layer of the tree. Assume first that our outlier points happened to fall in the first
 block. Then we have taken a sample of size $m$ from this block and immediately use this for the final composition. Thus, in this case the outliers are
-\emph{more} likely to be in our final sample than in the non-streaming setting. Now consider the alternate setting -- the outliers are in the last block and
-must get carried up through multiple layers of the tree before ending up in the final compression. This makes little difference to us, however, as uniform
-sampling already fails catastrophically on the $c$-outlier dataset in the static setting -- missing the outlier `more' does not affect our expected error since
-we already expect to miss it.
+\emph{more} likely to be in our final sample than in the non-streaming setting. Now consider the alternate setting where the outliers are in the last block and
+must get resampled through multiple layers of the tree before ending up in the final compression. Although we are more likely to miss the outlier in this
+setting, there is little practical impact as uniform sampling already fails catastrophically on the $c$-outlier dataset in the static setting -- missing the
+outlier `more' does not significantly affect our expected error since we already expect to miss it.
 
 \input{figures/coreset_size_on_quality.tex}
