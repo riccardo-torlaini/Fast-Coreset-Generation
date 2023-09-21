@@ -15,21 +15,76 @@ in a metric described by a graph with $m$ edges, the running time of this constr
 \label{app:quadtree}
 
 The first step is to obtain a box enclosing all input points, centered at zero, with all side lengths equal to
-$\boxsize$. This can be done as follows: select an arbitrary input point, and translate the dataset so that this point is at the origin. Then, using
-$O(nd)$ time, set $\boxsize$ to be the maximum distance from any point to the origin. Having obtained this box, add a random shift $s \leq \boxsize$ is to all the points'
-coordinates so that the input is now in the box $[-2\boxsize, 2\boxsize]^d$. This transformation does not change any distances and therefore preserves the
+$\Delta$. This can be done as follows: select an arbitrary input point, and translate the dataset so that this point is at the origin. Then, using
+$O(nd)$ time, set $\Delta$ to be the maximum distance from any point to the origin. Having obtained this box, add a random shift $s \leq \Delta$ is to all the points'
+coordinates so that the input is now in the box $[-2\Delta, 2\Delta]^d$. This transformation does not change any distances and therefore preserves the
 $k$-median cost.  The $i$-th level of the tree (for $i \in \lbra 0, ..., \log \Delta \rbra$) is constructed by centering a grid of side length $2^{-i} \cdot
-2\boxsize$ at $0$, making each grid-cell a node in the tree.  The parent of a cell $c$ is simply the cell at level $i-1$ that contains $c$, and the distance
-between $c$ and its parent is set to $2^{-i} \cdot 2\boxsize \cdot \sqrt{d}$ (the length of the hypercube's diagonal). This embedding takes $O(nd \log \Delta)$
-time to construct, where $\log \Delta$ is the depth of the tree.
+2\Delta$ at $0$, making each grid-cell a node in the tree.\footnote{This is equivalent to centering the grid at $(s, ...,s)$, as we described in the main body. We find this description easier for describing the construction.}  The parent of a cell $c$ is simply the cell at level $i-1$ that contains $c$, and the distance
+between $c$ and its parent is set to $2^{-i} \cdot 2\Delta \cdot \sqrt{d}$ (the length of the hypercube's diagonal). This embedding takes $O(nd \log \Delta)$
+time to construct, where $\log \Delta$ is the depth of the tree. Note crucially that, in our \cref{alg:crudeApx}, we do not need to build the full tree to only $\log \log \Delta$ levels of it, resulting in our improved complexity.
 
 The distances in the tree metric $d_T$ satisfy
-$\forall p,q, \|p-q\| \leq \mathbb{E}[d_T(p, q)] \leq O(\sqrt{d} \log \Delta) \|p-q\|$, where the expectation is taken over the random shift $s$ of the decomposition.
+$\forall p,q, \|p-q\| \leq \mathbb{E}[d_T(p, q)] \leq O(\sqrt{d} \log \Delta) \|p-q\|$, where the expectation is taken over the random shift $s$ of the decomposition (see \cite{}).
+
+\section{Pseudo-codes of the Algorithms}
+\label{app:pseudoCode}
+\begin{algorithm}[tb]
+   \caption{Crude-Approx($P$)}
+   \label{alg:crudeApx}
+\begin{algorithmic}[1]
+\Procedure{Count-Distinct-Cells}{$P, c, \ell$} \Comment data $P$, $c$ is the center of the quadtree grid at level $\ell$
+   \State Let $\calD$ be a dictionnary, and count $= 0$.
+   \For{each point $p \in P$}
+   \State let $c^p$ be the center of the cell containing $p$. The $i$-th coordinate of $c_p$ is $\lfloor \frac{p_i - c_i}{2^\ell}\rfloor  \cdot 2^\ell + \frac{2^{\ell}}{2}$. 
+   \If{$c_p$ is a not a key of $\calD$} 
+   \State insert $c_p$ in $\calD$ and do count $\gets$ count $+1$.
+   \EndIf
+   \EndFor
+   \State {\bfseries Output:} True if count $\geq k+1$, False otherwise.
+   \EndProcedure
+   
+   \Procedure{Crude-Approx}{$P$} \Comment data $P$, with diameter $\Delta$.
+   \State let $s$ be a u.a.r in $[0, \Delta]^d$, and $c = (s,..., s) \in \R^d$.
+   \State using a binary search, find the smallest $\ell$ such that Count-Distinct-Cells($P, c, \ell$) = True. Let $\ell_0$ be that level.
+   \State \textbf{Output:} $U = 2^{\ell_0} \Delta$.
+   \EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[tb]
+   \caption{Reduce-Spread($P, U$)}
+   \label{alg:reduce-diam}
+\begin{algorithmic}[1]
+\Procedure{Reduce-Diameter}{$P, U$} \Comment data $P$, upper bound on $\opt$ $U$
+   \State Let $\calD$ be a dictionnary
+   \State Let $r = d n^2\cdot U$, $s$ be chosen u.a.r. in $\{0, ..., r\}$, and $c = {s, ..., s}$ be the center of the grid.
+   \For{each point $p \in P$}
+   \State let $c^p$ be the center of the cell containing $p$. The $i$-th coordinate of $c_p$ is $\lfloor \frac{p_i - c_i}{r}\rfloor  \cdot r + \frac{r}{2}$.
+   Add $p$ to $\calD[c_p]$.
+   \EndFor
+   \State Identify the non-empty dictionnary keys $c^1, ..., c^k$, and let $\calC_1, ..., \calC_k$, be the corresponding cells.
+   \For {each coordinate $i = 1, ..., d$}
+   \State Sort the cells according to the $i$-th coordinate of their center. Let $\delta = 0$. 
+   \For{$j = 1, ..., k$}
+    \If {$\frac{c^j_i - c^j_{i-1}}{r} \geq 2$} update $\delta \gets \delta + c^j_i - c^j_{i-1} - 2r$.
+	\EndIf    
+    \State Substract $\delta$ from the $i$-th coordinate of all points in the $j$-th cell. 
+    \EndFor
+   \EndFor
+   \State {\bfseries Output:} the dataset $P'$ consisting of all shifted points.
+   \EndProcedure
+   
+   \Procedure{Reduce-Min-Distance}{$P, U$} \Comment data $P$, $U$ such that $U \leq n^2 d \log(\Delta) \opt$.
+   \State Round each coordinates of points to the closest multiple of $g := \frac{U}{n^4 d^2 \log \Delta}$.
+   \State \textbf{Output:} the dataset $P'$ with all point after rounding.
+   \EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
 \section{Proof of \cref{sec:theory}}\label{app:theory}
 
-We formalize the proof that the \cref{alg:main} produces an $\eps$-coreset in time $\tilde O(nd \log \Delta)$
-\begin{proof}
+We formalize the proof of \cref{cor:mainAlg}, stating that \cref{alg:main} produces an $\eps$-coreset in time $\tilde O(nd \log \Delta)$
+\begin{proof}[Proof of \cref{cor:mainAlg}]
 %We show that \cref{alg:main} has the desired guarantees.
 First, performing the Johnson-Lindenstrauss embedding takes time $\tilde O(nd)$.
 
@@ -46,10 +101,10 @@ Since the solution consisting of assigning each $p \in \calC_i$ to $c_i$ is a $O
 \end{proof}
 
 
-\subsection{Reduction to $k$-median.}
+\subsection{Reduction of $k$-means to $k$-median.}
 \label{app:redKM}
-
-\begin{lemma}
+In our argument, the only step spectific to $k$-median is to compute the upper-bound $U$ on the cost of the solution. Provided such an upper-bound, rounding points and shifting the box would work exactly alike for $k$-means. Therefore, the next lemma is enough to extend our reduction of the spread to $k$-means:
+\begin{lemma}\label{lem:kmedTokmeans}
 Let $\calS$ be a $c$-approximation for $k$-median on $P$. Then, $\calS$ is a $nc^2$-approximation for $k$-means on $P$.
 \end{lemma}
 \begin{proof}
@@ -67,11 +122,17 @@ where the last inequality stems from Cauchy-Schwarz. Therefore, $\calS$ is a $nc
 \label{app:apx-tree-proof}
 
 \begin{proof}[proof of \cref{lem:apxTree}]
-If the input is spread in $k+1$ distinct cell at level $i$, then in any solution there is at least one of those cells with no center. In the tree metric, points lying in this cell have therefore connexion cost at least $\sqrt{d}2^{-i+1} \cdot \boxsize$, and thus the left-hand-side of the inequality holds.
+If the input is spread in $k+1$ distinct cell at level $i$, then in any solution there is at least one of those cells with no center. In the tree metric, points lying in this cell have therefore connexion cost at least $\sqrt{d}2^{-i+1} \cdot \Delta$, and thus the left-hand-side of the inequality holds.
 
-On the other hand, if the input is contained into $k$ cells at level $i-1$, then placing arbitrarily a center in each cell yields a solution with cost at most $n \cdot \sqrt{d}2^{-i+4} \cdot \boxsize$: indeed, the distance from any point to its closest center is at most $2 \cdot \sum_{j \geq i-1} \sqrt{d}2^{-j} \cdot 2\boxsize \leq 4 \sqrt{d}2^{-i+2} \cdot \boxsize$ (summing the edge length from the point to the cell at level $i$, and then going down to the center). This concludes.
+On the other hand, if the input is contained into $k$ cells at level $i-1$, then placing arbitrarily a center in each cell yields a solution with cost at most $n \cdot \sqrt{d}2^{-i+4} \cdot \Delta$: indeed, the distance from any point to its closest center is at most $2 \cdot \sum_{j \geq i-1} \sqrt{d}2^{-j} \cdot 2\Delta \leq 4 \sqrt{d}2^{-i+2} \cdot \Delta$ (summing the edge length from the point to the cell at level $i$, and then going down to the center). This concludes.
 \end{proof}
 
+
+\begin{proof}[Proof of \cref{lem:crudeApx}]
+The running time of \textsc{Count-Distinct-Cells} in \cref{alg:crudeApx} is $\tilde O(nd)$, using a standard dictionnary datastructure. To compute $U$, \textsc{Crude-Approx} makes $O(\log \log \Delta)$ calls to \textsc{Count-Distinct-Cells}, as there are $O(\log \Delta)$ levels. This concludes the complexity of the algorithm.
+
+The approximation guarantee for $k$-median directly stems from \cref{lem:apxTree}. For $k$-means, it is a consequence of \cref{lem:kmedTokmeans}.
+\end{proof}
 \input{figures/lightweight_breaks}
 \input{figures/streaming_runtimes}
 
