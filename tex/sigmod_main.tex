@@ -1,0 +1,225 @@
+\documentclass[sigconf]{acmart}
+
+
+
+%%
+%% \BibTeX command to typeset BibTeX logo in the docs
+\AtBeginDocument{%
+  \providecommand\BibTeX{{%
+    Bib\TeX}}}
+
+%% Rights management information.  This information is sent to you
+%% when you complete the rights form.  These commands have SAMPLE
+%% values in them; it is your responsibility as an author to replace
+%% the commands and values with those provided to you when you
+%% complete the rights form.
+\setcopyright{acmcopyright}
+\copyrightyear{2018}
+\acmYear{2018}
+\acmDOI{XXXXXXX.XXXXXXX}
+
+%% These commands are for a PROCEEDINGS abstract or paper.
+\acmConference[Conference acronym 'XX]{Make sure to enter the correct
+  conference title from your rights confirmation emai}{June 03--05,
+  2018}{Woodstock, NY}
+%%
+%%  Uncomment \acmBooktitle if the title of the proceedings is different
+%%  from ``Proceedings of ...''!
+%%
+%%\acmBooktitle{Woodstock '18: ACM Symposium on Neural Gaze Detection,
+%%  June 03--05, 2018, Woodstock, NY}
+\acmPrice{15.00}
+\acmISBN{978-1-4503-XXXX-X/18/06}
+
+
+
+% Recommended, but optional, packages for figures and better typesetting:
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{subfigure}
+\usepackage{booktabs} % for professional tables
+\usepackage{makecell}
+\usepackage{caption}
+\usepackage{hyperref}
+
+
+% Attempt to make hyperref and algorithmic work together better:
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+
+% For theorems and such
+\usepackage{amsmath}  \usepackage{mathtools} \usepackage{amsthm}
+
+% if you use cleveref..
+\usepackage[capitalize,noabbrev]{cleveref}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% THEOREMS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{question}[theorem]{Question}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{fact}[theorem]{Fact}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+% Todonotes is useful during development; simply uncomment the next line
+%    and comment out the line below the next line to turn off comments
+%\usepackage[disable,textsize=tiny]{todonotes}
+\usepackage[textsize=tiny]{todonotes}
+
+
+
+
+\DeclareMathOperator{\polylog}{polylog}
+\DeclareMathOperator{\cost}{cost}
+\DeclareMathOperator{\dist}{dist}
+\DeclareMathOperator{\poly}{poly}
+
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\coreset}{\Omega}
+\newcommand{\calC}{\mathcal C}
+\newcommand{\calD}{\mathcal D}
+\newcommand{\calS}{\mathcal S}
+\newcommand{\calA}{\mathcal A}
+\newcommand{\opt}{\text{OPT}}
+\newcommand{\eps}{\varepsilon}
+
+\newcommand{\fkmeans}{\textsc{Fast-kmeans++}~}
+
+\newcommand{\lpar}{\left(}
+\newcommand{\rpar}{\right)}
+\newcommand{\lbra}{\left\{}
+\newcommand{\rbra}{\right\}}
+\newcommand{\lnor}{\left\|}
+\newcommand{\rnor}{\right\|}
+
+
+\newcounter{sideremark}
+\newcommand{\marrow}{\stepcounter{sideremark}\marginpar{$\boldsymbol{
+\longleftarrow\scriptstyle\arabic{sideremark}}$}}
+
+ \newcommand{\david}[1]{
+ %  \ifdraft{
+    \textsf{{\color{blue} *** (David) \marrow #1 ***}}
+ %  }
+ %  \fi
+ }
+  \newcommand{\andrew}[1]{
+ %  \ifdraft{
+    \textsf{{\color{red} *** (Andrew) \marrow #1 ***}}
+ %  }
+ %  \fi
+ }
+ 
+   \newcommand{\chris}[1]{
+ %  \ifdraft{
+    \textsf{{\color{green} *** (Chris) \marrow #1 ***}}
+ %  }
+ %  \fi
+ }
+
+ 
+%for having enumerates with (i) (ii) (iii): 
+\renewcommand{\labelenumi}{\theenumi}
+ 
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}         % colors
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+
+\title{Settling Time vs. Accuracy Tradeoffs for Clustering Big Data}
+
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to break the
+% lines. Using \AND forces a line break at that point. So, if LaTeX puts 3 of 4
+% authors names on the first line, and the last on the second line, try using
+% \AND instead of \And before the third author name.
+
+
+\author{}
+  % examples of more authors
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \AND
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+
+
+\begin{document}
+
+
+
+
+\begin{abstract}
+We study the theoretical and practical limits of $k$-means and $k$-median clustering on large datasets. Since the reader's favorite clustering method is likely
+slower than $\tilde{O}(nd)$ time, the general approach is to compress the data and perform the clustering on the compressed representation. Towards this goal,
+the number of features can be reduced in effectively linear time with guaranteed accuracy using random projections. Unfortunately, there is no such universal
+best choice for compressing the number of points -- while random sampling runs in sublinear time and coresets provide theoretical guarantees, the former does
+not enforce accuracy while the latter is too slow as $n$ and $k$ grow. Indeed, it has been conjectured that any sensitivity-based coreset construction
+necessitates $\tilde{O}(nd + nk)$ time.
+
+We examine this relationship by first showing that there does exist an algorithm that obtains coresets via sensitivity sampling in $\tilde{O}(nd)$ time --
+within log-factors of the time it takes to read the data.  Any approach that significantly improves on this must then resort to practical heuristics, leading us
+to consider the spectrum of sampling strategies across both real and artificial datasets in the static and streaming settings. Through this, we show the
+conditions in which coresets are necessary for preserving cluster validity as well as the settings in which faster, cruder sampling strategies are sufficient.
+As a result, we provide a comprehensive theoretical and practical blueprint for clustering effectively regardless of data size.  Our (anonymized) code is
+publicly available at \textcolor{blue}{\href{https://anonymous.4open.science/r/Fast-Coreset-Generation-7564}{source}}.
+\end{abstract}
+
+\maketitle
+
+
+\input{sigmod_introduction}
+\input{sigmod_preliminaries}
+%\input{related_work}
+\input{sigmod_theory}
+%\input{spread}
+\input{sigmod_results}
+\input{sigmod_conclusion}
+
+
+
+% Acknowledgements should only appear in the accepted version.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\appendix
+\input{sigmod_appendix}
+\end{document}

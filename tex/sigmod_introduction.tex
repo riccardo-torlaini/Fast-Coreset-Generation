@@ -1,0 +1,35 @@
+\section{Introduction}
+
+The modern data analyst has no shortage of clustering algorithms to choose from but, given the ever-increasing size of relevant datasets, many are often
+too slow to be practically useful. This has prompted the rise of big data algorithms which provide both theoretical guarantees and
+practical improvements for standard data-science techniques on otherwise insurmountable datasets. The perspectives
+of theoretical soundness and practical efficacy are, however, slightly at odds with one another. On the one hand, theoretical guarantees provide assurance that
+the algorithm will obtain valid solutions without unlucky inputs affecting their runtime or accuracy. On the other hand, it is sometimes difficult to convince
+oneself to implement the theoretically optimal algorithm when there are cruder methods that are faster to get running and perform well in practice.
+
+Since datasets can be large in the number of points $n$ and/or the number of features $d$, big-data methods must mitigate the effects of both.
+With respect to the feature space, the question is effectively closed as random projections are fast (running in effectively linear time), practical to
+implement, and provide tight guarantees on the embedding's size and quality. The outlook is less clear when reducing the number of points $n$, and there are
+two separate paradigms that each provide distinct advantages.  On the one hand we have uniform sampling, which runs in sublinear time but may miss important subsets of
+the data and therefore cannot guarantee accuracy.  On the other hand the most accurate sampling strategies are those that provide the \emph{strong coreset}
+guarantee, wherein the cost of any solution on the compressed data is within an $\varepsilon$-factor of that solution's cost on the original dataset.
+Surprisingly, many coreset constructions can remove the dependency on $n$, significantly accelerating downstream tasks.
+
+We study both paradigms with respect to a classic problem -- what are the limits and possibilities of compression for the $k$-means and $k$-median objectives?
+Whereas uniform sampling provides optimal speed but no accuracy guarantee, coreset constructions have
+unclear runtime bounds despite their tight bounds on the minimum number of samples required for accurate compression. Although there is little to study with respect to random
+sampling, the lack of clarity regarding linear-time coreset constructions throws into question their ability to facilitate clustering on large datasets. Indeed,
+available linear-time coreset via sensitivity sampling obtain an additive error \cite{BachemL018} while other fast sampling strategies
+\cite{kmeans_sublinear_bachem16} have weaker guarantees. Recently, \cite{DSWY22} proposed a sensitivity-based method for strong coresets that runs in time
+$\tilde{O}(nd + nk)$ and conjectured this to be optimal for $k$-median and $k$-means.  Since the issue of determining an optimal coreset size has recently
+been resolved \cite{CSS21,CLSSS22,HLW23}, this is arguably the main open problem in coreset research for center-based clustering. We resolve this by showing that
+there exists an easy-to-implement algorithm that constructs coresets in $\tilde{O}(nd)$ time -- only logarithmic factors away from the time it takes to read in
+the dataset.
+
+Nonetheless, this does not fully illuminate the landscape between the sampling paradigms for clustering algorithms when applying them in practice. Although our algorithm achieves an optimal
+running time, it is certainly possible that other, cruder methods may be just as viable on most real world data sets despite having no worst case guarantees.
+Thus, there is a natural spectrum within linear-time algorithms where obtaining more information about the dataset allows for a better
+sampling strategy at the expense of sublinear factors in speed. We state this formally in the following question: When are optimal $k$-means and $k$-median
+coresets necessary and what is the practical tradeoff between coreset speed and accuracy? To this end, we show that while many practical settings do not require
+the full coreset guarantee, one cannot cut corners if one wants to be confident in their compression. We also
+show that this extends to the streaming data paradigm and applies to downstream clustering approaches.
