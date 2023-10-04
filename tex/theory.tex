@@ -1,5 +1,5 @@
 \section{Fast-Coresets}
-\label{sec:theory}
+%\label{sec:theory}
 
 \begin{algorithm}[tb]
    \caption{Fast-Coreset($P, k, \eps, m$)}
@@ -28,7 +28,7 @@ algorithms. Both start by computing a solution $\calC$. When $\calC$ is a $c$-ap
 k \eps^{-z-2}\rpar$ and $\tilde O\lpar k \eps^{-2z -2}\rpar$, respectively. Hence, by rescaling, they provide an $\eps$-coreset with size $\tilde O\lpar
 k (\eps/c)^{-z-2}\rpar$ and $\tilde O\lpar k (\eps/c)^{-2z-2}\rpar$.  This leads to the following fact:
 
-\begin{fact}\label{fact:logApprox}
+\begin{fact}\label{fact:logApprox}[See Theorem 1 in \cite{stoc21} and 4.8 in \cite{FeldmanL11}\footnote{Those references use actually an $O(1)$-approximation, but all proofs go through with a  $O\lpar \log^{O(1)} k\rpar$ approximation, with an additional factor  $O\lpar \log^{O(1)} k\rpar$ in the coreset size.}]
 Let $\calC$ be an $O\lpar \log^{O(1)} k\rpar$ approximation to $k$-median or $k$-means.
 Then, group sampling using solution $\calC$ computes a coreset of size $\tilde O\lpar
 k \eps^{-z-2}\rpar$, and sensitivity sampling one of size $\tilde O\lpar k \eps^{-2z-2}\rpar$. 
@@ -48,17 +48,17 @@ The second property is crucial for us: the algorithm does not only compute cente
 combine it with sensitivity sampling in \cref{alg:main} and prove in \cref{app:theory} that this computes an $\eps$-coreset in time $\tilde O(nd \log \Delta)$.
 
 \begin{corollary}\label{cor:mainAlg}
-\cref{alg:main} runs in time $\tilde O\lpar n d \log \Delta\rpar$ and computes an $\eps$-coreset for $k$-means.
+\cref{alg:main} runs in time $\widetilde O\lpar n d \log \Delta\rpar$ and computes an $\eps$-coreset for $k$-means.
 \end{corollary}
 Furthermore, we generalize \cref{alg:main} to other fast $k$-median approaches in \cref{app:extensions}.
-Thus, it is easy to combine existing results to obtain an $\eps$-coreset without an $\tilde{O}(nk)$ time-dependency.  However, our method thus far has only
-replaced the $\tilde{O}(nd + nk)$ runtime by $\tilde{O}(nd \log \Delta)$. Indeed, the spirit of the issue remains -- this is not near-linear in the input size.
+Thus, it is easy to combine existing results to obtain an $\eps$-coreset without an $\widetilde{O}(nk)$ time-dependency.  However, our method thus far has only
+replaced the $\widetilde{O}(nd + nk)$ runtime by $\widetilde{O}(nd \log \Delta)$. Indeed, the spirit of the issue remains -- this is not near-linear in the input size.
 We verify this by devising a dataset that has $n - n'$ points uniformly in the $[-1, 1]^2$ square. Then, for $r \in \mathbb{Z}^+$, we produce a sequence of
 points at $(0, 1), (0, 0.5), \cdots, (0, 0.5^r)$ and copy this sequence $n' / r$ times, each time with a different $x$ coordinate. The result is a dataset of
 size $n$ where $\log \Delta$ grow linearly with $r$ (and, therefore, linearly with $n$). The resulting linear time-dependency can then be seen in Table \ref{tbl:logdelta}.
 
 \section{Reducing the Impact of the Spread}
-\label{sec:logdelta}
+ \label{sec:theory} %\label{sec:logdelta}
 \newcommand{\boxsize}{\textsc{MaxDist}}
 
 \paragraph*{Overview of the Approach}
@@ -68,42 +68,47 @@ a $\poly(n)$ factor.  If $U$ is a $c$-approximation of the optimal cost then the
 = U/(cn)$, giving us a minimum distance of no less than $g$; it is then enough to reduce the diameter to $\poly(n) U$.  For this, we place a grid with cell length
 $O(n \cdot U)$ centered at a random location, so that two points from the same cluster in $\opt$ fall into the same cell w.h.p. This implies that distinct cells do not interact with each other
 in any reasonable solution.  Then, we diameter of the input by "moving" non-empty cells closer to each other. We will focus this section on the simpler $k$-median
-problem but show how to reduce $k$-means to this case in \cref{app:redKM}. We also provide rigorous proofs in \ref{}, and give here an overview.
+problem but show how to reduce $k$-means to this case in \cref{app:redKM}.
 
 
-\paragraph*{Computing a crude upper-bound}
+\subsection{Computing a crude upper-bound}
 
 As described, we start by computing an approximate solution $U$ such that $\opt \leq U \leq \poly(n) \cdot \opt$. For this, the first step is to embed the input
-into a quadtree. This embedding has two key properties: first, distances are preserved up to a multiplicative factor $O(\sqrt{d} \log \Delta)$, and therefore the $k$-median cost is preserved up to this factor as well. Second, the metric is a \emph{hierarchically separated tree}: it can be represented with a tree, where points of $P$ are the leafs, and the distance between two points is given by the depth of their lowest common ancestor: if it is at depth $\ell$, their distance is $\Delta 2^{-\ell}$. 
+into a quadtree. This embedding has two key properties: first, distances are preserved up to a multiplicative factor $O(d \log \Delta)$, and therefore the $k$-median cost is preserved up to this factor as well. Second, the metric is a \emph{hierarchically separated tree}: it can be represented with a tree, where points of $P$ are the leafs, and the distance between two points is given by the depth of their lowest common ancestor: if it is at depth $\ell$, their distance is $\sqrt{d} \Delta 2^{-\ell}$. 
  Our first lemma shows
 that finding the first level of the tree for which the input lies in $k+1$ disjoint subtrees provides us with the desired approximation. 
 
 \begin{lemma}\label{lem:apxTree}
-[Proof in \cref{app:apx-tree-proof}]Let $\ell$ be the first level of the tree such that at least $k+1$ subtrees at level $i$ contain any point. Then, $\sqrt{d}2^{-ell+1} \cdot \Delta \leq
-\opt_T \leq n \cdot \sqrt{d}2^{-ell+4} \cdot \Delta$.
+[Proof in \cref{app:apx-tree-proof}]Let $\ell$ be the first level of the tree with at least $k+1$ non-empty subtrees. Then, $\sqrt{d}2^{-\ell+1} \cdot \Delta \leq
+\opt_T \leq n \cdot \sqrt{d}2^{-\ell+4} \cdot \Delta$, where $\opt_T$ is the optimal $k$-median solution in the tree metric.
 \end{lemma}
 
-We prove this in \cref{app:apx-tree-proof} of the appendix. A direct consequence  is that the first level of the tree for which at least
-$k+1$ cells are non empty allows to compute easily an $O(n)$-approximation to $k$-median on the tree metric. Since the tree metric approximates the oringial Euclidean metric up to $O(\sqrt{d} \log \Delta)$, this is therefore an $O(n \sqrt{d} \log \Delta)$-approximation to $k$-median in the Euclidean space.
+We prove this in \cref{app:apx-tree-proof}. A direct consequence  is that the first level of the tree for which at least
+$k+1$ cells are non empty allows to compute easily an $O(n)$-approximation to $k$-median on the tree metric. Since the tree metric approximates the oringial Euclidean metric up to $O(d \log \Delta)$, this is therefore an $O(n d \log \Delta)$-approximation to $k$-median in the Euclidean space.
  To turn that observation into an algorithm, one needs to count the number of non-empty cells at a given level $\ell$: for each point, identifying the cell that contains it can be done using modulo operations, and counting the number of distinct non-empty cells can be done with a mere dictionnary.
 This is done in time $\tilde O(nd)$, and a pseudo code is given \cref{alg:crudeApx}, in \cref{app:pseudoCode}.  Using a binary search on the $O(\log \Delta)$ many levels then concludes this section with the following result:
 
 \begin{lemma}\label{lem:crudeApx}[Proof in \cref{app:apx-tree-proof}]
-There is an algorithm running in time $\tilde O(nd \log \log \Delta)$ that computes an $O(n \sqrt{d} \log \Delta)$-approximation to $k$-median, and $O(n^2 d \log \Delta)$-approximation to $k$-means.
+There is an algorithm running in time $\tilde O(nd \log \log \Delta)$ that computes an $O(n d \log \Delta)$-approximation to $k$-median, and $O(n^3 d^2 \log^2 \Delta)$-approximation to $k$-means.
 \end{lemma}
 
 
 
+\subsection{From Approximate Solution to Reduced Spread}
 
-\paragraph*{From Approximate Solution to Reduced Spread}
 
-
-Let $U$ be an upper-bound on the optimal cost, computed via \cref{lem:crudeApx}. We place a grid with side length $r:= d n^2\cdot U$, centered at a random point in $\{0, ..., r\}^d$.
+Let $U$ be an upper-bound on the optimal cost, computed via \cref{lem:crudeApx}. We place a grid with side length $r:= \sqrt{d} n^2\cdot U$, centered at a random point in $\{0, ..., r\}^d$.
 The following folklore lemma ensures that with high probability (over the randomness of the center of the grid), no cluster of the optimal solution is spread on several grid cells.
 
-\begin{lemma}[Find a reference]
-The probability that two points $p$ and $q$ are in different grid cells is $O\lpar \frac{\|p-q\|^2}{n^2 U}\rpar$
+\begin{lemma}\label{lem:quadtreeSep}
+The probability over the center's location that two points $p$ and $q$ are in different grid cells is at most $\frac{\|p-q\|}{n^2 U}$
 \end{lemma}
+\begin{proof}
+We first bound the probability that there is a grid line along the $i$-th dimension between $p$ and $q$. Let $p_i, q_i$ be the $i$-th coordinate of $p$ and $q$, assume $p_i \leq q_i$ and let $\ell \in \mathbb{Z}$ such that $p_i - \ell r \in [0, r]$. 
+Then, $p$ and $q$ are separated along dimension $i$ if and only if the $i$-th coordinate of the center is in $[p_i - \ell r, q_i - \ell r]$. This happens with probability $|p_i - q_i|/r$. 
+
+Therefore, a union-bound over all coordinates shows that $p$ and $q$ are in different grid cells with probability at most $\sum |p_i-q_i| / r \leq \sqrt{d} \|p-q\|/r$.
+\end{proof}
 
 Since $U$ is larger than the distance between any input point and its center in the optimal solution, a union-bound ensures that with probability $1-1/n$, no
 cluster of this solution is split among different cells.  In particular, there are at most $k$-non empty cells. We call those "boxes".
@@ -117,14 +122,14 @@ each $j \in \lbra 1, ..., k\rbra$, let $c^i_j$  be the $i$-th coordinate of cent
 
 
 \begin{proposition}\label{prop:boxes}
-In $P'$, the diameter of the input is $\sqrt{d} \cdot 3d n^2\cdot U \cdot k$. 
+In $P'$, the diameter of the input is $O(d n^2\cdot U \cdot k)$ with probability $1-1/n$ over the randomness of the grid.
 Furthermore, two boxes that are adjacent (respectively non-adjacent) in $P$  are still adjacent (resp. non-adjacent) in $P'$.
 \end{proposition}
 \begin{proof}
 In $P'$, along any
-coordinate the maximal distance between the centers of two boxes is $2r = 2d n^2\cdot U$. Since there are at most $k$ boxes, the total distance along a coordinate is at most $2kr$, and therefore the diameter of the whole point set is $\sqrt{d} \cdot 2kr$.
+coordinate the maximal distance between the centers of two boxes is $2r = 2\sqrt d n^2\cdot U$. Since, with probability $1-1/n$, there are at most $k$ boxes, the total distance along a coordinate is at most $2kr$, and therefore the diameter of the whole point set is $\sqrt{d} \cdot 2kr$.
 
-If two boxes are adjacent, then they will be adjacent along any coordinate and their points have same shift in all coordinates. Therefore, the corresponding boxes are adjacents in $P'$. If they are not adjacent, there is at least one coordinate where they are at distance at least $2r$: in this case, their shift will be different, and they will stay non-adjacent.
+If two boxes are adjacent, then they are adjacent along any coordinate and their points have same shift in all coordinates. Therefore, the corresponding boxes are adjacents in $P'$. If they are not adjacent, there is at least one coordinate where they are at distance at least $2r$: in this case, their shift along this coordinate are different, and they will stay non-adjacent.
 \end{proof}
 
 
@@ -134,25 +139,25 @@ Combined with the diameter reduction, this ensures that the spread of the datase
 Furthermore, the second property of \cref{prop:boxes} combined with the choice of $g$ ensures that the cost of any reasonable solution is the same before and after the transformation, as stated in the following lemma:
 
 \begin{lemma}\label{lem:reduceSpread}
-Let $P'$ be the outcome of the diameter reduction and rounding steps. $P'$ has spread $(nd \log \Delta)^{O(1)}$.
+Let $P'$ be the outcome of the diameter reduction and rounding steps. with probability $1-1/n$ over the randomness of the grid, $P'$ has spread $(nd \log \Delta)^{O(1)}$.
 
-Suppose $U$ is such that $\opt \leq U \leq c \opt$, and 
-let $\calS'$ be a $c'$-approximation for  $k$-median (resp. $k$-means) on $P'$. 
-Then, one can compute a solution for $P$ for $k$-median (resp. $k$-means) on $P$, with same cost as $\calS'$ for $P'$ up to an additive error $\opt / n$, in time $O(nd)$. The same holds by reversing the roles of $P$ and $P'$.
+Suppose $U$ is such that $\opt \leq U \leq d n^2  \opt$, and 
+let $\calS'$ be a solution for  $k$-median (resp. $k$-means) on $P'$ with cost at most $d n^2 \opt$. 
+Then, one can compute a solution for $P$ for $k$-median (resp. $d^2 n^4 \opt$ for $k$-means) on $P$, with same cost as $\calS'$ for $P'$ up to an additive error $\opt / n$, in time $O(nd)$. The same holds by reversing the roles of $P$ and $P'$.
 \end{lemma}
 \begin{proof}
 First, in rounding points to the closest multiple of $g$,
-  the distance between any point and its rounding is at most $g \leq \frac{\opt}{n^2}$. Summing over all points,
+  the distance between any point and its rounding is at most $g \leq \frac{U}{n^4 d^2 \log \Delta} \leq \frac{\opt}{n^2}$. Summing over all points,
 any solution computed on the gridded data has cost within an additive factor $\pm \frac{\opt}{n}$ of the true cost. 
 
-Now, since distances in $P'$ are smaller than in $P$ (up to an additive $\frac{\opt}{n^2}$ due to the rounding), the optimal solution for $P'$ has cost at most $U$. Therefore, two points that are in non-adjacent boxes
-(i.e., at distance more than $d n^2\cdot U$) are not in the same cluster of $\calS'$ as otherwise $\calS'$ would not be a $c'$-approximation. 
+Now, two points that are in non-adjacent boxes
+(i.e., at distance more than $d n^2\cdot U$) are not in the same cluster of $\calS'$: otherwise, the cost of $\calS'$ would be larger than $d n^2\cdot U \geq d n^2\cdot \opt$. 
  Let $\calS$ be
-the solution obtained from $\calS'$ by reversing the construction of $P'$, namely re-adding the shift that was substracted to every box. Since adjacency is preserved, all clusters end up having the same shift, and therefore all
-intra-cluster distances are the same in $P$ and $P'$. Therefore, the costs are equal.
+the solution obtained from $\calS'$ by reversing the construction of $P'$, namely re-adding the shift that was substracted to every box. Since adjacency is preserved, all points that are in the same cluster have the same shift, and therefore all
+intra-cluster distances are the same in $P$ and $P'$. Therefore, the costs are equal. Therefore, $\calS$ has same cost as $\calS'$, up to the additive $\opt /n$ due to the rounding.
 
 Finally, the smallest
-non-zero distance is $g = \frac{U}{n^4 d^{2} \log \Delta}$, and the diameter is $\sqrt{d} \cdot 3d n^2\cdot U \cdot k$ (see \cref{lem:boxes}), implying that the spread of $P'$ is $(nd \log \Delta)^{O(1)}$.
+non-zero distance is $g = \frac{U}{n^4 d^{2} \log \Delta}$, and with probability $1-1/n$ the diameter is $\sqrt{d} \cdot 3d n^2\cdot U \cdot k$ (see \cref{prop:boxes}), implying that the spread of $P'$ is $(nd \log \Delta)^{O(1)}$.
 \end{proof}
 
 
@@ -165,5 +170,5 @@ non-zero distance is $g = \frac{U}{n^4 d^{2} \log \Delta}$, and the diameter is 
 Combining the algorithm of \cref{lem:crudeApx}, which gives a bound on $U$, with \cref{lem:reduceSpread} concludes the section with the following theorem:
 
 \begin{theorem}
-Given $P \subset \R^d$ with spread $\Delta$, there is an algorithm running in time $O(nd \log \log \Delta)$ that computes a set $P'$ such that (1) the spread of $P'$ is $\poly(n,d, \log(\Delta))$ and (2) any solution that is a $c'$-approximation for  $k$-median (resp. $k$-means) on $P'$ can be converted in time $O(nd)$ into a solution with same cost on $P$, up to an additive error $O(\opt / n)$.
+Given $P \subset \R^d$ with spread $\Delta$, there is an algorithm running in time $O(nd \log \log \Delta)$ that computes a set $P'$ such that (1) with probability $1-1/n$, the spread of $P'$ is $\poly(n,d, \log(\Delta))$ and (2) any solution with cost at most $d n^2 \opt$ for  $k$-median (resp. $d^2 n^4 \opt$ for $k$-means) on $P'$ can be converted in time $O(nd)$ into a solution with same cost on $P$, up to an additive error $O(\opt / n)$.
 \end{theorem}
