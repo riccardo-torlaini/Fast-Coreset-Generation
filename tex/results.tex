@@ -1,6 +1,6 @@
 \section{Fast Compression in Practice}
 
-Despite the near-linear time algorithm described in Sections~\ref{sec:theory} and~\ref{sec:logdelta}, the coreset construction in \ref{alg:main} nonetheless
+Despite the near-linear time algorithm described in Sections~\ref{sec:theory} and~\ref{sec:logdelta}, the coreset construction of \cref{alg:main} nonetheless
 requires an $O(1)$ approximation to the original task before the sampling can occur. Although theoretically justified, it is unclear how necessary this is in
 practice -- would a worse approximation factor still be representative of the dataset for practical purposes? We answer this question by defining a suite of
 algorithms, datasets and evaluation procedures that allow for a comprehensive study of speed vs. accuracy tradeoffs in compression for clustering.  We begin by
