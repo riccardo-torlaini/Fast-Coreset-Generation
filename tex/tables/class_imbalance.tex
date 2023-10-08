@@ -1,6 +1,5 @@
 \begin{table}[htbp]
     \centering
-    \small
     \begin{tabular}{|l|cccc|}
         \hline
         & $\gamma = 0$ & $\gamma = 1$ & $\gamma = 3$ & $\gamma = 5$\\
@@ -18,7 +17,7 @@
     \label{tbl:class-imbalance}
     \begin{tabular}{|c|cccc|}
         \hline
-        & Uniform Sampling & Lightweight & Welterweight & Fast Coreset \\
+        & \makecell{Uniform\\Sampling} & \makecell{Light-\\weight} & \makecell{Welter-\\weight} & \makecell{Fast\\Coreset} \\
         \hline
         MNIST & 12450 & 12379 & 12512 & 12449 \\
         Adult & 24982 & 24935 & 24944 & 25013 \\
@@ -30,7 +29,6 @@
     \vspace*{0.1cm}
     \caption{$cost(P, \calC_S)$, where $P$ is the whole dataset and $\calC_S$ is found via Lloyd's algorithm on the coreset. Sample sizes down the rows are
     $m=4K,4K,20K,20K,20K$ and initializations are identical within each row. We only show the first 5 digits of the cost for readability.}
-    %, i.e. uniform sampling on MNIST has error 12\,450\,330\,577
     \label{tbl:lloyds}
 \end{table}
 

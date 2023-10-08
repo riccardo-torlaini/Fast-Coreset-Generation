@@ -1,32 +1,11 @@
-\section{Extensions to \cref{alg:main}} 
-\label{app:extensions}
-Consider that \cref{alg:main}  only needs to be provided with an assignment to a solution that is a $O(\polylog k)$ approximationone, implying that one could
-compute the solution $\calC$ via any algorithm that satisfies this.  This initial solution may as well be an $O\lpar\polylog \lnor P \rnor_0 \rpar$
-approximation: using the iterative coreset construction from \cite{BravermanJKW21}, one could then derive a near-optimal coreset size, only suffering
-a $O(\log^* n)$ loss in the running time.
+\section{Proofs, Pseudo-Code, and Extensions}
+We put the proofs, pseudo-code and algorithmic extensions towards the end of the paper for improved readability of the primary text.
 
-As an example, we illustrate a different approach for $k$-median. One could first embed the input into a hierarchically separated tree (HST) with expected
-distortion $O(\log \lnor P \rnor_0)$ \cite{FakcharoenpholRT03}. On such tree metrics, solving $k$-median can be done in linear time using dedicated algorithms
-(see e.g. \cite{Cohen-AddadLNSS21}). Using the solution from the HST metric, one can compute a coreset, and iterate using the previous argument.  This embedding
-into HST is very similar to what is done by the \fkmeans algorithm, but can be actually performed in \emph{any} metric space, not only Euclidean.  For instance,
-in a metric described by a graph with $m$ edges, the running time of this construction would be near linear-time $\tilde O(m)$.
+\subsection{Pseudo-Code for Algorithms in Sections~\ref{sec:theory}}
 
-\section{Overview of Quadtree Construction}
-\label{app:quadtree}
+We provide pseudo-code for the algorithms discussed in Section~\ref{sec:theory}. We give the algorithm corresponding to Section~\ref{ssec:crude_bound} in
+Algorithm \ref{alg:crudeApx}. We give the algorithm corresponding to Section~\ref{ssec:reduce_spread} in Algorithm~\ref{alg:reduce-diam}.
 
-The first step is to obtain a box enclosing all input points, centered at zero, with all side lengths equal to
-$\Delta$. This can be done as follows: select an arbitrary input point, and translate the dataset so that this point is at the origin. Then, using
-$O(nd)$ time, set $\Delta$ to be the maximum distance from any point to the origin. Having obtained this box, add a random shift $s \leq \Delta$ is to all the points'
-coordinates so that the input is now in the box $[-2\Delta, 2\Delta]^d$. This transformation does not change any distances and therefore preserves the
-$k$-median cost.  The $i$-th level of the tree (for $i \in \lbra 0, ..., \log \Delta \rbra$) is constructed by centering a grid of side length $2^{-i} \cdot
-2\Delta$ at $0$, making each grid-cell a node in the tree.\footnote{This is equivalent to centering the grid at $(s, ...,s)$, as we described in the main body. We find this description easier for describing the construction.}  The parent of a cell $c$ is simply the cell at level $i-1$ that contains $c$, and the distance
-between $c$ and its parent is set to $2^{-i} \cdot 2\Delta \cdot \sqrt{d}$ (the length of the hypercube's diagonal). This embedding takes $O(nd \log \Delta)$
-time to construct, where $\log \Delta$ is the depth of the tree. Note crucially that, in our \cref{alg:crudeApx}, we do not need to build the full tree to only $\log \log \Delta$ levels of it, resulting in our improved complexity.
-
-The distances in the tree metric $d_T$ satisfy
-$\forall p,q, \|p-q\| \leq \mathbb{E}[d_T(p, q)] \leq O(\sqrt{d} \log \Delta) \|p-q\|$, where the expectation is taken over the random shift $s$ of the decomposition (see \cite{}).
-
-\section{Pseudo-codes of the Algorithms}
 \label{app:pseudoCode}
 \begin{algorithm}[tb]
    \caption{Crude-Approx($P$)}
@@ -57,7 +36,7 @@ $\forall p,q, \|p-q\| \leq \mathbb{E}[d_T(p, q)] \leq O(\sqrt{d} \log \Delta) \|
 \begin{algorithmic}[1]
 \Procedure{Reduce-Diameter}{$P, U$} \Comment data $P$, upper bound on $\opt$ $U$
    \State Let $\calD$ be a dictionnary
-   \State Let $r = d n^2\cdot U$, $s$ be chosen u.a.r. in $\{0, ..., r\}$, and $c = {s, ..., s}$ be the center of the grid.
+   \State Let $r = \sqrt d n^2\cdot U$, $s$ be chosen u.a.r. in $\{0, ..., r\}$, and $c = {s, ..., s}$ be the center of the grid.
    \For{each point $p \in P$}
    \State let $c^p$ be the center of the cell containing $p$. The $i$-th coordinate of $c_p$ is $\lfloor \frac{p_i - c_i}{r}\rfloor  \cdot r + \frac{r}{2}$.
    Add $p$ to $\calD[c_p]$.
@@ -81,9 +60,10 @@ $\forall p,q, \|p-q\| \leq \mathbb{E}[d_T(p, q)] \leq O(\sqrt{d} \log \Delta) \|
 \end{algorithmic}
 \end{algorithm}
 
-\section{Proofs of \cref{sec:theory}}\label{app:theory}
-
-We formalize the proof of \cref{cor:mainAlg}, stating that \cref{alg:main} produces an $\eps$-coreset in time $\tilde O(nd \log \Delta)$
+\section{Proofs from Sections \ref{sec:theory_0}, \ref{sec:theory}}\label{app:theory}
+\subsection{Proof of Corollary~\ref{cor:mainAlg}}
+\label{ssec:cor_proof}
+Recall that Corollary~\ref{cor:mainAlg} states that \cref{alg:main} produces an $\eps$-coreset in time $\tilde O(nd \log \Delta)$.
 \begin{proof}[Proof of \cref{cor:mainAlg}]
 %We show that \cref{alg:main} has the desired guarantees.
 First, performing the Johnson-Lindenstrauss embedding takes time $\tilde O(nd)$.
@@ -121,6 +101,7 @@ where the last inequality stems from Cauchy-Schwarz. Therefore, $\calS$ is a $nc
 \subsection{Estimation of the Optimal Cost in a Tree}
 \label{app:apx-tree-proof}
 
+We conclude by proving Lemma~\ref{lem:apxTree}:
 \begin{proof}[proof of \cref{lem:apxTree}]
 If the input is spread in $k+1$ distinct cell at level $i$, then in any solution there is at least one of those cells with no center. In the tree metric, points
 lying in this cell have therefore connexion cost at least $\sqrt{d}2^{-i+1} \cdot \Delta$, and thus the left-hand-side of the inequality holds.
@@ -137,33 +118,21 @@ The running time of \textsc{Count-Distinct-Cells} in \cref{alg:crudeApx} is $\ti
 \textsc{Crude-Approx} makes $O(\log \log \Delta)$ calls to \textsc{Count-Distinct-Cells}, as there are $O(\log \Delta)$ levels. This concludes the complexity of
 the algorithm.
 
-The approximation guarantee for $k$-median directly stems from \cref{lem:apxTree}. For $k$-means, it is a consequence of \cref{lem:kmedTokmeans}.
+The approximation guarantee for $k$-median directly stems from \cref{lem:apxTree} and \cref{lem:quadtreeDist}. For $k$-means, it is a consequence of \cref{lem:kmedTokmeans}.
 \end{proof}
-\input{figures/lightweight_breaks}
-\input{figures/streaming_runtimes}
 
-\section{Data Parameters}
-\label{app:data_params}
-In all real and artificial datasets, we add random uniform noise $\eta$ with $0 \leq \eta_i \leq 0.001$ in each dimension in order to make all points unique.
-Unless specifically varying these parameters, we default all algorithms in~\ref{ssec:algorithms} to $k=100$ for the Adult, MNIST, and artificial datasets and
-$k=500$ for the Song, Cover Type, and Census datasets. Our default coreset size is then $m = 40k$. We refer to the coreset size scalar as the \emph{$m$-scalar}.
-We only run the dimension-reduction step on the MNIST dataset, as the remaining datasets already have sufficiently low dimensionality.
 
-\begin{table}[htbp]
-    \centering
-    \begin{tabular}{lrr}
-        Dataset & Points & Dim \\
-        \hline
-        \emph{Adult} & 48\,842 & 14 \\
-        \emph{MNIST} & 60\,000 & 784 \\
-        \emph{Song} & 515\,345 & 90 \\
-        \emph{Cover Type} & 581\,012 & 54 \\
-        \emph{Census} & 2\,458\,285 & 68 \\
-        \hline
-        \vspace*{0.1cm}
-    \end{tabular}
-    \caption{Description of real world datasets}
-    \label{tbl:datasets}
-\end{table}
+\subsection{Extensions to Algorithm \ref{alg:main}}
+\label{app:extensions}
 
-\input{figures/coreset_size_on_quality.tex}
+Consider that Algorithm \ref{alg:main} only needs to be provided with an assignment to a solution that is a $O(\polylog k)$ approximation, implying that one
+could compute the solution $\calC$ via any algorithm that satisfies this.  Indeed, this initial solution may as well be an $O\lpar\polylog \lnor P \rnor_0 \rpar$
+approximation, where $\lnor P \rnor_0$ is the number of non-zero samples in $P$. Using the iterative coreset construction from \cite{BravermanJKW21}, one could
+then derive a near-optimal coreset size, only suffering a $O(\log^* n)$ loss in the running time.
+
+As an example, we illustrate a different approach for $k$-median. One could first embed the input into a hierarchically separated tree (HST) with expected
+distortion $O(\log \lnor P \rnor_0)$ \cite{FakcharoenpholRT03}. On such tree metrics, solving $k$-median can be done in linear time using dedicated algorithms
+(see e.g. \cite{Cohen-AddadLNSS21}). Using the solution from the HST metric, one can compute a coreset, and iterate using the previous argument.  This embedding
+into HST is very similar to what is done by the \fkmeans algorithm, but can be actually performed in \emph{any} metric space, not only Euclidean.  For instance,
+in a metric described by a graph with $m$ edges, the running time of this construction would be near linear-time $\tilde O(m)$.
+

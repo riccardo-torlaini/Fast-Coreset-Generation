@@ -1,9 +1,9 @@
-\begin{table*}
+\begin{table}
     \centering
     \small
     \begin{tabular}{|c|cccc|}
         \hline
-        & Uniform Sampling & Lightweight & Welterweight & Fast Coreset \\
+        & \makecell{Uniform \\ Sampling} & Lightweight & Welterweight & \makecell{Fast \\ Coreset} \\
         MNIST & 12450 & 12379 & 12512 & 12449 \\
         Adult & 24982 & 24935 & 24944 & 25013 \\
         Song & 16753 & 16612 & 16950 & 17010 \\
@@ -13,7 +13,6 @@
     \end{tabular}
     \caption{$cost(P, \calC_S)$, where $P$ is the whole dataset and $\calC_S$ is found via Lloyd's algorithm on the coreset. Sample sizes down the rows are
     $m=4K,4K,20K,20K,20K$ and initializations are identical within each row. We only show the first 5 digits of the cost for readability.}
-    %, i.e. uniform sampling on MNIST has error 12\,450\,330\,577
     \label{tbl:lloyds}
-\end{table*}
+\end{table}
 

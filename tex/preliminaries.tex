@@ -1,7 +1,7 @@
 \section{Preliminaries and Related Work}
 \label{sec:preliminaries}
 
-\paragraph*{On Sampling Strategies.}
+\subsection{On Sampling Strategies.}
 \label{ssec:sens_sampling}
 
 As discussed, we focus our study on linear- and sublinear-time sampling strategies. Specifically, given a dataset $P \in \R^{n \times d}$, we want to sample
@@ -47,7 +47,7 @@ centers from the bicriteria seems to require $\Omega(nk)$ running time.
 
 \input{figures/coreset_size_on_sens_quality.tex}
 
-\paragraph*{Other Coreset Strategies}
+\subsection{Other Coreset Strategies}
 \label{ssec:clustering_prelim}
 
 Much of the advancements regarding coresets have sought the smallest coreset possible across metric spaces and downstream objectives. The most prominent
@@ -68,11 +68,36 @@ check whether a candidate compression is a weak coreset \footnote{A weak coreset
 computed on the coreset yields a $(1+\varepsilon)$ on the entire point set \cite{chrisESA}.}. Therefore, although coreset algorithms succeed with some high probability, it is
 unclear how to computationally verify this. We refer to \cite{chrisESA} for further discussion on this topic and discuss our metrics in Section \ref{sssec:metrics}.
 
-\paragraph*{Quadtree Embeddings}
+\subsection{Quadtree Embeddings}
 
-To design fast algorithms, one of the common techniques is to embed the Euclidean space into a tree metric.  We give a brief description of the quadtree metric
-embedding procedure here and refer to \cref{app:quadtree} for a more formal explanation.  The central idea is that each hypercube in the input space can be
-split into $2^d$ sub-cubes and that this can be represented in a tree structure. Setting the weight of each branch equal to the length of the parent node's
-diagonal then guarantees that the expected distance in the tree is within a factor $O(\sqrt{d} \log \Delta)$ of the distance in the original space, where
-$\Delta$ is the \emph{spread} of the point set, namely the ratio of the largest distance by the smallest non-zero distance. Lastly, this tree can be constructed
-in $\tilde{O}(nd \log \Delta)$ time.
+To design fast algorithms, one of the common techniques is to embed the Euclidean space into a tree metric using \emph{quadtree embeddings}.  The central idea
+behind these is that each hypercube in the input space can be split into $2^d$ sub-cubes. We can represent this in a tree-structure, where each sub-cube has the
+original hypercube as its parent. Appropriately setting the weight of each branch then preserves the expected distance between points in the sub-cubes within
+a $O(\sqrt{d} \log \Delta)$ factor. Here, $\Delta$ is the \emph{spread} of the point set and is equal to the ratio of the largest distance over the smallest
+non-zero distance.  Given this context, we now introduce quadtree embeddings more formally:
+
+\paragraph*{Formal Overview}
+
+Given a set of points in $\mathbb{R}^{n \times d}$, we want to return a tree-structure that roughly preserves their pairwise distances.  To do this, our first
+step is to obtain a box enclosing all input points, centered at zero, with all side lengths equal to $\Delta$. This can be done as follows: select an arbitrary
+input point, and translate the dataset so that this point is at the origin. Then, using $O(nd)$ time, set $\Delta$ to be the maximum distance from any point to
+the origin. Note that, up to rescaling the points so that the smallest distance equals $1$, this is equivalent to the \emph{spread} as described in the previous
+paragraph.
+
+Having obtained this box, add a shift $s$ (picked uniformly at random in $[0, \Delta]$) to all the points' coordinates so that the input is now in the box
+$[-2\Delta, 2\Delta]^d$. This transformation does not change any distances and therefore preserves the $k$-median and $k$-means costs.  The $i$-th level of the
+tree (for $i \in \lbra 0, ..., \log \Delta \rbra$) is constructed by centering a grid of side length $2^{-i} \cdot 2\Delta$ at $0$, making each grid-cell a node
+in the tree.  The parent of a cell $c$ is simply the cell at level $i-1$ that contains $c$, and the distance between $c$ and its parent is set to $2^{-i} \cdot
+2\Delta \cdot \sqrt{d}$ (the length of the hypercube's diagonal). This embedding takes $O(nd \log \Delta)$ time to construct, where $\log \Delta$ is the depth
+of the tree\footnote{Crucially, note that, in our \cref{alg:crudeApx}, we do not need to build the full tree.  Instead, we only require $\log \log \Delta$
+levels of it, resulting in our improved complexity.}. The linearity in the $\log \Delta$ term comes from the fact that this is the maximum depth of the tree.
+
+The distortion of this embedding is at most $O(d \log \Delta)$, as stated in the following lemma:
+\begin{lemma}\label{lem:quadtreeDist}
+The distances in the tree metric $d_T$ satisfy
+$\forall p,q, \|p-q\| \leq \mathbb{E}[d_T(p, q)] \leq O(d \log \Delta) \|p-q\|$, where the expectation is taken over the random shift $s$ of the decomposition.
+\end{lemma}
+
+A sample proof (and further intuition on quadtree embeddings) can be found in Lemma 11.9 in \cite{har2011geometric}. The result follows from combining linearity
+of expectation and the fact that two points $p$ and $q$ are separated at level $i$ with probability at most $\sqrt{d} \|p-q\| \frac{2^i}{\Delta}$ (as in the
+proof of \cref{lem:quadtreeSep}).

@@ -5,7 +5,8 @@ requires an $O(1)$ approximation to the original task before the sampling can oc
 practice -- would a worse approximation factor still be representative of the dataset for practical purposes? We answer this question by defining a suite of
 algorithms, datasets and evaluation procedures that allow for a comprehensive study of speed vs. accuracy tradeoffs in compression for clustering.  We begin by
 describing our experimental setup before showing results in both the static and streaming settings.  We note that these results correspond directly to
-downstream clustering tasks.
+downstream clustering tasks. Unless stated otherwise, our experimental results focus on the $k$-means task as it is more common than $k$-median and the
+takeaways are consistent across the two.
 
 \subsection{Experimental Setup}
 \paragraph*{Metrics}
@@ -20,6 +21,7 @@ but may be unbounded otherwise.  We refer to this as the \emph{coreset distortio
 \paragraph*{Algorithms}
 \label{ssec:algorithms}
 
+
 We compare Fast-Coresets (Algorithm~\ref{alg:main}) against 4 different benchmark sampling strategies that span the space between optimal time and optimal
 accuracy.
 \begin{description}
@@ -33,27 +35,47 @@ accuracy.
 
 \input{tables/distortion}
 
-We take a moment here to motivate the welterweight coreset algorithm.  Consider that lightweight coresets are solving $1$-means to obtain sensitivity values
-whereas sensitivity sampling is solving $k$-means. Given that sensitivity values are estimated via~\cref{eq:sensitivity}, changing the value of $j$
-affects the cluster sizes $|\calC_p|$ and therefore acts as a direct interpolation between uniform and sensitivity sampling.  We default to $j = \log k$ unless
-stated otherwise. We will use the term `accelerated sampling methods' when referring to uniform, lightweight and welterweight coresets as a group.
+We take a moment here to motivate the welterweight coreset algorithm.  Consider that lightweight coresets use the $1$-means solution to obtain the sensitivities
+that dictate the sampling distribution. On the other hand, sensitivity sampling is solving the full $k$-means problem. Thus, changing the value of $j$ affects
+the cluster sizes $|\calC_p|$ and therefore acts as a direct interpolation between uniform and sensitivity sampling.  We default to $j = \log k$ unless stated
+otherwise. We will use the term `accelerated sampling methods' when referring to uniform, lightweight and welterweight coresets as a group.
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{lrr}
+        Dataset & Points & Dim \\
+        \hline
+        \emph{Adult} & 48\,842 & 14 \\
+        \emph{MNIST} & 60\,000 & 784 \\
+        \emph{Song} & 515\,345 & 90 \\
+        \emph{Cover Type} & 581\,012 & 54 \\
+        \emph{Census} & 2\,458\,285 & 68 \\
+        \hline
+        \vspace*{0.1cm}
+    \end{tabular}
+    \caption{Description of real world datasets}
+    \label{tbl:datasets}
+\end{table}
+
 
 \paragraph*{Datasets}
 \label{sssec:datasets}
 
 We employ several real and artificial datasets to evaluate the quality of a coreset.  For our real-world data, we utilize the Adult~\cite{Dua:2019},
 MNIST~\cite{mnist}, Song~\cite{song}, Census~\cite{census}, and Cover Type~\cite{covtype} datasets, whose characteristics are summarized in
-Table~\ref{tbl:datasets} in the Appendix. These are standard datasets for coreset and clustering evaluations.
+Table~\ref{tbl:datasets}. These are standard datasets for coreset and clustering evaluations.
 We complement these with artificial datasets and default to $n = 50\,000$ and $d=50$ unless stated otherwise.
 \begin{description}
     \item \emph{- c-outlier}. Place $n-c$ points in a single location and $c$ points a large distance away.
     \item \emph{- Geometric}. Place $c k$ points at $(1, 0, 0, \cdots)$, $\frac{ck}{r}$ points at $(0, 1, 0, \cdots)$, $\frac{ck}{r^2}$ points
         at $(0, 0, 1, \cdots)$, and so on for $\log_r (ck)$ rounds. Thus, the data creates a high-dimensional simplex with uneven weights across the vertices. We
         default to $c = 100$ and $r=2$.
-    \item \emph{- Gaussian mixture}. A set of scattered Gaussian clusters of varying density. These clusters are sequentially defined, with the size of the first
-        cluster defined by $\frac{n}{\kappa} \exp \left( \gamma \cdot \rho_0 \right)$, where $\kappa$ is the number of Gaussian clusters, $\rho_0$ is uniformly
-        chosen from $[-0.5, 0.5]$, and $\gamma$ is a hyperparameter that affects the distribution of cluster sizes.  Then, given clusters $\{c_1, \cdots,
-        c_i\}$, we obtain the size of the $(i+1)$-st cluster by $|c_{i+1}| = \frac{n - \sum_i |c_i|}{\kappa - i}\exp \left( \gamma \cdot \rho_{i+1} \right).$
+    \item \emph{- Gaussian mixture}. A set of scattered Gaussian clusters of varying density.
+
+        These clusters are sequentially defined, with the size of the first cluster defined by $\frac{n}{\kappa} \exp \left( \gamma \cdot \rho_0 \right)$, where
+        $\kappa$ is the number of Gaussian clusters, $\rho_0$ is uniformly chosen from $[-0.5, 0.5]$, and $\gamma$ is a hyperparameter that affects the
+        distribution of cluster sizes.  Then, given clusters $\{c_1, \cdots, c_i\}$, we obtain the size of the $(i+1)$-st cluster by \[ \quad \quad \quad \quad |c_{i+1}|
+        = \frac{n - \sum_i |c_i|}{\kappa - i}\exp \left( \gamma \cdot \rho_{i+1} \right).\]
 
         This has the property that all clusters have size $n / k$ when $\gamma = 0$ and, as $\gamma$ grows, the cluster sizes diverge at an exponential rate.
         We note that this is a well-clusterable instance with respect to cost stability conditions, see \cite{AwS12,Cohen-AddadS17,KuK10,ORSS12}.
@@ -69,8 +91,16 @@ The artificial datasets are constructed to emphasize strengths and weaknesses of
 very little information and, as such, should be simple for any sampling strategy that builds a reasonable representation of its input. The geometric dataset
 then increases the difficulty by having more regions of interest that must be sampled. The Gaussian mixture dataset is
 harder still, as it incorporates uneven inter-cluster distances and inconsistent cluster sizes. Lastly, the benchmark dataset is devised to be a worst-case
-example for sensitivity sampling. We discuss the parameters and implementation specifics of the datasets in~\cref{app:data_params}. We run our experiments on
-an Intel Core i9 10940X 3.3GHz 14-Core processor.
+example for sensitivity sampling.
+
+\paragraph*{Data Parameters}
+\label{app:data_params}
+
+In all real and artificial datasets, we add random uniform noise $\eta$ with $0 \leq \eta_i \leq 0.001$ in each dimension in order to make all points unique.
+Unless specifically varying these parameters, we default all algorithms in~\ref{ssec:algorithms} to $k=100$ for the Adult, MNIST, and artificial datasets and
+$k=500$ for the Song, Cover Type, and Census datasets. Our default coreset size is then $m = 40k$. We refer to the coreset size scalar as the \emph{$m$-scalar}.
+We only run the dimension-reduction step on the MNIST dataset, as the remaining datasets already have sufficiently low dimensionality.  We run our experiments
+on an Intel Core i9 10940X 3.3GHz 14-Core processor.
 
 \subsection{Evaluating Sampling Strategies}
 \label{ssec:alg_qualities}
@@ -78,41 +108,51 @@ an Intel Core i9 10940X 3.3GHz 14-Core processor.
 \paragraph*{Theoretically guaranteed methods.}
 
 We first compare the Fast-Coreset algorithm with standard sensitivity sampling to ensure that it obtains appropriate accuracy in a shorter runtime.  To this
-end, the last columns of Tables~\ref{tbl:composition} and~\ref{tbl:distortion} show that the Fast-Coreset method produces compressions of consistently low
+end, the last columns of Tables~\ref{tbl:distortion} and~\ref{tbl:composition} show that the Fast-Coreset method produces compressions of consistently low
 distortion and that this holds across datasets, $m$-scalar values and in the streaming setting.  Despite this, Figure~\ref{fig:coreset_size_on_sens_quality}
 shows that varying $k$ from $50$ to $400$ causes a linear slowdown in sensitivity sampling but only a logarithmic one for the Fast-Coreset method. This analysis
 confirms the theory in Section~\ref{sec:theory} and we therefore do not add traditional sensitivity sampling to the other experiments.
 
 \paragraph*{Speed vs. Accuracy.}
 
-We now refer the reader to the remaining columns of Table~\ref{tbl:distortion}, where we show the effect of coreset size across the real-world datasets by
-sweeping over $m$-scalar values. Despite the suboptimal theoretical guarantees of the accelerated sampling methods, we see that they obtain competitive
-distortions to sensitivity sampling while also running faster than Fast-Coresets in practice. We attribute this to the well-behaved nature of the real-world
-datasets, where they have few outliers and classes of consistent sizes.
+\input{figures/coreset_size_on_quality.tex}
 
-To verify this, consider the results of these sampling strategies on the artificial datasets in Table~\ref{tbl:distortion}: as disparity in cluster sizes and
-distributions grows, the accelerated sampling methods have difficulty capturing all of the outlying points in the dataset.  While uniform sampling is expected
-to be brittle, it may be less obvious what causes light- and welterweight coresets to break. Consider that the lightweight coreset is biased towards points that
-are far from the mean and, as a simple counterexample, is likely to miss a small cluster that is close to $\mu$.  Now let $\calC_j$ be the approximation
-obtained during welterweight coresets and observe that the sum of importance values of the points belonging to center $c_i \in \calC_j$ is
-$\sum_{p \in c_i} \left[ \dfrac{\cost(p, c_i)}{\cost(c_i, \calC_j)} + \dfrac{1}{|c_i|} \right] = \dfrac{\sum_{p \in c_i} \cost(p,
-    c_i)}{\cost(c_i, \calC_j)} + 1 = 2$
+We now refer the reader to the remaining columns of Table~\ref{tbl:distortion} and Figure~\ref{fig:coreset_size_on_quality}, where we show the effect of coreset
+size across datasets by sweeping over $m$-scalar values. Despite the suboptimal theoretical guarantees of the accelerated sampling methods, we see that they
+obtain competitive distortions on the real-world datasets while running faster than Fast-Coresets in practice. We attribute this to the well-behaved nature of
+the real-world datasets, where they have few outliers and consistent class sizes.
 
-Thus, our probability mass is distributed across the clusters that have been found in the approximate solution. Naturally, if $j < k$ and we missed a cluster
-from $\opt$, there is some set of points that have not received an appropriate probability mass and may therefore be missed.
+To verify this, consider the results of these sampling strategies on the artificial datasets in Table~\ref{tbl:distortion} and
+Figure~\ref{fig:coreset_size_on_quality}: as disparity in cluster sizes and distributions grows, the accelerated sampling methods have difficulty capturing all
+of the outlying points in the dataset. Indeed, Figure~\ref{fig:coreset_size_on_quality} shows a clear interplay between runtime and compression quality: \emph{the
+faster the method, the more brittle its compression}.
+
+\input{figures/lightweight_breaks}
+
+While uniform sampling is expected to be brittle, it may be less obvious what causes light- and welterweight coresets to break. The explanation is simple for
+lightweight coresets: they sample according to the $1$-means solution and are therefore biased towards points that are far from the mean. Thus, as a simple
+counterexample, lightweight coresets are likely to miss a small cluster that is close to the center-of-mass of the dataset. This can be seen in
+Figure~\ref{fig:lightweight_breaks}, where we show an example where the lightweight coreset construction fails on the Gaussian mixture dataset. Since the small
+circled cluster is close to the center-of-mass of the dataset, it is missed when sampling according to distance from the mean.
+
+It may be less immediately clear why welterweight coresets are brittle for $j < k$. To understand this, let $\calC_j$ be the approximation obtained during
+welterweight coresets and observe that the sum of importance values of the points belonging to center $c_i \in \calC_j$ is \[ \sum_{p \in c_i} \left[
+\dfrac{\cost(p, c_i)}{\cost(c_i, \calC_j)} + \dfrac{1}{|c_i|} \right] = \dfrac{\sum_{p \in c_i} \cost(p, c_i)}{\cost(c_i, \calC_j)} + 1 = 2.\] Thus, our
+probability mass is distributed across the clusters that have been found in the approximate solution. Naturally, if $j < k$ and we missed a cluster from $\opt$,
+there is some set of points that have not received an appropriate probability mass and may therefore be missed.
 
 We evaluate the full extent of this relationship in Table~\ref{tbl:class-imbalance}, where we show the interplay between the welterweight coreset's $j$
-parameter and the Gaussian mixture dataset's $\gamma$ parameter. We can consider this as answering the question ``How good must our approximate solution be
-before sensitivity sampling can handle class imbalance?'' To this end, all the methods have low distortion for small values of $\gamma$ but, as $\gamma$ grows,
-only Fast-Coresets\footnote{And, to a lesser extent, welterweight coresets for larger values of $j$.} are guaranteed to have low distortion.
+parameter (number of centers in the approximate solution) and the Gaussian mixture dataset's $\gamma$ parameter (higher $\gamma$ leads to higher class
+imbalance). We can consider this as answering the question ``How good must our approximate solution be before sensitivity sampling can handle class imbalance?''
+To this end, all the methods have low distortion for small values of $\gamma$ but, as $\gamma$ grows, only Fast-Coresets (and, to a lesser extent,
+welterweight coresets for larger values of $j$) are guaranteed to have low distortion.
 
-This pattern changes in the benchmark dataset as it is devised to challenge sensitivity sampling's reliance on the initial solution. Nonetheless, we see that
-sensitivity sampling does not require significantly larger sample sizes before it provides good compression on the benchmark. We lastly show how these
-compressions facilitate fast clustering on large datasets in Table~\ref{tbl:lloyds}. We see that running Lloyd's algorithm on the samples obtains a consistent
-cost value on the full datasets.
+To round out the dataset analysis, we note that every sampling method performs well on the benchmark dataset, which is designed to explicitly punish sensitivity
+sampling's reliance on the initial solution. Thus, we verify that there is no worst-case setting which breaks sensitivity sampling as there are for the other
+sampling methods.
 
-%\input{tables/lloyds}
-%\input{tables/composition}
+For completeness, we show how these compression schemas facilitate fast clustering on large datasets in Table~\ref{tbl:lloyds}. There, we see
+that running Lloyd's algorithm on the samples obtains a consistent cost value on the full datasets.
 
 \subsection{Streaming Setting}
 \label{ssec:streaming}
@@ -127,14 +167,25 @@ level\footnote{If there are $b=8$ blocks, then there would be coresets correspon
 concatenate these samples and obtain one final coreset from the composition. Since we are composing coresets from coresets, the errors stack and, in theory, we
 should require more samples to obtain a similar accuracy.
 
-Despite this, we see the opposite result for many of our sampling strategies. Surprisingly, the accelerated sampling methods all perform \emph{better} under
-composition on the artificial datasets and do not suffer significant drops in accuracy or variance on the real datasets\footnote{We show the effect of
-composition on runtime in \cref{fig:streaming_runtimes} in the Appendix.}. Although inconsistent with the prevailing intuition, we must therefore conclude that
-the accelerated sampling methods are \emph{more} feasible in the streaming setting but that they still suffer from the lack of a full coreset guarantee.  We
-suspect that this is due to the non-uniformity imposed by the merge-\&-reduce algorithm. To see this, consider uniform sampling on the $c$-outlier dataset
-during the final step of the composition, where we are composing the samples corresponding to each layer of the tree. Assume first that our outlier points
-happened to fall in the first block. Then we have taken a sample of size $m$ from this block and immediately use this for the final composition. Thus, in this
-case the outliers are \emph{more} likely to be in our final sample than in the non-streaming setting. In the alternate setting where the outliers are less
-likely, consider that our expected error is already high, so missing the outlier `more' does not significantly affect our expected error. 
+Despite this, we see the opposite result for many of our sampling strategies. Surprisingly, Table~\ref{tbl:composition} and Figure~\ref{fig:streaming_runtimes}
+show that the accelerated sampling methods all perform \emph{better} under composition on the artificial datasets and do not suffer significant drops in
+accuracy, variance or runtime on the real datasets. Although inconsistent with the prevailing intuition, we must therefore conclude that the accelerated
+sampling methods are \emph{more} feasible in the streaming setting but that they still suffer from the lack of a full coreset guarantee.  We suspect that this
+is due to the non-uniformity imposed by the merge-\&-reduce algorithm. To see this, consider uniform sampling on the $c$-outlier dataset during the final step
+of the composition, where we are composing the samples corresponding to each layer of the tree. Assume first that our outlier points happened to fall in the
+first block. Then we have taken a sample of size $m$ from this block and immediately use this for the final composition. Thus, in this case the outliers are
+\emph{more} likely to be in our final sample than in the non-streaming setting. In the alternate setting where the outliers are less likely, our
+expected error is already high. Thus, missing the outlier `more' does not significantly affect our expected error. 
+
+\begin{figure}
+    \begin{subfigure}
+        \centering
+        \includegraphics[width=\linewidth]{images/1/coreset_distortion-m_scalar_across_all_algorithms.pdf}
+        \vspace*{-0.6cm}
+        \caption{Sample coreset distortions under $k$-median for one run on each dataset. Bars within each dataset correspond to $m=40k, 60k, 80k$.}
+        \label{subfig:kmedian_distortion}
+    \end{subfigure}
+\end{figure}
 
 \input{tables/class_imbalance}
+\input{figures/streaming_runtimes}
