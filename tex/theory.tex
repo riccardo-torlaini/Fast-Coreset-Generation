@@ -52,8 +52,8 @@ combine it with sensitivity sampling in \cref{alg:main} and prove in \cref{ssec:
 \end{corollary}
 Furthermore, we generalize \cref{alg:main} to other fast $k$-median approaches in \cref{app:extensions}.
 
-Thus, it is easy to combine existing results to obtain an $\eps$-coreset without an $\widetilde{O}(nk)$ time-dependency.  However, our method thus far has only
-replaced the $\widetilde{O}(nd + nk)$ runtime by $\widetilde{O}(nd \log \Delta)$. Indeed, the spirit of the issue remains -- this is not near-linear in the input size.
+Thus, one can combine existing results to obtain an $\eps$-coreset without an $\widetilde{O}(nk)$ time-dependency.  However, this has only replaced the
+$\widetilde{O}(nd + nk)$ runtime by $\widetilde{O}(nd \log \Delta)$. Indeed, the spirit of the issue remains -- this is not near-linear in the input size.
 
 We verify this by devising a dataset that has $n - n'$ points uniformly in the $[-1, 1]^2$ square. Then, for $r \in \mathbb{Z}^+$, we produce a sequence of
 points at $(0, 1), (0, 0.5), \cdots, (0, 0.5^r)$ and copy this sequence $n' / r$ times, each time with a different $x$ coordinate. The result is a dataset of
@@ -70,7 +70,7 @@ We now show how to replace the linear time-dependency on $\log \Delta$ with a lo
 
 WLOG, we assume that the smallest pairwise distance is at least $1$, and $\Delta$ is a (known) upper-bound on the diameter of the input. To remove
 the $\log\Delta$ dependency, we proceed by producing a substitute dataset $P'$ that has a lower-bound on its minimum distance and an upper-bound on its maximum
-distance. We then show that, with overwhelming likelihood, solutions on $P'$ have the same cost as solutions on $P$ up to a small additive error.
+distance. We then show that, with overwhelming likelihood, solutions on $P'$ have the same cost as solutions on $P$ up to an additive error.
 
 In order to produce the substitute dataset $P'$, we first find a crude upper-bound on the cost of any reasonable solution to the clustering task on $P$. We
 then create a grid such that, for every cluster in this approximate solution, the cluster is entirely contained in a grid cell with overwhelming likelihood. We can then freely move these
@@ -82,7 +82,6 @@ grid cells around without affecting the cost of the solution. Thus, we can const
 % distinct cells do not interact with each other in any reasonable solution.
 
 We will focus this section on the simpler $k$-median problem but show how to reduce $k$-means to this case in \cref{app:redKM}.
-
 
 \subsection{Computing a crude upper-bound}
 \label{ssec:crude_bound}
@@ -100,12 +99,13 @@ Let $\ell$ be the first level of the tree with at least $k+1$ non-empty subtrees
 
 \end{lemma}
 
-We prove this in \cref{app:apx-tree-proof}. A direct consequence  is that the first level of the tree for which at least $k+1$ cells are non empty allows to
-compute easily an $O(n)$-approximation to $k$-median on the tree metric. Since the tree metric approximates the oringial Euclidean metric up to $O(d \log
-\Delta)$, this is therefore an $O(n d \log \Delta)$-approximation to $k$-median in the Euclidean space.  To turn that observation into an algorithm, one needs
-to count the number of non-empty cells at a given level $\ell$: for each point, identifying the cell that contains it can be done using modulo operations, and
-counting the number of distinct non-empty cells can be done with a standard dictionary.  This is done in time $\tilde O(nd)$, and pseudo-code is given
-\cref{alg:crudeApx}. Using a binary search on the $O(\log \Delta)$ many levels then gives the following result:
+We prove this in \cref{app:apx-tree-proof}. A direct consequence  is that the first level of the tree for which at least $k+1$ cells are non empty allows us to
+compute an $O(n)$-approximation for $k$-median on the tree metric. Since the tree metric approximates the oringial Euclidean metric up to $O(d \log
+\Delta)$, this is therefore an $O(n d \log \Delta)$-approximation to $k$-median in the Euclidean space.
+
+To turn this observation into an algorithm, one needs to count the number of non-empty cells at a given level $\ell$: for each point, we identify the cell that
+contains it using modulo operations. Furthermore, we count the number of distinct non-empty cells using a standard dictionary data structure. This is done in
+time $\tilde O(nd)$, and pseudo-code is given \cref{alg:crudeApx}. Using a binary search on the $O(\log \Delta)$ many levels then gives the following result:
 
 \begin{lemma}\label{lem:crudeApx}[Proof in \cref{app:apx-tree-proof}]
 There is an algorithm running in time $\tilde O(nd \log \log \Delta)$ that computes an $O(n d \log \Delta)$-approximation to $k$-median, and $O(n^3 d^2 \log^2
@@ -116,8 +116,8 @@ There is an algorithm running in time $\tilde O(nd \log \log \Delta)$ that compu
 Since our approximate solution's quality has a logarithmic dependence on $\Delta$, it remains to create a substitute dataset $P'$ using this solution that
 satisfies two requirements:
 \begin{enumerate}
-    \item First, $P'$ must have spread linear in the quality of the approximate solution. If this holds, running Algorithm~\ref{alg:main} on $P'$ will have
-        a $\log \log$ dependency on $\Delta$.
+    \item First, $P'$ must have spread linear in the quality of the approximate solution. If this holds, Algorithm~\ref{alg:main} on $P'$ will take
+        $\tilde{O}(nd \log \log \Delta)$ time.
     \item Second, any reasonable solution on $P'$ should be roughly equivalent to a corresponding solution on $P$. This would mean that running
         Algorithm~\ref{alg:main} on $P'$ gives us a valid compression for $P$.
 \end{enumerate}

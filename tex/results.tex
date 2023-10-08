@@ -46,17 +46,19 @@ accuracy.
         \item \emph{- Lightweight coresets \cite{bachem2018scalable}}. Obtain a coreset by sampling sensitivity values with respect to the $1$-means solution,
             i.e. sensitivities are given by $\hat{s}(p) = 1/|P| + \cost(p, \mu) / \cost(P, \mu)$, where $\mu$ is the dataset mean.
         \item \emph{- Welterweight coresets}. For any $j \in \{1,..., k\}$, we compute a coreset using sensitivity sampling with respect to a candidate
-            $j$-means++ solution.
+            $j$-means solution.
         \item \emph{- BICO \cite{bico}}. Utilizes BIRCH \cite{birch} to produce a $k$-means coreset in a stream.
 \end{description}
 
 \input{tables/distortion}
 
+We use $j$ going forward to describe the number of solutions in the candidate $j$-means solution. Thus, lightweight coresets have $j=1$ while Fast-Coresets have
+$j=k$.
+
 We take a moment here to motivate the welterweight coreset algorithm.  Consider that lightweight coresets use the $1$-means solution to obtain the sensitivities
 that dictate the sampling distribution. On the other hand, sensitivity sampling is solving the full $k$-means problem. Thus, changing the value of $j$ affects
 the cluster sizes $|\calC_p|$ and therefore acts as a direct interpolation between uniform and sensitivity sampling.  We default to $j = \log k$ unless stated
 otherwise. We use the term `accelerated sampling methods' when referring to uniform, lightweight and welterweight coresets as a group.
-
 
 \paragraph*{Datasets}
 \label{sssec:datasets}
@@ -124,7 +126,7 @@ the real-world datasets, where they have few outliers and consistent class sizes
 
 To verify this, consider the results of these sampling strategies on the artificial datasets in Table~\ref{tbl:distortion} and
 Figure~\ref{fig:coreset_size_on_quality}: as disparity in cluster sizes and distributions grows, the accelerated sampling methods have difficulty capturing all
-of the outlying points in the dataset. Indeed, Figure~\ref{fig:coreset_size_on_quality} shows a clear interplay between runtime and compression quality: \emph{the
+of the outlying points in the dataset. Thus, Figure~\ref{fig:coreset_size_on_quality} shows a clear interplay between runtime and sample quality: \emph{the
 faster the method, the more brittle its compression}.
 
 \input{figures/lightweight_breaks}

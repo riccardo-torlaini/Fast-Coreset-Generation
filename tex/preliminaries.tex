@@ -4,23 +4,33 @@
 \subsection{On Sampling Strategies.}
 \label{ssec:sens_sampling}
 
-As discussed, we focus our study on linear- and sublinear-time sampling strategies. Specifically, given a dataset $P \in \R^{n \times d}$, we want to sample
-$\Omega \in \R^{m \times d} \subset P$ such that $m \ll n$ along with a weights vector $w \in \R^m$. The goal is then that for some solution $\calC$, $\Omega$
-provides us with an idea of the solution's quality with respect to the original dataset, i.e. $\sum_{p \in \Omega} w_p \cost(p, \calC) \sim \sum_{p \in P}
-\cost(p, \calC)$.  The quickest sampling strategy, running in sublinear time, is uniform sampling. It is clear, however, that this cannot provide any
-cost-preservation guarantee as missing a single extreme outlier will cause the sampling strategy to fail. Thus, any approach that outperforms this strategy must
-read in the entire dataset and therefore run in at least linear time. Indeed, sublinear algorithms always require some assumption on the input to provide
-guarantees, see \cite{Ben-David07,czumaj2007sublinear,HJJ23,meyerson2004k}.
+As discussed, we focus our study on linear- and sublinear-time sampling strategies. Generally speaking, we consider compression algorithms through the lens of
+three requirements: 
+\begin{itemize}
+    \item One can find a compression in the time it takes to read in the data.
+    \item The size of the compressed dataset does not depend on $n$, the size of the original dataset.
+    \item Solutions on the compressed dataset are provably good on the original dataset.
+\end{itemize}
+If these requirements are satisfied then, when analyzing runtimes on large datasets, it is always preferable to compress the dataset and then perform the task
+in question on the compressed representation.
 
+Specifically, given a dataset $P \in \R^{n \times d}$, we concern ourselves with sampling $\Omega \in \R^{m \times d} \subset P$ (such that $m \ll n$) along
+with a weights vector $w \in \R^m$. The goal is then that for some solution $\calC$, $\Omega$ provides us with an idea of the solution's quality with respect to
+the original dataset, i.e. $\sum_{p \in \Omega} w_p \cost(p, \calC) \sim \sum_{p \in P} \cost(p, \calC)$.
 
-Among these more sophisticated sampling strategies, coresets offer the strongest compression guarantee. Specifically, a strong $\eps$-coreset is an 
-$\Omega
-\subseteq P$ with weights $\tilde w$ such that for \emph{any} solution $\calC$, \[\sum_{p \in \Omega} \tilde w_p \cost(p, \calC) \in (1 \pm \eps) \cost(P, \calC)\] with
-high probability.  Going forward, we will discuss this in the context of the $k$-median and $k$-means cost functions: for dataset $P \in \R^d$ with weights $w
-: P \rightarrow \R^+$, and any $k$-tuple $\calC$ in $\R^d$, \[\cost_z(P, \calC) := \sum_{p \in P} \tilde w(p) \dist^z(p, \calC),\] with
-$z=1$ for $k$-median and $z=2$ for $k$-means. We use $\opt$ to denote $\min_{\Omega} \cost_z(P, \calC)$.
+The quickest sampling strategy, running in sublinear time, is uniform sampling. It is clear, however, that this cannot provide any cost-preservation guarantee
+as missing a single extreme outlier will cause the sampling strategy to fail. Thus, any approach that outperforms this strategy must read in the entire dataset
+and therefore run in at least linear time. Indeed, sublinear algorithms always require some assumption on the input to provide guarantees, see
+\cite{Ben-David07,czumaj2007sublinear,HJJ23,meyerson2004k}.
 
-Recently, sampling with respect to sensitivity values has grown to prominence due to its simplicity and coreset guarantee.  True sensitivity values are defined
+Among these more sophisticated sampling strategies, coresets offer the strongest compression guarantee. Specifically, a strong $\eps$-coreset is an $\Omega
+\subseteq P$ with weights $\tilde w$ such that for \emph{any} solution $\calC$, \[\sum_{p \in \Omega} \tilde w_p \cost(p, \calC) \in (1 \pm \eps) \cost(P,
+\calC)\] with high probability.  Going forward, we will discuss this in the context of the $k$-median and $k$-means cost functions: for dataset $P \in \R^d$
+with weights $w : P \rightarrow \R^+$, and any $k$-tuple $\calC$ in $\R^d$, \[\cost_z(P, \calC) := \sum_{p \in P} \tilde w(p) \dist^z(p, \calC),\] with $z=1$
+for $k$-median and $z=2$ for $k$-means. We use $\opt$ to denote $\min_{\calC} \cost_z(P, \calC)$ and will denote an $\alpha$-approximation as any solution
+$\calC$ such that $\cost(\calC) \leq \alpha \cdot \opt$.
+
+Recently, sampling with respect to sensitivity values has grown to prominence due to its simple-to-obtain coreset guarantee.  True sensitivity values are defined
 as $\sup_{\calC} \frac{\dist^z(p, \calC)}{\cost_z(P, \calC)}$, where the supremum is taken over all possible solutions $\calC$. Intuitively, this is a measure
 of the maximum impact a point can have on a solution and is difficult to evaluate directly.
 Thus, the approximate sensitivity-sampling algorithm we consider is the following, as introduced in \cite{FeldmanL11}.
