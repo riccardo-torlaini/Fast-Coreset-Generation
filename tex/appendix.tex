@@ -10,7 +10,7 @@ Section~\ref{ssec:reduce_spread}.
    \label{alg:crudeApx}
 \begin{algorithmic}[1]
 \Procedure{Count-Distinct-Cells}{$P, c, \ell$} \Comment data $P$, $c$ is the center of the quadtree grid at level $\ell$
-   \State Let $\calD$ be a dictionnary, and count $= 0$.
+   \State Let $\calD$ be a dictionary, and count $= 0$.
    \For{each point $p \in P$}
    \State let $c^p$ be the center of the cell containing $p$. The $i$-th coordinate of $c_p$ is $\lfloor \frac{p_i - c_i}{2^\ell}\rfloor  \cdot 2^\ell + \frac{2^{\ell}}{2}$. 
    \If{$c_p$ is a not a key of $\calD$} 
@@ -33,13 +33,13 @@ Section~\ref{ssec:reduce_spread}.
    \label{alg:reduce-diam}
 \begin{algorithmic}[1]
 \Procedure{Reduce-Diameter}{$P, U$} \Comment data $P$, upper bound on $\opt$ $U$
-   \State Let $\calD$ be a dictionnary
+   \State Let $\calD$ be a dictionary
    \State Let $r = \sqrt d n^2\cdot U$, $s$ be chosen u.a.r. in $\{0, ..., r\}$, and $c = {s, ..., s}$ be the center of the grid.
    \For{each point $p \in P$}
    \State let $c^p$ be the center of the cell containing $p$. The $i$-th coordinate of $c_p$ is $\lfloor \frac{p_i - c_i}{r}\rfloor  \cdot r + \frac{r}{2}$.
    Add $p$ to $\calD[c_p]$.
    \EndFor
-   \State Identify the non-empty dictionnary keys $c^1, ..., c^k$, and let $\calC_1, ..., \calC_k$, be the corresponding cells.
+   \State Identify the non-empty dictionary keys $c^1, ..., c^k$, and let $\calC_1, ..., \calC_k$, be the corresponding cells.
    \For {each coordinate $i = 1, ..., d$}
    \State Sort the cells according to the $i$-th coordinate of their center. Let $\delta = 0$. 
    \For{$j = 1, ..., k$}
@@ -99,7 +99,7 @@ where the last inequality stems from Cauchy-Schwarz. Therefore, $\calS$ is a $nc
 \subsection{Estimation of the Optimal Cost in a Tree}
 \label{app:apx-tree-proof}
 
-We conclude by proving Lemma~\ref{lem:apxTree}:
+We conclude by proving the Lemmas from Section~\ref{sec:theory}.
 \begin{proof}[proof of \cref{lem:apxTree}]
 If the input is spread in $k+1$ distinct cell at level $i$, then in any solution there is at least one of those cells with no center. In the tree metric, points
 lying in this cell have therefore connexion cost at least $\sqrt{d}2^{-i+1} \cdot \Delta$, and thus the left-hand-side of the inequality holds.
@@ -112,7 +112,7 @@ concludes.
 
 
 \begin{proof}[Proof of \cref{lem:crudeApx}]
-The running time of \textsc{Count-Distinct-Cells} in \cref{alg:crudeApx} is $\tilde O(nd)$, using a standard dictionnary datastructure. To compute $U$,
+The running time of \textsc{Count-Distinct-Cells} in \cref{alg:crudeApx} is $\tilde O(nd)$, using a standard dictionary datastructure. To compute $U$,
 \textsc{Crude-Approx} makes $O(\log \log \Delta)$ calls to \textsc{Count-Distinct-Cells}, as there are $O(\log \Delta)$ levels. This concludes the complexity of
 the algorithm.
 

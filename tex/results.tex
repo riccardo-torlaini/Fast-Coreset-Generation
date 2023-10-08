@@ -1,13 +1,12 @@
 \section{Fast Compression in Practice}
 \label{sec:results}
 
-Despite the near-linear time algorithm described in Sections~\ref{sec:theory} and~\ref{sec:logdelta}, the coreset construction of \cref{alg:main} nonetheless
+Despite the near-linear time algorithm described in Sections~\ref{sec:theory_0} and~\ref{sec:theory}, the coreset construction of \cref{alg:main} nonetheless
 requires an $O(1)$ approximation to the original task before the sampling can occur. Although theoretically justified, it is unclear how necessary this is in
 practice -- would a worse approximation factor still be representative of the dataset for practical purposes? We answer this question by defining a suite of
 algorithms, datasets and evaluation procedures that allow for a comprehensive study of speed vs. accuracy tradeoffs in compression for clustering.  We begin by
-describing our experimental setup before showing results in both the static and streaming settings.  We note that these results correspond directly to
-downstream clustering tasks. Unless stated otherwise, our experimental results focus on the $k$-means task as it is more common than $k$-median and the
-takeaways are consistent across the two.
+describing our experimental setup before showing results in both the static and streaming settings. We note that these results correspond directly to
+downstream clustering tasks. Unless stated otherwise, our experimental results focus on the $k$-means task.
 
 \subsection{Experimental Setup}
 \paragraph*{Metrics}
@@ -19,7 +18,7 @@ confirm that a subset of points satisfies the coreset property over all solution
 $\calC_{\Omega}$ is a candidate solution computed over the coreset $\Omega$. This will be within $1+\varepsilon$ if the coreset guarantee is satisfied
 but may be unbounded otherwise.  We refer to this as the \emph{coreset distortion}.
 
-\begin{table}[htbp]
+\begin{table}
     \centering
     \begin{tabular}{lrr}
         Dataset & Points & Dim \\
@@ -30,7 +29,6 @@ but may be unbounded otherwise.  We refer to this as the \emph{coreset distortio
         \emph{Cover Type} & 581\,012 & 54 \\
         \emph{Census} & 2\,458\,285 & 68 \\
         \hline
-        \vspace*{0.1cm}
     \end{tabular}
     \caption{Description of real world datasets}
     \label{tbl:datasets}
@@ -39,7 +37,6 @@ but may be unbounded otherwise.  We refer to this as the \emph{coreset distortio
 
 \paragraph*{Algorithms}
 \label{ssec:algorithms}
-
 
 We compare Fast-Coresets (Algorithm~\ref{alg:main}) against 5 different benchmark sampling strategies that span the space between optimal time and optimal
 accuracy.
