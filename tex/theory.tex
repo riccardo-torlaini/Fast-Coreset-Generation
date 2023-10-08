@@ -44,7 +44,8 @@ properties:
 \end{enumerate}
 
 The second property is crucial for us: the algorithm does not only compute centers, but also assignments in $\tilde{O}(nd\log \Delta)$ time.  We describe how to
-combine it with sensitivity sampling in \cref{alg:main} and prove in \cref{ssec:cor_proof} that this computes an $\eps$-coreset in time $\tilde O(nd \log \Delta)$.
+combine it with sensitivity sampling in \cref{alg:main} and prove in \cref{ssec:cor_proof} that this computes an $\eps$-coreset in time $\tilde O(nd \log
+\Delta)$:
 
 \begin{corollary}\label{cor:mainAlg}
 \cref{alg:main} runs in time $\widetilde O\lpar n d \log \Delta\rpar$ and computes an $\eps$-coreset for $k$-means.
@@ -63,24 +64,32 @@ size $n$ where $\log \Delta$ grow linearly with $r$. The resulting linear time-d
 \section{Reducing the Impact of the Spread}
 \label{sec:theory} %\label{sec:logdelta}
 \newcommand{\boxsize}{\textsc{MaxDist}}
+We now show how to replace the linear time-dependency on $\log \Delta$ with a logarithmic one.
 
 \paragraph*{Overview of the Approach}
-We assume in this section that the smallest pairwise distance is at least $1$, and $\Delta$ is a (known) upper-bound on the diameter of the input.
-To remove the $\log\Delta$ dependency, we proceed in two steps: first, we compute a very crude upper-bound on the cost $U$ of the optimal solution -- up to
-a $\poly(n)$ factor.  If $U$ is a $c$-approximation of the optimal cost then the minimum distance can be reduced by rounding all coordinates to multiples of $g
-= U/(cn)$, giving us a minimum distance of no less than $g$; it is then enough to reduce the diameter to $\poly(n) U$.  For this, we place a grid with cell length
-$O(n \cdot U)$ centered at a random location, so that two points from the same cluster in $\opt$ fall into the same cell w.h.p. This implies that distinct cells do not interact with each other
-in any reasonable solution.  Then, we diameter of the input by "moving" non-empty cells closer to each other. We will focus this section on the simpler $k$-median
-problem but show how to reduce $k$-means to this case in \cref{app:redKM}.
+
+We assume in this section that the smallest pairwise distance is at least $1$, and $\Delta$ is a (known) upper-bound on the diameter of the input.  To remove
+the $\log\Delta$ dependency, we proceed in two steps: first, we compute a very crude upper-bound on the cost $U$ of the optimal solution -- up to a $\poly(n)$
+factor. Then, we shrink the diameter of the input by "moving" non-empty cells in the quadtree closer together.
+
+More formally, if $U$ is a $c$-approximation of the optimal cost then the minimum distance can be reduced by rounding all coordinates to multiples of $g = U/(cn)$,
+giving us a minimum distance of no less than $g$; it is then enough to reduce the diameter to $\poly(n) U$.  For this, we place a grid with cell length $O(n
+\cdot U)$ centered at a random location, so that two points from the same cluster in $\opt$ fall into the same cell with high probability. This implies that
+distinct cells do not interact with each other in any reasonable solution.
+
+ We will focus this section on the simpler $k$-median problem but
+show how to reduce $k$-means to this case in \cref{app:redKM}.
 
 
 \subsection{Computing a crude upper-bound}
 \label{ssec:crude_bound}
 
 As described, we start by computing an approximate solution $U$ such that $\opt \leq U \leq \poly(n) \cdot \opt$. For this, the first step is to embed the input
-into a quadtree. This embedding has two key properties: first, distances are preserved up to a multiplicative factor $O(d \log \Delta)$, and therefore the $k$-median cost is preserved up to this factor as well. Second, the metric is a \emph{hierarchically separated tree}: it can be represented with a tree, where points of $P$ are the leafs, and the distance between two points is given by the depth of their lowest common ancestor: if it is at depth $\ell$, their distance is $\sqrt{d} \Delta 2^{-\ell}$. 
- Our first lemma shows
-that finding the first level of the tree for which the input lies in $k+1$ disjoint subtrees provides us with the desired approximation. 
+into a quadtree. This embedding has two key properties: first, distances are preserved up to a multiplicative factor $O(d \log \Delta)$, and therefore the
+$k$-median cost is preserved up to this factor as well. Second, the metric is a \emph{hierarchically separated tree}: it can be represented with a tree, where
+points of $P$ are the leafs, and the distance between two points is given by the depth of their lowest common ancestor: if it is at depth $\ell$, their distance
+is $\sqrt{d} \Delta 2^{-\ell}$.  Our first lemma shows that finding the first level of the tree for which the input lies in $k+1$ disjoint subtrees provides us
+with the desired approximation. 
 
 \begin{lemma}\label{lem:apxTree}
 [Proof in \cref{app:apx-tree-proof}] Let $\ell$ be the first level of the tree with at least $k+1$ non-empty subtrees. Then, $\sqrt{d}2^{-\ell+1} \cdot \Delta \leq

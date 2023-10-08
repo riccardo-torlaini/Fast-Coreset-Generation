@@ -54,7 +54,7 @@ Much of the advancements regarding coresets have sought the smallest coreset pos
 examples are in Euclidean space \cite{BadoiuHI02, HaM04, Chen09, HuangV20, stoc22}, with much of the focus on obtaining the optimal size in the $k$-means and
 $k$-median setting. Recently, a lower bound \cite{huangLB} showed that the group sampling algorithm developed in \cite{stoc21, stoc22} is optimal.
 
-Although this algorithm's coresets have size $\tilde{O}(k\cdot \varepsilon^{-2} \min(k^{z/(z+2)},\varepsilon^{-z}))$ \cite{CLSSS22} and are theoretically smaller than
+Although these coresets have size $\tilde{O}(k\cdot \varepsilon^{-2} \min(k^{z/(z+2)},\varepsilon^{-z}))$ \cite{CLSSS22} and are theoretically smaller than
 those obtained by sensitivity sampling, the experiments of \cite{chrisESA} showed that the latter is often more efficient in practice. We also note that one
 could use virtually any coreset construction as many are linear-time once provided with an initial solution $\calC$ and assignment $\sigma$.
 
@@ -63,10 +63,15 @@ samples with respect to a solution $\calC=\{\mu\}$, i.e. the mean of the data se
 additive error of $\varepsilon\cdot \cost(P,\{\mu\})$.  We note that this can be generalized to performing sensitivity sampling using a $\calC$ that has fewer
 than $k$ centers. We discuss this in more depth in Section \ref{ssec:algorithms}.
 
-All efficient coreset constructions are probabilistic and this comes with a disadvantage of coresets being difficult to evaluate. For example, it is co-NP-hard to
-check whether a candidate compression is a weak coreset \footnote{A weak coreset guarantee only requires that a $(1+\varepsilon)$ approximation
-computed on the coreset yields a $(1+\varepsilon)$ on the entire point set \cite{chrisESA}.}. Therefore, although coreset algorithms succeed with some high probability, it is
-unclear how to computationally verify this. We refer to \cite{chrisESA} for further discussion on this topic and discuss our metrics in Section \ref{sssec:metrics}.
+Lastly, the BICO coreset algorithm \cite{bico} utilizes the SIGMOD test-of-time winning BIRCH \cite{birch} clustering method to obtain $k$-means coresets. While
+BICO was developed to perform quickly in a data-stream, we show in Section \ref{sec:results} that it does not provide a strong coreset guarantee in
+practice.
+
+All efficient coreset constructions are probabilistic and this comes with a disadvantage of coresets being difficult to evaluate. For example, it is co-NP-hard
+to check whether a candidate compression is a weak coreset \footnote{A weak coreset guarantee only requires that a $(1+\varepsilon)$ approximation computed on
+the coreset yields a $(1+\varepsilon)$ on the entire point set \cite{chrisESA}.}. Therefore, although coreset algorithms succeed with some high probability, it
+is unclear how to computationally verify this. We refer to \cite{chrisESA} for further discussion on this topic and discuss our metrics in Section
+\ref{sssec:metrics}.
 
 \subsection{Quadtree Embeddings}
 

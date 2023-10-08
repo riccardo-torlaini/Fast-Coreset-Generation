@@ -1,4 +1,5 @@
 \section{Fast Compression in Practice}
+\label{sec:results}
 
 Despite the near-linear time algorithm described in Sections~\ref{sec:theory} and~\ref{sec:logdelta}, the coreset construction of \cref{alg:main} nonetheless
 requires an $O(1)$ approximation to the original task before the sampling can occur. Although theoretically justified, it is unclear how necessary this is in
@@ -18,28 +19,6 @@ confirm that a subset of points satisfies the coreset property over all solution
 $\calC_{\Omega}$ is a candidate solution computed over the coreset $\Omega$. This will be within $1+\varepsilon$ if the coreset guarantee is satisfied
 but may be unbounded otherwise.  We refer to this as the \emph{coreset distortion}.
 
-\paragraph*{Algorithms}
-\label{ssec:algorithms}
-
-
-We compare Fast-Coresets (Algorithm~\ref{alg:main}) against 4 different benchmark sampling strategies that span the space between optimal time and optimal
-accuracy.
-\begin{description}
-        \item \emph{- Standard uniform sampling}. Each point is sampled with equal probability and weights are set to $n / m$, where $m$ is the size of the sample.
-        \item \emph{- Standard sensitivity sampling \cite{LS10}}. We refer to Section~\ref{sec:preliminaries}.
-        \item \emph{- Lightweight coresets \cite{bachem2018scalable}}. Obtain a coreset by sampling sensitivity values with respect to the $1$-means solution,
-            i.e. sensitivities are given by $\hat{s}(p) = 1/|P| + \cost(p, \mu) / \cost(P, \mu)$, where $\mu$ is the dataset mean.
-        \item \emph{- Welterweight coresets}. For any $j \in \{1,..., k\}$, we compute a coreset using sensitivity sampling with respect to a candidate
-            $j$-means++ solution.
-\end{description}
-
-\input{tables/distortion}
-
-We take a moment here to motivate the welterweight coreset algorithm.  Consider that lightweight coresets use the $1$-means solution to obtain the sensitivities
-that dictate the sampling distribution. On the other hand, sensitivity sampling is solving the full $k$-means problem. Thus, changing the value of $j$ affects
-the cluster sizes $|\calC_p|$ and therefore acts as a direct interpolation between uniform and sensitivity sampling.  We default to $j = \log k$ unless stated
-otherwise. We will use the term `accelerated sampling methods' when referring to uniform, lightweight and welterweight coresets as a group.
-
 \begin{table}[htbp]
     \centering
     \begin{tabular}{lrr}
@@ -56,6 +35,30 @@ otherwise. We will use the term `accelerated sampling methods' when referring to
     \caption{Description of real world datasets}
     \label{tbl:datasets}
 \end{table}
+
+
+\paragraph*{Algorithms}
+\label{ssec:algorithms}
+
+
+We compare Fast-Coresets (Algorithm~\ref{alg:main}) against 5 different benchmark sampling strategies that span the space between optimal time and optimal
+accuracy.
+\begin{description}
+        \item \emph{- Standard uniform sampling}. Each point is sampled with equal probability and weights are set to $n / m$, where $m$ is the size of the sample.
+        \item \emph{- Standard sensitivity sampling \cite{LS10}}. We refer to Section~\ref{sec:preliminaries}.
+        \item \emph{- Lightweight coresets \cite{bachem2018scalable}}. Obtain a coreset by sampling sensitivity values with respect to the $1$-means solution,
+            i.e. sensitivities are given by $\hat{s}(p) = 1/|P| + \cost(p, \mu) / \cost(P, \mu)$, where $\mu$ is the dataset mean.
+        \item \emph{- Welterweight coresets}. For any $j \in \{1,..., k\}$, we compute a coreset using sensitivity sampling with respect to a candidate
+            $j$-means++ solution.
+        \item \emph{- BICO \cite{bico}}. Utilizes BIRCH \cite{birch} to produce a $k$-means coreset in a stream.
+\end{description}
+
+\input{tables/distortion}
+
+We take a moment here to motivate the welterweight coreset algorithm.  Consider that lightweight coresets use the $1$-means solution to obtain the sensitivities
+that dictate the sampling distribution. On the other hand, sensitivity sampling is solving the full $k$-means problem. Thus, changing the value of $j$ affects
+the cluster sizes $|\calC_p|$ and therefore acts as a direct interpolation between uniform and sensitivity sampling.  We default to $j = \log k$ unless stated
+otherwise. We use the term `accelerated sampling methods' when referring to uniform, lightweight and welterweight coresets as a group.
 
 
 \paragraph*{Datasets}
@@ -141,21 +144,37 @@ welterweight coresets and observe that the sum of importance values of the point
 probability mass is distributed across the clusters that have been found in the approximate solution. Naturally, if $j < k$ and we missed a cluster from $\opt$,
 there is some set of points that have not received an appropriate probability mass and may therefore be missed.
 
+\input{tables/class_imbalance}
+
 We evaluate the full extent of this relationship in Table~\ref{tbl:class-imbalance}, where we show the interplay between the welterweight coreset's $j$
 parameter (number of centers in the approximate solution) and the Gaussian mixture dataset's $\gamma$ parameter (higher $\gamma$ leads to higher class
 imbalance). We can consider this as answering the question ``How good must our approximate solution be before sensitivity sampling can handle class imbalance?''
 To this end, all the methods have low distortion for small values of $\gamma$ but, as $\gamma$ grows, only Fast-Coresets (and, to a lesser extent,
 welterweight coresets for larger values of $j$) are guaranteed to have low distortion.
 
-To round out the dataset analysis, we note that every sampling method performs well on the benchmark dataset, which is designed to explicitly punish sensitivity
-sampling's reliance on the initial solution. Thus, we verify that there is no worst-case setting which breaks sensitivity sampling as there are for the other
-sampling methods.
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{images/1/coreset_distortion-m_scalar_across_all_algorithms.pdf}
+    \vspace*{-0.6cm}
+    \caption{Sample coreset distortions under $k$-median for one run on each dataset. Bars within each dataset correspond to $m=40k, 60k, 80k$.}
+    \label{subfig:kmedian_distortion}
+\end{figure}
+For completeness, we verify that these results also hold for the $k$-median task in Figure~\ref{subfig:kmedian_distortion}. There, we see that $k$-median
+distortions across datasets are consistent with $k$-means distortions. We show one of five runs to emphasize the random nature of compression quality when using
+various sampling schemas.
 
-For completeness, we show how these compression schemas facilitate fast clustering on large datasets in Table~\ref{tbl:lloyds}. There, we see
-that running Lloyd's algorithm on the samples obtains a consistent cost value on the full datasets.
+To round out the dataset analysis, we note that BICO performs consistently poorly on the coreset distortion metric\footnote{We do not include BICO in Figures
+\ref{fig:coreset_size_on_quality}, \ref{subfig:kmedian_distortion}, \ref{fig:streaming_runtimes},  as it does not fall into the $\tilde{O}(nd)$ complexity class
+and is only designed for $k$-means.}, as can be seen in Tables \ref{tbl:distortion} and \ref{tbl:composition}. We also point out that every sampling method
+performs well on the benchmark dataset, which is designed to explicitly punish sensitivity sampling's reliance on the initial solution. Thus, we verify that
+there is no worst-case setting which breaks sensitivity sampling as there are for the other sampling methods.  Lastly, we show how these compression schemas
+facilitate fast clustering on large datasets in Table~\ref{tbl:lloyds}. There, we see that running Lloyd's algorithm on the samples obtains a consistent cost
+value on the full datasets.
 
 \subsection{Streaming Setting}
 \label{ssec:streaming}
+
+\input{figures/streaming_runtimes}
 
 One of the most common use-cases for big-data algorithms is the streaming setting, where one receives input in batches and must maintain a compression that is
 representative of the dataset. Although there is a wealth of sampling and coreset methods in the streaming paradigm, we require consistency across algorithms
@@ -177,15 +196,4 @@ first block. Then we have taken a sample of size $m$ from this block and immedia
 \emph{more} likely to be in our final sample than in the non-streaming setting. In the alternate setting where the outliers are less likely, our
 expected error is already high. Thus, missing the outlier `more' does not significantly affect our expected error. 
 
-\begin{figure}
-    \begin{subfigure}
-        \centering
-        \includegraphics[width=\linewidth]{images/1/coreset_distortion-m_scalar_across_all_algorithms.pdf}
-        \vspace*{-0.6cm}
-        \caption{Sample coreset distortions under $k$-median for one run on each dataset. Bars within each dataset correspond to $m=40k, 60k, 80k$.}
-        \label{subfig:kmedian_distortion}
-    \end{subfigure}
-\end{figure}
 
-\input{tables/class_imbalance}
-\input{figures/streaming_runtimes}
