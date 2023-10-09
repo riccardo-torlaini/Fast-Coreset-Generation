@@ -8,8 +8,8 @@ As discussed, we focus our study on linear- and sublinear-time sampling strategi
 three requirements: 
 \begin{itemize}
     \item One can find a compression in the time it takes to read in the data.
-    \item The size of the compressed dataset does not depend on $n$, the size of the original dataset.
-    \item Solutions on the compressed dataset are provably good on the original dataset.
+    \item The size of the compressed dataset does not depend on the size of the original data.
+    \item Solutions on the compressed dataset are provably good on the original data.
 \end{itemize}
 If these requirements are satisfied then, when analyzing runtimes on large datasets, it is always preferable to compress the dataset and then perform the task
 in question on the compressed representation.
@@ -87,9 +87,9 @@ is unclear how to computationally verify this. We refer to \cite{chrisESA} for f
 
 To design fast algorithms, one of the common techniques is to embed the Euclidean space into a tree metric using \emph{quadtree embeddings}.  The central idea
 behind these is that each hypercube in the input space can be split into $2^d$ sub-cubes. We can represent this in a tree-structure, where each sub-cube has the
-original hypercube as its parent. Appropriately setting the weight of each branch then preserves the expected distance between points in the sub-cubes within
-a $O(\sqrt{d} \log \Delta)$ factor. Here, $\Delta$ is the \emph{spread} of the point set and is equal to the ratio of the largest distance over the smallest
-non-zero distance.  Given this context, we now introduce quadtree embeddings more formally:
+original hypercube as its parent. Appropriately setting the weight of each branch then preserves the expected distance between points in different sub-cubes
+within an $O(\sqrt{d} \log \Delta)$ factor. Here, $\Delta$ is the \emph{spread} of the point set and is equal to the ratio of the largest distance over the
+smallest non-zero distance.  Given this context, we now introduce quadtree embeddings more formally:
 
 \paragraph*{Formal Overview}
 

@@ -16,37 +16,36 @@ guarantee, wherein the cost of any solution on the compressed data is within an 
 Surprisingly, many coreset constructions can remove the dependency on $n$, significantly accelerating downstream tasks.
 
 We study both paradigms with respect to a classic problem -- what are the limits and possibilities of compression for the $k$-means and $k$-median objectives?
-Whereas uniform sampling provides optimal speed but no accuracy guarantee, coreset constructions have
-unclear runtime bounds despite their tight bounds on the minimum number of samples required for accurate compression. Although there is little to study with respect to random
-sampling, the lack of clarity regarding linear-time coreset constructions throws into question their ability to facilitate clustering on large datasets. Indeed,
-currently available fast sampling algorithms for clustering \cite{BachemL018} \cite{kmeans_sublinear_bachem16} cannot achieve strong coreset guarantees.
-Recently, \cite{DSWY22} proposed a sensitivity-based method for strong coresets that runs in time
-$\tilde{O}(nd + nk)$ and conjectured this to be optimal for $k$-median and $k$-means.  Since the issue of determining an optimal coreset size has recently
-been resolved \cite{CSS21,CLSSS22,HLW23}, this is arguably the main open problem in coreset research for center-based clustering. We resolve this by showing that
-there exists an easy-to-implement algorithm that constructs coresets in $\tilde{O}(nd)$ time -- only logarithmic factors away from the time it takes to read in
-the dataset.
+Whereas uniform sampling provides optimal speed but no accuracy guarantee, coreset constructions have unclear runtime bounds despite their tight bounds on the
+minimum number of samples required for accurate compression. Although there is little to study with respect to random sampling, the lack of clarity regarding
+linear-time coreset constructions throws into question their ability to facilitate clustering on large datasets. Indeed, currently available fast sampling
+algorithms for clustering \cite{BachemL018} \cite{kmeans_sublinear_bachem16} cannot achieve strong coreset guarantees.  Recently, \cite{DSWY22} proposed
+a sensitivity-based method for strong coresets that runs in time $\tilde{O}(nd + nk)$ and conjectured this to be optimal for $k$-median and $k$-means.  Since
+the issue of determining an optimal coreset size has recently been resolved \cite{CSS21,CLSSS22,HLW23}, this is arguably the main open problem in coreset
+research for center-based clustering. We resolve this by showing that there exists an easy-to-implement algorithm that constructs coresets in $\tilde{O}(nd)$
+time -- only logarithmic factors away from the time it takes to read in the dataset.
 
-Nonetheless, this does not fully illuminate the landscape between the sampling paradigms for clustering algorithms when applying them in practice. Although our algorithm achieves an optimal
-running time, it is certainly possible that other, cruder methods may be just as viable on most real world data sets despite having no worst case guarantees.
-Thus, there is a natural spectrum within linear-time algorithms where obtaining more information about the dataset allows for a better
-sampling strategy at the expense of sublinear factors in speed. We state this formally in the following question: When are optimal $k$-means and $k$-median
-coresets necessary and what is the practical tradeoff between coreset speed and accuracy? To this end, we show that while many practical settings do not require
-the full coreset guarantee, one cannot cut corners if one wants to be confident in their compression. We also
-show that this extends to the streaming paradigm and applies to downstream clustering approaches.
+Nonetheless, this does not fully illuminate the landscape between the sampling paradigms for clustering algorithms when applying them in practice. Although our
+algorithm achieves an optimal running time, it is certainly possible that other, cruder methods may be just as viable on most real world data sets despite
+having no worst case guarantees.  Thus, there is a natural spectrum within linear-time algorithms where obtaining more information about the dataset allows for
+a better sampling strategy at the expense of sublinear factors in speed. We state this formally in the following question: When are optimal $k$-means and
+$k$-median coresets necessary and what is the practical tradeoff between coreset speed and accuracy? To this end, we show that while many practical settings do
+not require the full coreset guarantee, one cannot cut corners if one wants to be confident in their compression. We also show that this extends to the
+streaming paradigm and applies to downstream clustering approaches.
 
 In summary, our contributions are as follows:
 \begin{itemize}
     \item Theoretical Contributions
     \begin{itemize}
-        \item We show that one can obtain strong coresets for $k$-means and $k$-median in $\tilde{O}(nd \log \Delta)$ time\footnote{$\Delta$ is the ratio of maximum distance over minimum
-distance in the dataset.}. This resolves a conjecture that the runtime requires an $\tilde{O}(nk)$ term \cite{DSWY22}.
-        \item We extend this by noting that the linear dependency on $\log \Delta$ can be avoided by appropriately reorganizing the space. This gives an $\tilde{O}(nd)$
-time algorithm for $k$-means and $k$-median coresets -- only logarithmic factors away from the optimal runtime.
+        \item We show that one can obtain strong coresets for $k$-means and $k$-median in $\tilde{O}(nd \log \Delta)$ time\footnote{$\Delta$ is the ratio of
+            maximum distance over minimum distance in the dataset.}. This resolves a conjecture that the runtime requires an $\tilde{O}(nk)$ term \cite{DSWY22}.
+        \item We extend this by noting that the linear dependency on $\log \Delta$ can be avoided by appropriately reorganizing the space. This gives the first
+            effectively optimal\footnote{up to log factors} $\tilde{O}(nd)$ time algorithm for $k$-means and $k$-median coresets.
     \end{itemize}
     \item Experimental Contributions
     \begin{itemize}
-        \item We perform a comprehensive analysis of sampling methods for the $k$-means and $k$-median tasks, measuring runtime and compression quality in
-the streaming and non-streaming settings.
+        \item We perform a comprehensive analysis of sampling methods for the $k$-means and $k$-median tasks, measuring runtime and compression quality in the
+            streaming and non-streaming settings.
         \item We provide an intuitive blueprint for the practitioner on what tradeoff can be expected between speed and accuracy when clustering big-data.
     \end{itemize}
 \end{itemize}
