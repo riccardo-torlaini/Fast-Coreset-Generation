@@ -70,11 +70,12 @@ We now show how to replace the linear time-dependency on $\log \Delta$ with a lo
 
 WLOG, we assume that the smallest pairwise distance is at least $1$, and $\Delta$ is a (known) upper-bound on the diameter of the input. To remove
 the $\log\Delta$ dependency, we proceed by producing a substitute dataset $P'$ that has a lower-bound on its minimum distance and an upper-bound on its maximum
-distance. We then show that, with overwhelming likelihood, solutions on $P'$ have the same cost as solutions on $P$ up to an additive error.
+distance. We then show that, with overwhelming likelihood, reasonable solutions on $P'$ have the same cost as solutions on $P$ up to an additive error.
 
-In order to produce the substitute dataset $P'$, we first find a crude upper-bound on the cost of any reasonable solution to the clustering task on $P$. We
-then create a grid such that, for every cluster in this approximate solution, the cluster is entirely contained in a grid cell with overwhelming likelihood. We can then freely move these
-grid cells around without affecting the cost of the solution. Thus, we can constrain the $\Delta$ to be small with respect to the quality of the approximate solution.
+In order to produce the substitute dataset $P'$, we first find a crude upper-bound on the cost of the optimal solution to the clustering task on $P$. We
+then create a grid such that, for every cluster in the optimal solution, the cluster is entirely contained in a grid cell with overwhelming likelihood -- in some sense, points in different grid cell do not interact. We can then freely move these
+grid cells around without affecting the cost of the solution, as long as they stay far enough away so that points in different cells still do not interact. 
+Thus, we can constrain the diameter of $P'$ to be small with respect to the quality of the approximate solution. We show later how to constrain the minimum distance to be comparable to the quality of this approximate solution as well.
 
 % More formally, if $U$ is a $c$-approximation of the optimal cost then the minimum distance can be reduced by rounding all coordinates to multiples of $g = U/(cn)$,
 % giving us a minimum distance of no less than $g$; it is then enough to reduce the diameter to $\poly(n) U$.  For this, we place a grid with cell length $O(n
@@ -110,16 +111,15 @@ time $\tilde O(nd)$, and pseudo-code is given \cref{alg:crudeApx}. Using a binar
 \begin{lemma}\label{lem:crudeApx}[Proof in \cref{app:apx-tree-proof}]
 There is an algorithm running in time $\tilde O(nd \log \log \Delta)$ that computes an $O(n d \log \Delta)$-approximation to $k$-median, and $O(n^3 d^2 \log^2
 \Delta)$-approximation to $k$-means.
-
 \end{lemma}
 
-Since our approximate solution's quality has a logarithmic dependence on $\Delta$, it remains to create a substitute dataset $P'$ using this solution that
+Given this crudez approximate solution, it remains to create a substitute dataset $P'$  that
 satisfies two requirements:
 \begin{enumerate}
     \item First, $P'$ must have spread linear in the quality of the approximate solution. If this holds, Algorithm~\ref{alg:main} on $P'$ will take
         $\tilde{O}(nd \log \log \Delta)$ time.
     \item Second, any reasonable solution on $P'$ should be roughly equivalent to a corresponding solution on $P$. This would mean that running
-        Algorithm~\ref{alg:main} on $P'$ gives us a valid compression for $P$.
+        Algorithm~\ref{alg:main} on $P'$ gives us a valid coreset for $P$.
 \end{enumerate}
 
 \subsection{From Approximate Solution to Reduced Spread}
@@ -136,7 +136,7 @@ The probability over the center's location that two points $p$ and $q$ are in di
 \end{lemma}
 \begin{proof}
 We first bound the probability that there is a grid line along the $i$-th dimension between $p$ and $q$. Let $p_i, q_i$ be the $i$-th coordinate of $p$ and $q$,
-assume $p_i \leq q_i$ and let $\ell \in \mathbb{Z}$ such that $p_i - \ell r \in [0, r]$.  Then, $p$ and $q$ are separated along dimension $i$ if and only if the
+assume $p_i \leq q_i$ and let $\ell \in \mathbb{Z}$ such that $p_i - \ell r \in [0, r)$.  Then, $p$ and $q$ are separated along dimension $i$ if and only if the
 $i$-th coordinate of the center is in $[p_i - \ell r, q_i - \ell r]$. This happens with probability $|p_i - q_i|/r$. 
 
 Therefore, a union-bound over all coordinates shows that $p$ and $q$ are in different grid cells with probability at most $\sum |p_i-q_i| / r \leq \sqrt{d} \|p-q\|/r$.
@@ -144,8 +144,8 @@ Therefore, a union-bound over all coordinates shows that $p$ and $q$ are in diff
 
 Since $U$ is larger than the distance between any input point and its center in the optimal solution, a union-bound ensures that with probability $1-1/n$, no
 cluster of this solution is split among different cells.  In particular, there are at most $k$-non empty cells which we can identify using a dictionary.  We
-call these "boxes" and associate the $j$-th box with the $j$-th cluster in our solution from Lemma~\ref{lem:crudeApx}, for $1 \leq j \leq k$. Each box $j$ has
-a middle point, which we call $m_j$.
+call these ``boxes".% and associate the $j$-th box with the $j$-th cluster in our solution from Lemma~\ref{lem:crudeApx}, for $1 \leq j \leq k$. 
+Each box $j$ has a middle point, which we call $m_j$.
 
 From this input, we build a new set of points $P'$ as follows.  For each dimension $i \in \lbra 1, ..., d \rbra$, sort the $k$ boxes according to their value on
 dimension $i$. Then, for each $j \in \lbra 1, ..., k\rbra$, let $m^i_j$  be the $i$-th coordinate of the middle-point of the $j$-th box. If $m^i_{j+1} - m^i_j
@@ -160,21 +160,19 @@ closer together. The dataset $P'$ obtained after these transformations has the f
 % \cref{alg:reduce-diam} (presented in \cref{app:pseudoCode}). The dataset $P'$ obtained after these transformations has the following properties:
 
 \begin{proposition}\label{prop:boxes}
-
-    Properties after performing Algorithm~\ref{alg:reduce-diam}:
+    Let $P'$ be the dataset produced by Algorithm~\ref{alg:reduce-diam}. It holds that:
     \begin{enumerate}
-        \item In $P'$, the diameter of the input is $O(d n^2\cdot U \cdot k)$ with probability $1-1/n$ over the randomness of the grid.
-        \item Furthermore, two boxes that are adjacent (respectively non-adjacent) in $P$ are still adjacent (resp. non-adjacent) in $P'$.
+        \item in $P'$, the diameter of the input is $O(d n^2\cdot U \cdot k)$ with probability $1-1/n$ over the randomness of the grid, and
+        \item two boxes that are adjacent (respectively non-adjacent) in $P$ are still adjacent (resp. non-adjacent) in $P'$.
     \end{enumerate}
-
 \end{proposition}
 \begin{proof}
 
-By construction, the maximal distance between the middle-points of any two boxes in $P'$ is $2r = 2\sqrt d n^2\cdot U$. Since, with probability $1-1/n$, there are at
-most $k$ boxes, the total distance along a coordinate is at most $2kr$. Therefore, the diameter of the whole point set is $\sqrt{d} \cdot 2kr$.
+By construction, the maximal distance between the middle-points of any two boxes in $P'$ is $2r = 2\sqrt d n^2\cdot U$. \cref{lem:}, ensures that, with probability $1-1/n^2$, any two points in the same cluster of the optimal solution (e.g., at distance less than $\opt \leq U$ from each other) are in the same box. Therefore, a union-bound ensures that there are at most $k$ boxes.
 
-If two boxes were adjacent in $P$, there is at least one dimension along which their middle-points have distance $r$ and, along all other dimensions, their
-middle-points must have distance less than $r$. Thus, if one of the adjacent boxes moves along any dimension, the others must as well and they will remain
+Therefore, the total distance along a coordinate is at most $2kr$, and the diameter of the whole point set is $\sqrt{d} \cdot 2kr$.
+
+If two boxes were adjacent in $P$, then along any dimension their middle-points have distance at most $r$. Thus, if one of the adjacent boxes moves along any dimension, the other must as well and they will remain
 adjacent.
 If they are not adjacent, there is at least one dimension where their middle-points are at distance at least $2r$ from one another. Along each such dimension,
 their shift cannot bring them closer than to within $2r$ of one another and they will stay non-adjacent.
