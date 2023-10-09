@@ -57,14 +57,14 @@ $\widetilde{O}(nd + nk)$ runtime by $\widetilde{O}(nd \log \Delta)$. Indeed, the
 
 We verify this by devising a dataset that has $n - n'$ points uniformly in the $[-1, 1]^2$ square. Then, for $r \in \mathbb{Z}^+$, we produce a sequence of
 points at $(0, 1), (0, 0.5), \cdots, (0, 0.5^r)$ and copy this sequence $n' / r$ times, each time with a different $x$ coordinate. The result is a dataset of
-size $n$ where $\log \Delta$ grow linearly with $r \in o(n)$. The resulting linear time-dependency can then be seen in Table \ref{tbl:logdelta}.
+size $n$ where $\log \Delta$ grows linearly with $r \in o(n)$. The resulting linear time-dependency can be seen in Table \ref{tbl:logdelta}.
 
 \input{tables/log_delta_runtime.tex}
 
 \section{Reducing the Impact of the Spread}
 \label{sec:theory} %\label{sec:logdelta}
 \newcommand{\boxsize}{\textsc{MaxDist}}
-We now show how to replace the linear time-dependency on $\log \Delta$ with a logarithmic one.
+We now show how one can replace the linear time-dependency on $\log \Delta$ with a logarithmic one.
 
 \paragraph*{Overview of the Approach}
 
@@ -88,9 +88,9 @@ We will focus this section on the simpler $k$-median problem but show how to red
 \label{ssec:crude_bound}
 
 As described, we start by computing an approximate solution $U$ such that $\opt \leq U \leq \poly(n) \cdot \opt$. For this, the first step is to embed the input
-into a quadtree. This embedding has two key properties: first, distances are preserved up to a multiplicative factor $O(d \log \Delta)$, and therefore the
+into a quadtree. This embedding has two key properties. First, distances are preserved up to a multiplicative factor $O(d \log \Delta)$, and therefore the
 $k$-median cost is preserved up to this factor as well. Second, the metric is a \emph{hierarchically separated tree}: it can be represented with a tree, where
-points of $P$ are the leafs, and the distance between two points is given by the depth of their lowest common ancestor: if it is at depth $\ell$, their distance
+points of $P$ are the leafs. The distance between two points is then given by the depth of their lowest common ancestor -- if it is at depth $\ell$, their distance
 is $\sqrt{d} \Delta 2^{-\ell}$.  Our first lemma shows that finding the first level of the tree for which the input lies in $k+1$ disjoint subtrees provides us
 with the desired approximation. 
 
@@ -113,7 +113,7 @@ There is an algorithm running in time $\tilde O(nd \log \log \Delta)$ that compu
 \Delta)$-approximation to $k$-means.
 \end{lemma}
 
-Given this crudez approximate solution, it remains to create a substitute dataset $P'$  that
+Given this crude approximate solution, it remains to create a substitute dataset $P'$ that
 satisfies two requirements:
 \begin{enumerate}
     \item First, $P'$ must have spread linear in the quality of the approximate solution. If this holds, Algorithm~\ref{alg:main} on $P'$ will take
@@ -137,9 +137,8 @@ The probability over the center's location that two points $p$ and $q$ are in di
 \begin{proof}
 We first bound the probability that there is a grid line along the $i$-th dimension between $p$ and $q$. Let $p_i, q_i$ be the $i$-th coordinate of $p$ and $q$,
 assume $p_i \leq q_i$ and let $\ell \in \mathbb{Z}$ such that $p_i - \ell r \in [0, r)$.  Then, $p$ and $q$ are separated along dimension $i$ if and only if the
-$i$-th coordinate of the center is in $[p_i - \ell r, q_i - \ell r]$. This happens with probability $|p_i - q_i|/r$. 
-
-Therefore, a union-bound over all coordinates shows that $p$ and $q$ are in different grid cells with probability at most $\sum |p_i-q_i| / r \leq \sqrt{d} \|p-q\|/r$.
+$i$-th coordinate of the center is in $[p_i - \ell r, q_i - \ell r]$. This happens with probability $|p_i - q_i|/r$.  Finally, a union-bound over all
+coordinates shows that $p$ and $q$ are in different grid cells with probability at most $\sum |p_i-q_i| / r \leq \sqrt{d} \|p-q\|/r$.
 \end{proof}
 
 Since $U$ is larger than the distance between any input point and its center in the optimal solution, a union-bound ensures that with probability $1-1/n$, no
@@ -168,21 +167,22 @@ closer together. The dataset $P'$ obtained after these transformations has the f
 \end{proposition}
 \begin{proof}
 
-By construction, the maximal distance between the middle-points of any two boxes in $P'$ is $2r = 2\sqrt d n^2\cdot U$. \cref{lem:}, ensures that, with probability $1-1/n^2$, any two points in the same cluster of the optimal solution (e.g., at distance less than $\opt \leq U$ from each other) are in the same box. Therefore, a union-bound ensures that there are at most $k$ boxes.
+By construction, the maximal distance between the middle-points of any two boxes in $P'$ is $2r = 2\sqrt d n^2\cdot U$. \cref{lem:}, ensures that, with
+probability $1-1/n^2$, any two points in the same cluster of the optimal solution (e.g., at distance less than $\opt \leq U$ from each other) are in the same
+box. Therefore, a union-bound ensures that there are at most $k$ boxes.  It then follows that the total distance along a coordinate is at most $2kr$, and the
+diameter of the whole point set is $\sqrt{d} \cdot 2kr$.
 
-Therefore, the total distance along a coordinate is at most $2kr$, and the diameter of the whole point set is $\sqrt{d} \cdot 2kr$.
-
-If two boxes were adjacent in $P$, then along any dimension their middle-points have distance at most $r$. Thus, if one of the adjacent boxes moves along any dimension, the other must as well and they will remain
-adjacent.
-If they are not adjacent, there is at least one dimension where their middle-points are at distance at least $2r$ from one another. Along each such dimension,
-their shift cannot bring them closer than to within $2r$ of one another and they will stay non-adjacent.
+If two boxes were adjacent in $P$, then along any dimension their middle-points have distance at most $r$. Thus, if one of the adjacent boxes moves along any
+dimension, the other must as well and they will remain adjacent.  If they are not adjacent, there is at least one dimension where their middle-points are at
+distance at least $2r$ from one another. Along each such dimension, their shift cannot bring them closer than to within $2r$ of one another and they will stay
+non-adjacent.
 
 \end{proof}
 
-The first property allows us to reduce the spread to $(nd \log \Delta)^{O(1)}$.  Indeed, one can round all coordinates of points in $P'$ to the closest multiple
-of $g := \frac{U}{n^4 d^{2} \log \Delta}$.  Combined with the diameter reduction, this ensures that the spread of the dataset obtained is at most $(nd \log
-\Delta)^{O(1)}$.  Furthermore, the second property of \cref{prop:boxes} combined with the choice of $g$ ensures that the cost of any reasonable solution is the
-same before and after the transformation, as stated in the following lemma:
+The first property allows us to reduce the spread to $(nd \log \Delta)^{O(1)}$.  Indeed, one can round the coordinates of every point in $P'$ to the closest
+multiple of $g := \frac{U}{n^4 d^{2} \log \Delta}$.  Combined with the diameter reduction, this ensures that the spread of the dataset obtained is at most $(nd
+\log \Delta)^{O(1)}$.  Furthermore, the second property of \cref{prop:boxes} combined with the choice of $g$ ensures that the cost of any reasonable solution is
+the same before and after the transformation, as stated in the following lemma:
 
 \begin{lemma}\label{lem:reduceSpread}
 

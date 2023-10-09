@@ -188,11 +188,11 @@ should require more samples to obtain a similar accuracy.
 Despite this, we see the opposite result for many of our sampling strategies. Surprisingly, Table~\ref{tbl:composition} and Figure~\ref{fig:streaming_runtimes}
 show that the accelerated sampling methods all perform \emph{better} under composition on the artificial datasets and do not suffer significant drops in
 accuracy, variance or runtime on the real datasets. Although inconsistent with the prevailing intuition, we must therefore conclude that the accelerated
-sampling methods are \emph{more} feasible in the streaming setting but that they still suffer from the lack of a full coreset guarantee.  We suspect that this
-is due to the non-uniformity imposed by the merge-\&-reduce algorithm. To see this, consider uniform sampling on the $c$-outlier dataset during the final step
-of the composition, where we are composing the samples corresponding to each layer of the tree. Assume first that our outlier points happened to fall in the
-first block. Then we have taken a sample of size $m$ from this block and immediately use this for the final composition. Thus, in this case the outliers are
-\emph{more} likely to be in our final sample than in the non-streaming setting. In the alternate setting where the outliers are less likely, our
-expected error is already high. Thus, missing the outlier `more' does not significantly affect our expected error. 
+sampling methods are \emph{more} feasible in the streaming setting.  We suspect that this is due to the non-uniformity imposed by the merge-\&-reduce algorithm.
+To see this, consider uniform sampling on the $c$-outlier dataset during the final step of the composition, where we are composing the samples corresponding to
+each layer of the tree. Assume first that our outlier points happened to fall in the first block. Then we have taken a sample of size $m$ from this block and
+immediately use this for the final composition. Thus, in this case the outliers are \emph{more} likely to be in our final sample than in the non-streaming
+setting. In the alternate setting where the outliers are less likely, our expected error is already high and missing the outlier `more' cannot worsen our
+expected error. 
 
 
