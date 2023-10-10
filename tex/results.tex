@@ -2,7 +2,7 @@
 \label{sec:results}
 
 Despite the near-linear time algorithm described in Sections~\ref{sec:theory_0} and~\ref{sec:theory}, the coreset construction of \cref{alg:main} nonetheless
-requires an $O(1)$ approximation to the original task before the sampling can occur. Although theoretically justified, it is unclear how necessary this is in
+requires a bounded approximation to the original task before the sampling can occur. Although theoretically justified, it is unclear how necessary this is in
 practice -- would a worse approximation factor still be representative of the dataset for practical purposes? We answer this question by defining a suite of
 algorithms, datasets and evaluation procedures that allow for a comprehensive study of speed vs. accuracy tradeoffs in compression for clustering.  We begin by
 describing our experimental setup before showing results in both the static and streaming settings. We note that these results correspond directly to
@@ -100,9 +100,9 @@ example for sensitivity sampling.
 
 In all real and artificial datasets, we add random uniform noise $\eta$ with $0 \leq \eta_i \leq 0.001$ in each dimension in order to make all points unique.
 Unless specifically varying these parameters, we default all algorithms in~\ref{ssec:algorithms} to $k=100$ for the Adult, MNIST, and artificial datasets and
-$k=500$ for the Song, Cover Type, and Census datasets. Our default coreset size is then $m = 40k$. We refer to the coreset size scalar as the \emph{$m$-scalar}.
-We only run the dimension-reduction step on the MNIST dataset, as the remaining datasets already have sufficiently low dimensionality.  We run our experiments
-on an Intel Core i9 10940X 3.3GHz 14-Core processor.
+$k=500$ for the Song, Cover Type, and Census datasets. Our default coreset size is then $m = 40k$. We refer to the coreset size scalar (the ``$40$'' in the
+previous sentence) as the \emph{$m$-scalar}.  We only run the dimension-reduction step on the MNIST dataset, as the remaining datasets already have sufficiently
+low dimensionality.  We run our experiments on an Intel Core i9 10940X 3.3GHz 14-Core processor.
 
 \subsection{Evaluating Sampling Strategies}
 \label{ssec:alg_qualities}
@@ -137,7 +137,7 @@ counterexample, lightweight coresets are likely to miss a small cluster that is 
 Figure~\ref{fig:lightweight_breaks}, where we show an example where the lightweight coreset construction fails on the Gaussian mixture dataset. Since the small
 circled cluster is close to the center-of-mass of the dataset, it is missed when sampling according to distance from the mean.
 
-It may be less immediately clear why welterweight coresets are brittle for $j < k$. To understand this, let $\calC_j$ be the approximation obtained during
+Generalizing this reasoning also explains the brittleness of welterweight coresets when $j<k$. To see this, let $\calC_j$ be the approximation obtained during
 welterweight coresets and observe that the sum of importance values of the points belonging to center $c_i \in \calC_j$ is \[ \sum_{p \in c_i} \left[
 \dfrac{\cost(p, c_i)}{\cost(c_i, \calC_j)} + \dfrac{1}{|c_i|} \right] = \dfrac{\sum_{p \in c_i} \cost(p, c_i)}{\cost(c_i, \calC_j)} + 1 = 2.\] Thus, our
 probability mass is distributed across the clusters that have been found in the approximate solution. Naturally, if $j < k$ and we missed a cluster from $\opt$,
@@ -166,9 +166,13 @@ To round out the dataset analysis, we note that BICO performs consistently poorl
 \ref{fig:coreset_size_on_quality}, \ref{subfig:kmedian_distortion}, \ref{fig:streaming_runtimes},  as it does not fall into the $\tilde{O}(nd)$ complexity class
 and is only designed for $k$-means.}, as can be seen in Tables \ref{tbl:distortion} and \ref{tbl:composition}. We also point out that every sampling method
 performs well on the benchmark dataset, which is designed to explicitly punish sensitivity sampling's reliance on the initial solution. Thus, we verify that
-there is no worst-case setting which breaks sensitivity sampling as there are for the other sampling methods.  Lastly, we show how these compression schemas
-facilitate fast clustering on large datasets in Table~\ref{tbl:lloyds}. There, we see that running Lloyd's algorithm on the samples obtains a consistent cost
-value on the full datasets.
+there is no worst-case setting that breaks sensitivity sampling.
+
+We lastly show how well these compression schemas facilitate fast clustering on large datasets in Table~\ref{tbl:lloyds}. Consider that a large
+coreset-distortion means that the centers obtained on the coreset poorly represent the full dataset. However, among sampling methods with small distortion, it
+may be the case that one consistently leads to the `best' solutions. To test this, we compare the solution quality across all fast methods on the real-world
+datasets, where coreset distortions are consistent. Indeed, Table~\ref{tbl:lloyds} shows that no sampling method leads to solutions with consistently minimal
+costs.
 
 \subsection{Streaming Setting}
 \label{ssec:streaming}
@@ -194,5 +198,3 @@ each layer of the tree. Assume first that our outlier points happened to fall in
 immediately use this for the final composition. Thus, in this case the outliers are \emph{more} likely to be in our final sample than in the non-streaming
 setting. In the alternate setting where the outliers are less likely, our expected error is already high and missing the outlier `more' cannot worsen our
 expected error. 
-
-

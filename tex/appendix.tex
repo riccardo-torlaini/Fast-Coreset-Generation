@@ -64,10 +64,11 @@ Section~\ref{ssec:reduce_spread}.
 Recall that Corollary~\ref{cor:mainAlg} states that \cref{alg:main} produces an $\eps$-coreset in time $\tilde O(nd \log \Delta)$.
 \begin{proof}[Proof of \cref{cor:mainAlg}]
 %We show that \cref{alg:main} has the desired guarantees.
-First, performing the Johnson-Lindenstrauss embedding takes time $\tilde O(nd)$.
+First, performing the Johnson Lindenstrauss embedding \cite{makarychev2019performance} takes time $\tilde O(nd)$.
 
-On the projected dataset, the algorithm \fkmeans runs in time $\tilde O\lpar n \log \Delta\rpar$, and the solution it has an approximation-ratio $O\lpar \tilde{d}^z \log k\rpar = O\lpar\log^{z+1} k\rpar$ for $\tilde P$. 
-The guarantee offered by the embedding ensure that the clustering $\lbra \calC_1,...,\calC_k\rbra$ still has approximation ratio for $P$ \cite{makarychev2019performance}. 
+On the projected dataset, the algorithm \fkmeans runs in time $\tilde O\lpar n \log \Delta\rpar$, and its solution has an approximation-ratio $O\lpar
+\tilde{d}^z \log k\rpar = O\lpar\log^{z+1} k\rpar$ for $\tilde P$.  The guarantee offered by the embedding ensures that the clustering $\lbra
+\calC_1,...,\calC_k\rbra$ still has approximation ratio for $P$ \cite{makarychev2019performance}. 
 
 For $k$-means, computing the $1$-mean solution for each $\calC_i$ takes time $O(nd)$ (the $1$-mean is simply the mean). 
 For $k$-median, computing the $1$-median solution can be done as well in time $O(nd)$ \cite{CohenLMPS16}. 
@@ -75,48 +76,61 @@ We note that both may be approximated to a factor $2$ in constant time, by sampl
 
 Provided the $c_i$ and the partition $\calC_i$, computing $|\calC_i|$ and $\cost(\calC_i, c_i)$ for all $i$ also takes time $O(nd)$.
 
-Since the solution consisting of assigning each $p \in \calC_i$ to $c_i$ is a $O\lpar \log^{z+1} k\rpar$-approximation, the values $s(p)$ defined in \cref{alg:main} can be used to perform the coreset construction algorithm, and we conclude from \cref{fact:logApprox}.
+Since the solution consisting of assigning each $p \in \calC_i$ to $c_i$ is a $O\lpar \log^{z+1} k\rpar$-approximation, the values $s(p)$ defined in
+\cref{alg:main} can be used to perform the coreset construction algorithm, and we conclude from \cref{fact:logApprox}.
+
 \end{proof}
 
 
 \subsection{Reduction of $k$-means to $k$-median.}
 \label{app:redKM}
-In our argument, the only step spectific to $k$-median is to compute the upper-bound $U$ on the cost of the solution. Provided such an upper-bound, rounding points and shifting the box would work exactly alike for $k$-means. Therefore, the next lemma is enough to extend our reduction of the spread to $k$-means:
+
+In our argument, the only step specific to $k$-median is computing the upper-bound $U$ on the cost of the solution. Provided such an upper-bound, rounding
+points and shifting the box would work exactly alike for $k$-means. Therefore, the next lemma is enough to extend our reduction of the spread to $k$-means:
+
 \begin{lemma}\label{lem:kmedTokmeans}
 Let $\calS$ be a $c$-approximation for $k$-median on $P$. Then, $\calS$ is a $nc^2$-approximation for $k$-means on $P$.
 \end{lemma}
+
 \begin{proof}
-Let $\cost_1$ (resp. $\cost_2$) be the $k$-median (resp. $k$-means) cost, $\opt_1$ (resp. $\opt_2$) be the optimal $k$-median (resp. $k$-means) solution. We have the following inequalities:
+
+Let $\cost_1$ (resp. $\cost_2$) be the $k$-median (resp. $k$-means) cost, $\opt_1$ (resp. $\opt_2$) be the optimal $k$-median (resp. $k$-means) solution. We
+have the following inequalities:
+
 \begin{align*}
 \cost_2(\calS) &= \sum_{p\in P} \dist(p, \calS)^2 \leq \lpar \sum_{p\in P} \dist(p, \calS)\rpar^2\\
 &\leq c^2 \cdot \lpar  \sum_{p\in P} \dist(p, \opt_1)\rpar^2\\
 &\leq c^2 \cdot \lpar  \sum_{p\in P} \dist(p, \opt_2)\rpar^2\\
 &\leq c^2 \cdot n \cdot  \sum_{p\in P} \dist(p, \opt_2)^2,
 \end{align*}
-where the last inequality stems from Cauchy-Schwarz. Therefore, $\calS$ is a $nc^2$ - approximation to $k$-means. 
+where the last inequality stems from Cauchy-Schwarz. Therefore, $\calS$ is an $nc^2$-approximation to $k$-means. 
 \end{proof}
 
 \subsection{Estimation of the Optimal Cost in a Tree}
 \label{app:apx-tree-proof}
 
-We conclude by proving the Lemmas from Section~\ref{sec:theory}.
 \begin{proof}[proof of \cref{lem:apxTree}]
-If the input is spread in $k+1$ distinct cell at level $i$, then in any solution there is at least one of those cells with no center. In the tree metric, points
-lying in this cell have therefore connexion cost at least $\sqrt{d}2^{-i+1} \cdot \Delta$, and thus the left-hand-side of the inequality holds.
 
-On the other hand, if the input is contained into $k$ cells at level $i-1$, then placing arbitrarily a center in each cell yields a solution with cost at most
-$n \cdot \sqrt{d}2^{-i+4} \cdot \Delta$: indeed, the distance from any point to its closest center is at most $2 \cdot \sum_{j \geq i-1} \sqrt{d}2^{-j} \cdot
+If the input is spread in $k+1$ distinct cell at level $i$, then in any solution there is at least one of those cells with no center. In the tree metric, points
+lying in this cell have therefore connection cost at least $\sqrt{d}2^{-i+1} \cdot \Delta$. Thus, the left-hand-side of the inequality holds.
+
+On the other hand, if the input is contained in $k$ cells at level $i-1$, then placing a center arbitrarily in each cell yields a solution with cost at most
+$n \cdot \sqrt{d}2^{-i+4} \cdot \Delta$. Indeed, the distance from any point to its closest center is at most $2 \cdot \sum_{j \geq i-1} \sqrt{d}2^{-j} \cdot
 2\Delta \leq 4 \sqrt{d}2^{-i+2} \cdot \Delta$ (summing the edge length from the point to the cell at level $i$, and then going down to the center). This
-concludes.
+concludes the proof.
+
 \end{proof}
 
 
 \begin{proof}[Proof of \cref{lem:crudeApx}]
-The running time of \textsc{Count-Distinct-Cells} in \cref{alg:crudeApx} is $\tilde O(nd)$, using a standard dictionary datastructure. To compute $U$,
+
+The running time of \textsc{Count-Distinct-Cells} in \cref{alg:crudeApx} is $\tilde O(nd)$, using a standard dictionary data structure. To compute $U$,
 \textsc{Crude-Approx} makes $O(\log \log \Delta)$ calls to \textsc{Count-Distinct-Cells}, as there are $O(\log \Delta)$ levels. This concludes the complexity of
 the algorithm.
 
-The approximation guarantee for $k$-median directly stems from \cref{lem:apxTree} and \cref{lem:quadtreeDist}. For $k$-means, it is a consequence of \cref{lem:kmedTokmeans}.
+The approximation guarantee for $k$-median directly stems from \cref{lem:apxTree} and \cref{lem:quadtreeDist}. For $k$-means, it is a consequence of
+\cref{lem:kmedTokmeans}.
+
 \end{proof}
 
 
