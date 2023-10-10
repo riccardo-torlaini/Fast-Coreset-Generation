@@ -35,17 +35,11 @@ streaming paradigm and applies to downstream clustering approaches.
 
 In summary, our contributions are as follows:
 \begin{itemize}
-    \item Theoretical Contributions
     \begin{itemize}
-        \item We show that one can obtain strong coresets for $k$-means and $k$-median in $\tilde{O}(nd \log \Delta)$ time\footnote{$\Delta$ is the ratio of
-            maximum distance over minimum distance in the dataset.}. This resolves a conjecture that the runtime requires an $\tilde{O}(nk)$ term \cite{DSWY22}.
-        \item We extend this by noting that the linear dependency on $\log \Delta$ can be avoided by appropriately reorganizing the space. This gives the first
-            effectively optimal\footnote{up to log factors} $\tilde{O}(nd)$ time algorithm for $k$-means and $k$-median coresets.
-    \end{itemize}
-    \item Experimental Contributions
-    \begin{itemize}
-        \item We perform a comprehensive analysis of sampling methods for the $k$-means and $k$-median tasks, measuring runtime and compression quality in the
-            streaming and non-streaming settings.
-        \item We provide an intuitive blueprint for the practitioner on what tradeoff can be expected between speed and accuracy when clustering big-data.
+        \item We show that one can obtain strong coresets for $k$-means and $k$-median in $\tilde{O}(nd)$ time, resolving a conjecture that the runtime
+            requires an $\tilde{O}(nk)$ term \cite{DSWY22}.
+        \item We perform a comprehensive analysis of sampling methods for clustering, measuring runtime and compression quality in the
+            streaming and non-streaming settings. 
+        \item We provide an intuitive blueprint on what tradeoff can be expected between speed and accuracy when clustering big-data.
     \end{itemize}
 \end{itemize}
