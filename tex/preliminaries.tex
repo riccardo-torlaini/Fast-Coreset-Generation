@@ -33,18 +33,18 @@ $\calC$ such that $\cost(\calC) \leq \alpha \cdot \opt$.
 Recently, sampling with respect to sensitivity values has grown to prominence due to its simple-to-obtain coreset guarantee.  True sensitivity values are defined
 as $\sup_{\calC} \frac{\dist^z(p, \calC)}{\cost_z(P, \calC)}$, where the supremum is taken over all possible solutions $\calC$. Intuitively, this is a measure
 of the maximum impact a point can have on a solution and is difficult to evaluate directly.
-Thus, the approximate sensitivity-sampling algorithm we consider is the following, as introduced in \cite{FeldmanL11}.
+Thus, the approximate sensitivity-sampling algorithm we consider is the following, as introduced in \cite{FL11}.
 Given an $\alpha$-approximate solution to a clustering problem $\calC$, importance scores are defined as
 \begin{equation}
 \label{eq:sensitivity}
 \sigma_\calC(p) = \alpha \cdot \left( \dfrac{\cost(p, \calC)}{\cost(\calC_{p}, \calC)} + \dfrac{1}{|\calC_p|} \right),
 \end{equation}
-where $\calC_p$ is the cluster that $p$ belongs to. This is always an upper-bound on the sensitivity values, see \cite{FL11,FeldmanSS20}.
+where $\calC_p$ is the cluster that $p$ belongs to. This is always an upper-bound on the sensitivity values, see \cite{FL11}.
 
 The coreset $\Omega$ then consists of $m$ points sampled proportionate to $\sigma$ with weights defined as follows. First, for any sampled point $p$, define $w_p :=
 \frac{1}{\Pr[p \in \Omega]} = \frac{\sum_{p'} s_\calC(p')}{m s_\calC(p)}$. For a cluster $C_i$, let $|\hat{C_i}|$ be the number of points in $C_i$ estimated by the
 sample, i.e. $C_i \cap \Omega$ weighted with $w_p$. A sampled point $p$ in $C_i$ is
-weighted $\tilde w(p) = \tilde w_1(p) \lpar (1+\eps)|C_i| - |\hat{C_i}|\rpar$.  \cite{FeldmanL11} and subsequent works showed that, when $\calC$ is
+weighted $\tilde w(p) = \tilde w_1(p) \lpar (1+\eps)|C_i| - |\hat{C_i}|\rpar$.  \cite{HuangV20} and subsequent works showed that, when $\calC$ is
 a $O(1)$-approximation, sampling $\Omega = \tilde O\lpar k \eps^{-2z-2}\rpar$ many points was enough to ensure concentration, namely, $\Omega$ is a coreset with
 probability at least $2/3$.
 
@@ -53,7 +53,7 @@ assigned center in $\calC$. Using any bicriteria approximation algorithm\footnot
 that computes a solution $\calC$ satisfying $\cost(P\calC)\leq \alpha\cdot \opt$ and $|\calC|\leq \beta\cdot k$.} such as the standard $k$-means++ algorithm
 \cite{ArV07} combined with dimension reduction techniques (see for example \cite{BecchettiBC0S19,CohenEMMP15,MakarychevMR19}), this takes time $\tilde O(nk
 +nd)$. This is precisely what was conjectured as the necessary runtime for obtaining $k$-means and $k$-median coresets, as merely assigning points to their
-centers from the bicriteria seems to require $\Omega(nk)$ running time.
+centers from the bicriteria seems to require $\Omega(nk)$ running time, see \cite{DSWY22}. 
 
 \input{figures/coreset_size_on_sens_quality.tex}
 
@@ -78,9 +78,9 @@ BICO was developed to perform quickly in a data-stream, we show in Section \ref{
 practice.
 
 All efficient coreset constructions are probabilistic and this comes with a disadvantage of coresets being difficult to evaluate. For example, it is co-NP-hard
-to check whether a candidate compression is a weak coreset \footnote{A weak coreset guarantee only requires that a $(1+\varepsilon)$ approximation computed on
-the coreset yields a $(1+\varepsilon)$ on the entire point set \cite{chrisESA}.}. Therefore, although coreset algorithms succeed with some high probability, it
-is unclear how to computationally verify this. We refer to \cite{chrisESA} for further discussion on this topic and discuss our metrics in Section
+to check whether a candidate compression is a weak coreset \cite{chrisESA}\footnote{A weak coreset guarantee only requires that a $(1+\varepsilon)$ approximation computed on
+the coreset yields a $(1+\varepsilon)$ on the entire point set.}. Therefore, although coreset algorithms succeed with some high probability, it
+is unclear how to computationally verify this. We refer to \cite{chrisESA} for further discussion on this topic and discuss our evaluation metrics in Section
 \ref{sssec:metrics}.
 
 \subsection{Quadtree Embeddings}
@@ -108,7 +108,7 @@ of the tree\footnote{Crucially, note that, in our \cref{alg:crudeApx}, we do not
 levels of it, resulting in our improved complexity.}. The linearity in the $\log \Delta$ term comes from the fact that this is the maximum depth of the tree.
 
 The distortion of this embedding is at most $O(d \log \Delta)$, as stated in the following lemma:
-\begin{lemma}\label{lem:quadtreeDist}
+\begin{lemma}[Lemma 11.9 in \cite{har2011geometric}]\label{lem:quadtreeDist}
 The distances in the tree metric $d_T$ satisfy
 $\forall p,q, \|p-q\| \leq \mathbb{E}[d_T(p, q)] \leq O(d \log \Delta) \|p-q\|$, where the expectation is taken over the random shift $s$ of the decomposition.
 \end{lemma}
