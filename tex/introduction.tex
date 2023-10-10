@@ -14,7 +14,7 @@ implement \cite{makarychev2019performance}, and provide tight guarantees on the 
 two separate paradigms that each provide distinct advantages. 
 On the one hand, we have uniform sampling, which runs in sublinear time but may miss important subsets of
 the data and therefore can only guarantee accuracy when making assumptions on the data \cite{HuangJL23}.  On the other hand, the most accurate sampling strategies are those that provide the \emph{strong coreset}
-guarantee, wherein the cost of any solution on the compressed data is within an $\varepsilon$-factor of that solution's cost on the original dataset \cite{CSS21}.
+guarantee, wherein the cost of any solution on the compressed data is within an $\varepsilon$-factor of that solution's cost on the original dataset \cite{stoc21}.
 Surprisingly, many coreset constructions can remove the dependency on $n$, significantly accelerating downstream tasks.
 
 We study both paradigms with respect to a classic problem -- what are the limits and possibilities of compression for the $k$-means and $k$-median objectives?
@@ -26,7 +26,7 @@ $\mathbb{R}^{n \times d}$ with one single large entry and the remaining entries 
 2-clustering.}. Thus a clear open question is what guarantees are achievable in linear or nearly linear time. Indeed, currently available fast sampling
 algorithms for clustering \cite{BachemL018} \cite{kmeans_sublinear_bachem16} cannot achieve strong coreset guarantees.  Recently, \cite{DSWY22} proposed
 a sensitivity-based method for strong coresets that runs in time $\tilde{O}(nd + nk)$ and conjectured this to be optimal for $k$-median and $k$-means.  Since
-the issue of determining a coreset size of optimal size has recently been closed \cite{CSS21,CLSSS22,HLW23}, this is arguably the main open problem in coreset
+the issue of determining a coreset size of optimal size has recently been closed \cite{CSS21,CLSSS22,huangLB}, this is arguably the main open problem in coreset
 research for center-based clustering. We resolve this by showing that there exists an easy-to-implement algorithm that constructs coresets in $\tilde{O}(nd)$
 time -- only logarithmic factors away from the time it takes to read in the dataset.
 

@@ -23,12 +23,12 @@
 In this section, we first combine two existing results to produce a strong coreset in time $\tilde{O}(nd \log \Delta)$, where $\Delta$ is the spread of
 the input.  We show afterwards how to reduce the dependency in $\Delta$ to $\log \log \Delta$, giving the desired nearly-linear runtime.
 
-Our method is based on the following observations about the group sampling \cite{stoc21} and sensitivity sampling \cite{FeldmanL11} coreset construction
+Our method is based on the following observations about the group sampling \cite{stoc21} and sensitivity sampling \cite{FL11} coreset construction
 algorithms. Both start by computing a solution $\calC$. When $\calC$ is a $c$-approximation, they compute a $c \eps$-coreset of size $\tilde O\lpar
 k \eps^{-z-2}\rpar$ and $\tilde O\lpar k \eps^{-2z -2}\rpar$, respectively. Hence, by rescaling, they provide an $\eps$-coreset with size $\tilde O\lpar
 k (\eps/c)^{-z-2}\rpar$ and $\tilde O\lpar k (\eps/c)^{-2z-2}\rpar$.  This leads to the following fact:
 
-\begin{fact}\label{fact:logApprox}[See Theorem 1 in \cite{stoc21} and 4.8 in \cite{FeldmanL11}\footnote{Those references use actually an $O(1)$-approximation,
+\begin{fact}\label{fact:logApprox}[See Theorem 1 in \cite{stoc21} and 4.8 in \cite{FL11}\footnote{Those references use actually an $O(1)$-approximation,
     but all proofs go through with a  $O\lpar \log^{O(1)} k\rpar$ approximation, with an additional factor  $O\lpar \log^{O(1)} k\rpar$ in the coreset size.}]
     Let $\calC$ be an $O\lpar \log^{O(1)} k\rpar$ approximation to $k$-median or $k$-means.  Then, group sampling using solution $\calC$ computes a coreset of
     size $\tilde O\lpar k \eps^{-z-2}\rpar$, and sensitivity sampling one of size $\tilde O\lpar k \eps^{-2z-2}\rpar$.  Both run in time $\tilde O(nd)$,
