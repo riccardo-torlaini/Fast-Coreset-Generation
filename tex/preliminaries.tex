@@ -105,7 +105,7 @@ $[-2\Delta, 2\Delta]^d$. This transformation does not change any distances and t
 tree (for $i \in \lbra 0, ..., \log \Delta \rbra$) is constructed by centering a grid of side length $2^{-i} \cdot 2\Delta$ at $0$, making each grid-cell a node
 in the tree.  The parent of a cell $c$ is simply the cell at level $i-1$ that contains $c$, and the distance between $c$ and its parent is set to $2^{-i} \cdot
 2\Delta \cdot \sqrt{d}$ (the length of the hypercube's diagonal). This embedding takes $O(nd \log \Delta)$ time to construct, where $\log \Delta$ is the depth
-of the tree\footnote{Crucially, note that, in our \cref{alg:crudeApx}, we do not need to build the full tree.  Instead, we only require $\log \log \Delta$
+of the tree\footnote{Crucially, note that our \cref{alg:crudeApx} does not need to build the full tree. Instead, we only require $\log \log \Delta$
 levels of it, resulting in our improved complexity.}. The linearity in the $\log \Delta$ term comes from the fact that this is the maximum depth of the tree.
 
 The distortion of this embedding is at most $O(d \log \Delta)$, as stated in the following lemma:
