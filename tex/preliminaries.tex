@@ -43,10 +43,12 @@ where $\calC_p$ is the cluster that $p$ belongs to. This is always an upper-boun
 proportionately to these values guarantees an accurate compression. The following paragraph discusses how the points must be re-weighted to guarantee the
 coreset property:
 
-The coreset $\Omega$ consists of $m$ points sampled proportionate to $\sigma$ with weights defined as follows. First, for any sampled point $p$, define
-$w_p := \frac{1}{\Pr[p \in \Omega]} = \frac{\sum_{p'} \sigma_\calC(p')}{m \cdot \sigma_\calC(p)}$. For a cluster $C_i$, let $|\hat{C_i}|$ be the number of
-points in $C_i$ estimated by the sample, i.e. $C_i \cap \Omega$ weighted with $w_p$. A sampled point $p$ in $C_i$ is weighted $\tilde w(p) = \tilde w_1(p) \lpar
-(1+\eps)|C_i| - |\hat{C_i}|\rpar$.  \cite{HuangV20} and subsequent works showed that, when $\calC$ is a $O(1)$-approximation, sampling $\Omega = \tilde O\lpar
+The coreset $\Omega$ consists of $m$ points sampled proportionate to $\sigma$ with weights defined as follows: for any sampled point $p$, define
+$w_p := \frac{1}{\Pr[p \in \Omega]} = \frac{\sum_{p'} \sigma_\calC(p')}{m \cdot \sigma_\calC(p)}$. 
+%For a cluster $C_i$, let $|\hat{C_i}|$ be the number of
+%points in $C_i$ estimated by the sample, i.e. $C_i \cap \Omega$ weighted with $w_p$. A sampled point $p$ in $C_i$ is weighted $\tilde w(p) = \tilde w_1(p) \lpar
+%(1+\eps)|C_i| - |\hat{C_i}|\rpar$.  
+\cite{HuangV20} and subsequent works showed that, when $\calC$ is a $O(1)$-approximation, sampling $m = \tilde O\lpar
 k \eps^{-2z-2}\rpar$ many points was enough to ensure concentration, namely, $\Omega$ is a coreset with probability at least $2/3$.
 
 To perform this algorithm, the bottleneck in the running time lies in computing the solution $\calC$ as well as then obtaining costs of every point to its
@@ -114,6 +116,6 @@ The distances in the tree metric $d_T$ satisfy
 $\forall p,q, \|p-q\| \leq \mathbb{E}[d_T(p, q)] \leq O(d \log \Delta) \|p-q\|$, where the expectation is taken over the random shift $s$ of the decomposition.
 \end{lemma}
 
-A sample proof (and further intuition on quadtree embeddings) can be found in Lemma 11.9 in \cite{har2011geometric}. The result follows from combining linearity
+A simple proof (and further intuition on quadtree embeddings) can be found in Lemma 11.9 in \cite{har2011geometric}. The result follows from combining linearity
 of expectation and the fact that two points $p$ and $q$ are separated at level $i$ with probability at most $\sqrt{d} \|p-q\| \frac{2^i}{\Delta}$ (as in the
 proof of \cref{lem:quadtreeSep}).
