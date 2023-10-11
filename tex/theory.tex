@@ -191,7 +191,7 @@ Let $P'$ be the outcome of the diameter reduction and rounding steps. With proba
 
 Suppose $U$ is such that $\opt \leq U \leq d n^2 \opt$, and let $\calS'$ be a solution for $k$-median (resp. $k$-means) on $P'$ with cost at most $d n^2
 \opt$ (resp. $d^2 n^4 \opt$ for $k$-means). Then, one can compute a $k$-median solution for $P$, with the same cost as $\calS'$ for $P'$ up to an
-additive error $\opt / n$, in time $O(nd)$. The same holds by reversing the roles of $P$ and $P'$.
+additive error $\opt / n$, in time $O(nd)$. This also works if we replace $P'$ and $P$.
 
 \end{lemma}
 \begin{proof}

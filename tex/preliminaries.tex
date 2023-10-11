@@ -63,7 +63,7 @@ centers from the bicriteria seems to require $\Omega(nk)$ running time, see \cit
 \subsection{Other Coreset Strategies}
 \label{ssec:clustering_prelim}
 
-Much of the advancements regarding coresets have sought the smallest coreset possible across metric spaces and downstream objectives. The most prominent
+Many of the advancements regarding coresets have sought the smallest coreset possible across metric spaces and downstream objectives. The most prominent
 examples are in Euclidean space \cite{BadoiuHI02, HaM04, Chen09, HuangV20, stoc22}, with much of the focus on obtaining the optimal size in the $k$-means and
 $k$-median setting. Recently, a lower bound \cite{huangLB} showed that the group sampling algorithm developed in \cite{stoc21, stoc22} is optimal.
 
@@ -116,6 +116,6 @@ The distances in the tree metric $d_T$ satisfy
 $\forall p,q, \|p-q\| \leq \mathbb{E}[d_T(p, q)] \leq O(d \log \Delta) \|p-q\|$, where the expectation is taken over the random shift $s$ of the decomposition.
 \end{lemma}
 
-A simple proof (and further intuition on quadtree embeddings) can be found in Lemma 11.9 in \cite{har2011geometric}. The result follows from combining linearity
+A simple proof (and further intuition on quadtree embeddings) can be found in \cite{har2011geometric}. The result follows from combining linearity
 of expectation and the fact that two points $p$ and $q$ are separated at level $i$ with probability at most $\sqrt{d} \|p-q\| \frac{2^i}{\Delta}$ (as in the
 proof of \cref{lem:quadtreeSep}).
