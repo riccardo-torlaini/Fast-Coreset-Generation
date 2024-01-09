@@ -1,0 +1,34 @@
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{|l|cccc|}
+        \hline
+        & $\gamma = 0$ & $\gamma = 1$ & $\gamma = 3$ & $\gamma = 5$\\
+        \hline
+        LW Coreset & 1.03 & 1.03 & 1.36 & 2.17\\
+        $j=2$ & 1.04 & 1.04 & 1.04 & 1.92\\
+        $j=\log k$ & 1.04 & 1.04 & 1.04 & 1.95\\
+        $j=\sqrt{k}$ & 1.05 & 1.06 & 1.04 & 1.18\\
+        Fast Coreset & 1.03 & 1.03 & 1.04 & 1.12\\
+        \hline
+    \end{tabular}
+    \vspace*{0.1cm}
+    \caption{The effect of $\gamma$ in the Gaussian mixture dataset on the coreset distortion. We report the means over 5 random dataset generations.
+    Each generation had 50\,000 points in 50 dimensions, with 50 Gaussian clusters and coresets of size 4\,000. We set $k=100$.}
+    \label{tbl:class-imbalance}
+    \begin{tabular}{|c|cccc|}
+        \hline
+        & \makecell{Uniform\\Sampling} & \makecell{Light-\\weight} & \makecell{Welter-\\weight} & \makecell{Fast\\Coreset} \\
+        \hline
+        MNIST & 12450 & 12379 & 12512 & 12449 \\
+        Adult & 24982 & 24935 & 24944 & 25013 \\
+        Song & 16753 & 16612 & 16950 & 17010 \\
+        Census & 36697 & 35577 & 37379 & 32163 \\
+        Cover-Type & 10506 & 10337 & 10032 & 9787 \\
+        \hline
+    \end{tabular}
+    \vspace*{0.1cm}
+    \caption{$cost(P, \calC_S)$, where $P$ is the whole dataset and $\calC_S$ is found via $k$-means++\cite{ArV07, cohen2020fast} and Lloyd's algorithm on the coreset. Sample sizes down the rows are
+    $m=4K,4K,20K,20K,20K$ and initializations are identical within each row. We only show the first 5 digits of the cost for readability.}
+    \label{tbl:lloyds}
+\end{table}
+

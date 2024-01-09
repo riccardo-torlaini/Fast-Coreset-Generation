@@ -62,6 +62,7 @@ def get_coreset(sensitivities, m, points, labels, weights=None):
     """
     replace = False
     if m > len(points):
+        m = len(points)
         replace = True
     rng = np.random.default_rng()
     if m > len(sensitivities):
@@ -93,6 +94,8 @@ def uniform_coreset(points, m, weights=None, **kwargs):
     n = len(points)
     if weights is None:
         weights = np.ones(n)
+    if m > len(points):
+        m = len(points)
     weights_prob_dist = weights / np.sum(weights)
     if m > n:
         m = n
@@ -130,7 +133,7 @@ def semi_uniform_coreset(
     norm,
     kmeans_alg=cluster_pp_slow,
     allotted_time=np.inf,
-    j_func='2',
+    j_func='log',
     sample_method='sens',
     weights=None,
     **kwargs

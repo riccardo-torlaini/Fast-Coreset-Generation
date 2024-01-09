@@ -1,0 +1,48 @@
+\begin{table*}
+    \centering
+    \vspace*{-0.1cm}
+    \small
+    \renewcommand{\arraystretch}{0.9}
+    \begin{tabular}{|c|cc|cc|cc|cc|cc|}
+        \hline
+        & \multicolumn{10}{c|}{Method} \\
+        \cline{2-11} & \multicolumn{2}{c|}{Uniform Sampling} & \multicolumn{2}{c|}{Lightweight} & \multicolumn{2}{c|}{Welterweight} & \multicolumn{2}{c|}{BICO} & \multicolumn{2}{c|}{Fast Coreset} \\
+        & $m=40k$ & $m=80k$ & $m=40k$ & $m=80k$ & $m=40k$ & $m=80k$ & $m=40k$ & $m=80k$ & $m=40k$ & $m=80k$ \\
+        \cline{2-11}
+        $c$-outlier & 405 $\pm$ 24K & 159 $\pm$ 20K & 1.07 $\pm$ 0.0 & 5.63 $\pm$ 84.6 & 9.44 $\pm$ 105 & 1.03 $\pm$ 0.0 & 12.46 $\pm$ 0.60 & 6.10 $\pm$ 3.90 & 1.12 $\pm$ 0.0 & 1.05 $\pm$ 0.0 \\
+        Geometric & 86.3 $\pm$ 8.4K & 21.8 $\pm$ 652 & 1.05 $\pm$ 0.0 & 11.6 $\pm$ 452 & 1.11 $\pm$ 0.0 & 1.03 $\pm$ 0.0 & 2.42 $\pm$ 0.01 & 1.38 $\pm$ 0.0 & 1.11 $\pm$ 0.0 & 1.05 $\pm$ 0.0 \\
+        Gaussian Mix. & 3.17 $\pm$ 3.42 & 1.43 $\pm$ 0.25 & 2.64 $\pm$ 1.61 & 1.81 $\pm$ 0.58 & 2.26 $\pm$ 1.55 & 1.28 $\pm$ 0.07 & 11.4 $\pm$ 0.69 & 7.58 $\pm$ 0.33 & 1.24 $\pm$ 0.0 & 1.13 $\pm$ 0.0 \\
+        \makecell{Benchmark\\---} & \makecell{1.07 $\pm$ 0.0\\---} & \makecell{1.03 $\pm$ 0.0\\---} & \makecell{1.11 $\pm$ 0.0\\---} & \makecell{1.05 $\pm$
+        0.0\\---} & \makecell{1.10 $\pm$ 0.0\\---} & \makecell{1.04 $\pm$ 0.0\\---} & \makecell{5.49 $\pm$ 0.03\\---} & \makecell{2.64 $\pm$ 0.0\\---}
+          & \makecell{1.15 $\pm$ 0.0\\---} & \makecell{1.06 $\pm$ 0.0\\---} \\
+
+        MNIST & 1.08 $\pm$ 0.0 & 1.03 $\pm$ 0.0 & 1.08 $\pm$ 0.0 & 1.03 $\pm$ 0.0 & 1.08 $\pm$ 0.0 & 1.04 $\pm$ 0.0 & 6.41 $\pm$ 1.36 & 3.83 $\pm$ 0.02 & 1.08 $\pm$ 0.0 & 1.04 $\pm$ 0.0 \\
+        Adult & 1.08 $\pm$ 0.0 & 1.04 $\pm$ 0.0 & 1.09 $\pm$ 0.0 & 1.04 $\pm$ 0.0 & 1.32 $\pm$ 0.0 & 1.17 $\pm$ 0.0 & 3.12 $\pm$ 0.0 & 3.39 $\pm$ 0.0 & 1.17 $\pm$ 0.0 & 1.07 $\pm$ 0.0 \\
+        Song & 1.30 $\pm$ 0.0 & 1.14 $\pm$ 0.0 & 1.13 $\pm$ 0.0 & 1.12 $\pm$ 0.0 & 1.18 $\pm$ 0.0 & 1.16 $\pm$ 0.0 & 5.44 $\pm$ 1.32 & 3.24 $\pm$ 0.45 & 1.50 $\pm$ 0.0 & 1.29 $\pm$ 0.0 \\
+        Census & 1.15 $\pm$ 0.0 & 1.07 $\pm$ 0.0 & 1.12 $\pm$ 0.0 & 1.06 $\pm$ 0.0 & 1.14 $\pm$ 0.0 & 1.06 $\pm$ 0.0 & 3.45 $\pm$ 0.03 & 3.13 $\pm$ 0.04 & 1.13 $\pm$ 0.0 & 1.07 $\pm$ 0.0 \\
+        Cover-Type & 1.12 $\pm$ 0.0 & 1.05 $\pm$ 0.0 & 1.11 $\pm$ 0.0 & 1.06 $\pm$ 0.0 & 1.17 $\pm$ 0.0 & 1.08 $\pm$ 0.0 & 1.49 $\pm$ 1.78 & 1.41 $\pm$ 0.0 & 1.11 $\pm$ 0.0 & 1.04 $\pm$ 0.0 \\
+        \hline
+    \end{tabular}
+    \caption{Distortion means and variances for different sample sizes across datasets for $k$-means; taken over 5 runs.}
+    \label{tbl:distortion}
+    \vspace*{0.1cm}
+    \fontsize{7.74pt}{7.74pt}\selectfont
+    \renewcommand{\arraystretch}{1.25}
+    \begin{tabular}{|c|cc|cc|cc|cc|cc|}
+        \hline
+        & \multicolumn{10}{c|}{Method} \\
+        \cline{2-11} & \multicolumn{2}{c|}{Uniform Sampling} & \multicolumn{2}{c|}{Lightweight} & \multicolumn{2}{c|}{Welterweight} & \multicolumn{2}{c|}{BICO} & \multicolumn{2}{c|}{Fast Coreset} \\
+        & Streaming & Static & Streaming & Static & Streaming & Static & Streaming & Static & Streaming & Static \\
+        \cline{2-11}
+        $c$-outlier & 221 $\pm$ 15K & 261 $\pm$ 44K & 1.07 $\pm$ 0.0 & 5.51 $\pm$ 78.9 & 1.09 $\pm$ 0.0 & 12.1 $\pm$ 80.1 & 18.8 $\pm$ 5.47 & 12.90 $\pm$ 1.87 & 1.13 $\pm$ 0.0 & 1.11 $\pm$ 0.0 \\
+        Geometric & 66.5 $\pm$ 2.7K & 140 $\pm$ 1.8K & 85.2 $\pm$ 2.8K & 45.6 $\pm$ 4.2K & 1.09 $\pm$ 0.0 & 10.4 $\pm$ 349 & 2.91 $\pm$ 0.14 & 2.39 $\pm$ 0.02 & 1.15 $\pm$ 0.0 & 1.12 $\pm$ 0.0 \\
+        Gaussian Mix. & 1.51 $\pm$ 0.07 & 2.42 $\pm$ 2.52 & 2.35 $\pm$ 0.67 & 2.38 $\pm$ 1.78 & 1.45 $\pm$ 0.05 & 3.65 $\pm$ 3.85 & 27.0 $\pm$ 6.72 & 11.6 $\pm$ 0.42 & 1.15 $\pm$ 0.0 & 1.24 $\pm$ 0.0 \\
+        Benchmark & 1.10 $\pm$ 0.0 & 1.07 $\pm$ 0.0 & 1.08 $\pm$ 0.0 & 1.11 $\pm$ 0.0 & 1.09 $\pm$ 0.0 & 1.11 $\pm$ 0.0 & 6.67 $\pm$ 0.01 & 5.63 $\pm$ 0.16 & 1.18 $\pm$ 0.0 & 1.16 $\pm$ 0.0 \\
+        MNIST & 1.42 $\pm$ 0.0 & 1.08 $\pm$ 0.0 & 1.07 $\pm$ 0.0 & 1.07 $\pm$ 0.0 & 1.02 $\pm$ 0.0 & 1.09 $\pm$ 0.0 & 11.72 $\pm$ 2.53 & 8.13 $\pm$ 1.56 & 1.12 $\pm$ 0.0 & 1.08 $\pm$ 0.0 \\
+        Adult & 1.33 $\pm$ 0.0 & 895K $\pm$ 3.2B & 1.09 $\pm$ 0.0 & 1.09 $\pm$ 0.0 & 1.27 $\pm$ 0.01 & 1.32 $\pm$ 0.0 & 9.03 $\pm$ 3.10 & 3.24 $\pm$ 0.0 & 1.14 $\pm$ 0.0 & 1.15 $\pm$ 0.0 \\
+        \hline
+    \end{tabular}
+    \caption{Distortion means and variances in the streaming and non-streaming setting for $k$-means; taken over 5 runs.}
+    \label{tbl:composition}
+\end{table*}
+\renewcommand{\arraystretch}{1}

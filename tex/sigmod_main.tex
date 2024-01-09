@@ -1,4 +1,37 @@
-\documentclass{article}
+\documentclass[sigconf]{acmart}
+
+
+
+%%
+%% \BibTeX command to typeset BibTeX logo in the docs
+\AtBeginDocument{%
+  \providecommand\BibTeX{{%
+    Bib\TeX}}}
+
+%% Rights management information.  This information is sent to you
+%% when you complete the rights form.  These commands have SAMPLE
+%% values in them; it is your responsibility as an author to replace
+%% the commands and values with those provided to you when you
+%% complete the rights form.
+\setcopyright{acmcopyright}
+\copyrightyear{2018}
+\acmYear{2018}
+\acmDOI{XXXXXXX.XXXXXXX}
+
+%% These commands are for a PROCEEDINGS abstract or paper.
+\acmConference[Conference acronym 'XX]{Make sure to enter the correct
+  conference title from your rights confirmation emai}{June 03--05,
+  2018}{Woodstock, NY}
+%%
+%%  Uncomment \acmBooktitle if the title of the proceedings is different
+%%  from ``Proceedings of ...''!
+%%
+%%\acmBooktitle{Woodstock '18: ACM Symposium on Neural Gaze Detection,
+%%  June 03--05, 2018, Woodstock, NY}
+\acmPrice{15.00}
+\acmISBN{978-1-4503-XXXX-X/18/06}
+
+
 
 % Recommended, but optional, packages for figures and better typesetting:
 \usepackage{microtype}
@@ -15,7 +48,7 @@
 \newcommand{\theHalgorithm}{\arabic{algorithm}}
 
 % For theorems and such
-\usepackage{amsmath} \usepackage{amssymb} \usepackage{mathtools} \usepackage{amsthm}
+\usepackage{amsmath}  \usepackage{mathtools} \usepackage{amsthm}
 
 % if you use cleveref..
 \usepackage[capitalize,noabbrev]{cleveref}
@@ -98,27 +131,6 @@
 %for having enumerates with (i) (ii) (iii): 
 \renewcommand{\labelenumi}{\theenumi}
  
-% if you need to pass options to natbib, use, e.g.:
-%     \PassOptionsToPackage{numbers, compress}{natbib}
-% before loading neurips_2023
-
-
-% ready for submission
-%\usepackage{neurips_2023}
-
-
-% to compile a preprint version, e.g., for submission to arXiv, add add the
-% [preprint] option:
-%     \usepackage[preprint]{neurips_2023}
-
-
-% to compile a camera-ready version, add the [final] option, e.g.:
-%     \usepackage[final]{neurips_2023}
-
-
-% to avoid loading the natbib package, add option nonatbib:
-\usepackage{neurips_2023}
-
 
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
@@ -145,14 +157,7 @@
 % \AND instead of \And before the third author name.
 
 
-\author{%
-  David S.~Hippocampus\thanks{Use footnote for providing further information
-    about author (webpage, alternative address)---\emph{not} for acknowledging
-    funding agencies.} \\
-  Department of Computer Science\\
-  Cranberry-Lemon University\\
-  Pittsburgh, PA 15213 \\
-  \texttt{hippo@cs.cranberry-lemon.edu} \\
+\author{}
   % examples of more authors
   % \And
   % Coauthor \\
@@ -174,13 +179,11 @@
   % Affiliation \\
   % Address \\
   % \texttt{email} \\
-}
 
 
 \begin{document}
 
 
-\maketitle
 
 
 \begin{abstract}
@@ -196,8 +199,11 @@ within log-factors of the time it takes to read the data.  Any approach that sig
 to consider the spectrum of sampling strategies across both real and artificial datasets in the static and streaming settings. Through this, we show the
 conditions in which coresets are necessary for preserving cluster validity as well as the settings in which faster, cruder sampling strategies are sufficient.
 As a result, we provide a comprehensive theoretical and practical blueprint for clustering effectively regardless of data size.  Our (anonymized) code is
-publicly available at \textcolor{blue}{\href{https://anonymous.4open.science/r/Fast-Coreset-Generation-7564}{source}}.
+publicly available at \textcolor{blue}{\href{https://anonymous.4open.science/r/Fast-Coreset-Generation-7564}{source}} and has scripts to recreate the
+experiments.
 \end{abstract}
+
+\maketitle
 
 
 \input{introduction}
@@ -208,14 +214,11 @@ publicly available at \textcolor{blue}{\href{https://anonymous.4open.science/r/F
 \input{results}
 \input{conclusion}
 
-
+\input{appendix}
 
 % Acknowledgements should only appear in the accepted version.
-
 \bibliographystyle{plainnat}
 \bibliography{references}
 
-\newpage
-\appendix
-\input{appendix}
+
 \end{document}

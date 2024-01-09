@@ -33,7 +33,7 @@ def run_sweeps():
         # 'cover_type'
         # 'fraud',
         # 'caltech',
-        # 'nytimes'
+        # 'nytimes',
         'taxi'
     ]
     methods = ['fast_coreset', 'uniform_sampling', 'lightweight', 'semi_uniform']
@@ -50,13 +50,14 @@ def run_sweeps():
     n_points = 50000
     D = 50
     num_centers = 50
+    iterations = 3
 
     # Default values for sweep parameters on small datasets
     small_default_values = {
         'k': 100,
         'j_func': '2', # Only applies for semi-uniform coreset
         'sample_method': 'sens', # Only applies for semi-uniform coreset
-        'm_scalar': 40, # FIXME -- need small samples for composition experiments?
+        'm_scalar': 40,
         'composition': False,
         'allotted_time': 1200,
         'hst_count_from_norm': True, # Only applies to fast-coreset
@@ -168,10 +169,10 @@ def run_sweeps():
                             coreset_alg,
                             params,
                             dataset=dataset,
+                            iterations=iterations,
                             n_points=n_points,
                             D=D,
                             num_centers=num_centers,
-
                         )
 
                         metric_results = {'acc': accuracies, 'time': times}

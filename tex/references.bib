@@ -1,11 +1,45 @@
-@inproceedings{neurips21,
-  author    = {Vincent Cohen{-}Addad and
-               David Saulpic and
-               Chris Schwiegelshohn},
-  title     = {Improved Coresets and Sublinear Algorithms for Power Means in Euclidean
-               Spaces},
-  booktitle = { NeurIPS},
-  year      = {2021},
+@book{har2011geometric,
+  title={Geometric approximation algorithms},
+  author={Har-Peled, Sariel},
+  number={173},
+  year={2011},
+  publisher={American Mathematical Soc.}
+}
+
+
+@article{HJJ23,
+  author       = {Lingxiao Huang and
+                  Shaofeng H.{-}C. Jiang and
+                  Jianing Lou},
+  title        = {The Power of Uniform Sampling for k-Median},
+  journal      = {CoRR},
+  volume       = {abs/2302.11339},
+  year         = {2023},
+  url          = {https://doi.org/10.48550/arXiv.2302.11339},
+  doi          = {10.48550/arXiv.2302.11339},
+  eprinttype    = {arXiv},
+  eprint       = {2302.11339},
+  timestamp    = {Fri, 24 Feb 2023 11:55:23 +0100},
+  biburl       = {https://dblp.org/rec/journals/corr/abs-2302-11339.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{HLW23,
+  author       = {Lingxiao Huang and
+                  Jian Li and
+                  Xuan Wu},
+  title        = {Towards Optimal Coreset Construction for (k, z)-Clustering: Breaking
+                  the Quadratic Dependency on k},
+  journal      = {CoRR},
+  volume       = {abs/2211.11923},
+  year         = {2022},
+  url          = {https://doi.org/10.48550/arXiv.2211.11923},
+  doi          = {10.48550/arXiv.2211.11923},
+  eprinttype    = {arXiv},
+  eprint       = {2211.11923},
+  timestamp    = {Mon, 20 Feb 2023 08:27:21 +0100},
+  biburl       = {https://dblp.org/rec/journals/corr/abs-2211-11923.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
 }
 
 @article{czumaj2007sublinear,
@@ -84,7 +118,27 @@
   biburl    = {https://dblp.org/rec/journals/siamcomp/ClarksonDMMMW16.bib},
   bibsource = {dblp computer science bibliography, https://dblp.org}
 }
-
+@inproceedings{cohen2019fixed,
+  author    = {Vincent Cohen{-}Addad and
+               Jason Li},
+  title     = {On the Fixed-Parameter Tractability of Capacitated Clustering},
+  booktitle = {{ICALP}},
+  series    = {LIPIcs},
+  volume    = {132},
+  pages     = {41:1--41:14},
+  publisher = {Schloss Dagstuhl - Leibniz-Zentrum f{\"{u}}r Informatik},
+  year      = {2019},
+  note      = {Full version: \url{https://arxiv.org/abs/2208.14129}}
+}
+@inproceedings{HJV19,
+  author    = {Lingxiao Huang and
+               Shaofeng H.{-}C. Jiang and
+               Nisheeth K. Vishnoi},
+  title     = {Coresets for Clustering with Fairness Constraints},
+  booktitle = {NeurIPS},
+  pages     = {7587--7598},
+  year      = {2019}
+}
 @inproceedings{HugginsCB16,
   author    = {Jonathan H. Huggins and
                Trevor Campbell and
@@ -277,6 +331,14 @@
   bibsource = {dblp computer science bibliography, https://dblp.org}
 }
 
+@inproceedings{kmeans_sublinear_bachem16,
+  title={Approximate k-means++ in sublinear time},
+  author={Bachem, Olivier and Lucic, Mario and Hassani, S Hamed and Krause, Andreas},
+  booktitle={Proceedings of the AAAI conference on artificial intelligence},
+  volume={30},
+  number={1},
+  year={2016}
+}
 
 @inproceedings{NaN18,
   author    = {Shyam Narayanan and
@@ -316,6 +378,28 @@ titlle = {US Census Data},
 year = "1990",
 url = "https://archive.ics.uci.edu/ml/datasets/US+Census+Data+(1990)",
 }
+
+
+
+@article{huangLB,
+  author       = {Lingxiao Huang and
+                  Jian Li and
+                  Xuan Wu},
+  title        = {Towards Optimal Coreset Construction for (k, z)-Clustering: Breaking
+                  the Quadratic Dependency on k},
+  journal      = {CoRR},
+  volume       = {abs/2211.11923},
+  year         = {2022},
+  url          = {https://doi.org/10.48550/arXiv.2211.11923},
+  doi          = {10.48550/arXiv.2211.11923},
+  eprinttype    = {arXiv},
+  eprint       = {2211.11923},
+  timestamp    = {Mon, 20 Feb 2023 08:27:21 +0100},
+  biburl       = {https://dblp.org/rec/journals/corr/abs-2211-11923.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
+
+
 
 @article{DSWY22,
   author    = {Yichuan Deng and
@@ -682,24 +766,6 @@ url = "https://archive.ics.uci.edu/ml/datasets/US+Census+Data+(1990)",
 }
 
 
-@inproceedings{stoc21,
-  author    = {Vincent Cohen{-}Addad and
-               David Saulpic and
-               Chris Schwiegelshohn},
-  editor    = {Samir Khuller and
-               Virginia Vassilevska Williams},
-  title     = {A new coreset framework for clustering},
-  booktitle = {{STOC} '21: 53rd Annual {ACM} {SIGACT} Symposium on Theory of Computing,
-               Virtual Event, Italy, June 21-25, 2021},
-  pages     = {169--182},
-  publisher = {{ACM}},
-  year      = {2021},
-  url       = {https://doi.org/10.1145/3406325.3451022},
-  doi       = {10.1145/3406325.3451022},
-  timestamp = {Sat, 08 Jan 2022 02:24:27 +0100},
-  biburl    = {https://dblp.org/rec/conf/stoc/Cohen-AddadSS21.bib},
-  bibsource = {dblp computer science bibliography, https://dblp.org}
-  }
   
 @inproceedings{stoc22,
   author    = {Vincent Cohen{-}Addad and
@@ -786,24 +852,30 @@ url = "https://archive.ics.uci.edu/ml/datasets/US+Census+Data+(1990)",
 }
 
 
-@inproceedings{makarychev2019performance,
-  title={Performance of Johnson-Lindenstrauss transform for k-means and k-medians clustering},
-  author={Makarychev, Konstantin and Makarychev, Yury and Razenshteyn, Ilya},
-  booktitle={Proceedings of the 51st Annual ACM SIGACT Symposium on Theory of Computing},
-  pages={1027--1038},
-  year={2019}
-}
-
 @article{thickstunfast,
   title={THE FAST JOHNSON-LINDENSTRAUSS TRANSFORM},
   author={THICKSTUN, JOHN}
 }
 
 @article{cohen2022scalable,
-  title={Scalable Differentially Private Clustering via Hierarchically Separated Trees},
-  author={Cohen-Addad, Vincent and Epasto, Alessandro and Lattanzi, Silvio and Mirrokni, Vahab and Munoz, Andres and Saulpic, David and Schwiegelshohn, Chris and Vassilvitskii, Sergei},
-  journal={arXiv preprint arXiv:2206.08646},
-  year={2022}
+  author       = {Vincent Cohen{-}Addad and
+                  Alessandro Epasto and
+                  Silvio Lattanzi and
+                  Vahab Mirrokni and
+                  Andres Mu{\~{n}}oz Medina and
+                  David Saulpic and
+                  Chris Schwiegelshohn and
+                  Sergei Vassilvitskii},
+  editor       = {Aidong Zhang and
+                  Huzefa Rangwala},
+  title        = {Scalable Differentially Private Clustering via Hierarchically Separated
+                  Trees},
+  booktitle    = {{KDD} '22: The 28th {ACM} {SIGKDD} Conference on Knowledge Discovery
+                  and Data Mining, Washington, DC, USA, August 14 - 18, 2022},
+  pages        = {221--230},
+  publisher    = {{ACM}},
+  year         = {2022},
+  url          = {https://doi.org/10.1145/3534678.3539409}
 }
 
 @article{cohen2020fast,
@@ -1434,6 +1506,64 @@ year="1999",
   biburl    = {https://dblp.org/rec/conf/podc/AbrahamG06.bib},
   bibsource = {dblp computer science bibliography, https://dblp.org}
 }
+@inproceedings{BandyapadhyayFS21,
+  author       = {Sayan Bandyapadhyay and
+                  Fedor V. Fomin and
+                  Kirill Simonov},
+  editor       = {Nikhil Bansal and
+                  Emanuela Merelli and
+                  James Worrell},
+  title        = {On Coresets for Fair Clustering in Metric and Euclidean Spaces and
+                  Their Applications},
+  booktitle    = {48th International Colloquium on Automata, Languages, and Programming,
+                  {ICALP} 2021, July 12-16, 2021, Glasgow, Scotland (Virtual Conference)},
+  series       = {LIPIcs},
+  volume       = {198},
+  pages        = {23:1--23:15},
+  publisher    = {Schloss Dagstuhl - Leibniz-Zentrum f{\"{u}}r Informatik},
+  year         = {2021},
+  url          = {https://doi.org/10.4230/LIPIcs.ICALP.2021.23},
+  doi          = {10.4230/LIPIcs.ICALP.2021.23},
+  timestamp    = {Tue, 15 Feb 2022 07:54:27 +0100},
+  biburl       = {https://dblp.org/rec/conf/icalp/BandyapadhyayFS21.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
+@article{HLW23,
+  author       = {Lingxiao Huang and
+                  Pinyan Lu and
+                  Xuan Wu},
+  title        = {Improved Coresets for Clustering with Capacity and Fairness Constraints},
+  journal      = {CoRR},
+  volume       = {abs/2302.11151},
+  year         = {2023},
+  url          = {https://doi.org/10.48550/arXiv.2302.11151},
+  doi          = {10.48550/arXiv.2302.11151},
+  eprinttype    = {arXiv},
+  eprint       = {2302.11151},
+  timestamp    = {Fri, 24 Feb 2023 11:55:23 +0100},
+  biburl       = {https://dblp.org/rec/journals/corr/abs-2302-11151.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{BravermanCJKST022,
+  author       = {Vladimir Braverman and
+                  Vincent Cohen{-}Addad and
+                  Shaofeng H.{-}C. Jiang and
+                  Robert Krauthgamer and
+                  Chris Schwiegelshohn and
+                  Mads Bech Toftrup and
+                  Xuan Wu},
+  title        = {The Power of Uniform Sampling for Coresets},
+  booktitle    = {63rd {IEEE} Annual Symposium on Foundations of Computer Science, {FOCS}                  2022, Denver, CO, USA, October 31 - November 3, 2022},
+  pages        = {462--473},
+  publisher    = {{IEEE}},
+  year         = {2022},
+  url          = {https://doi.org/10.1109/FOCS54457.2022.00051},
+  doi          = {10.1109/FOCS54457.2022.00051},
+  timestamp    = {Sat, 31 Dec 2022 17:18:44 +0100},
+  biburl       = {https://dblp.org/rec/conf/focs/BravermanCJKST022.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
 
 @inproceedings{Cohen-AddadPP19,
   author    = {Vincent Cohen{-}Addad and
@@ -1694,23 +1824,6 @@ journal = {JIPAM. Journal of Inequalities in Pure \& Applied Mathematics [electr
   bibsource = {dblp computer science bibliography, https://dblp.org}
 }
 
-@inproceedings{BachemL018,
-  author    = {Olivier Bachem and
-               Mario Lucic and
-               Andreas Krause},
-  title     = {Scalable k -Means Clustering via Lightweight Coresets},
-  booktitle = {Proceedings of the 24th {ACM} {SIGKDD} International Conference on
-               Knowledge Discovery {\&} Data Mining, {KDD} 2018, London, UK,
-               August 19-23, 2018},
-  pages     = {1119--1127},
-  year      = {2018},
-  crossref  = {DBLP:conf/kdd/2018},
-  url       = {https://doi.org/10.1145/3219819.3219973},
-  doi       = {10.1145/3219819.3219973},
-  timestamp = {Wed, 21 Nov 2018 12:44:27 +0100},
-  biburl    = {https://dblp.org/rec/conf/kdd/BachemL018.bib},
-  bibsource = {dblp computer science bibliography, https://dblp.org}
-}
 
 @inproceedings{BachemLL18,
   author    = {Olivier Bachem and
@@ -3111,6 +3224,30 @@ author = "Farid Ablayev"
   bibsource = {dblp computer science bibliography, https://dblp.org}
 }
 
+@inproceedings{HuangJL23,
+  author       = {Lingxiao Huang and
+                  Shaofeng H.{-}C. Jiang and
+                  Jianing Lou},
+  editor       = {Andreas Krause and
+                  Emma Brunskill and
+                  Kyunghyun Cho and
+                  Barbara Engelhardt and
+                  Sivan Sabato and
+                  Jonathan Scarlett},
+  title        = {The Power of Uniform Sampling for k-Median},
+  booktitle    = {International Conference on Machine Learning, {ICML} 2023, 23-29 July
+                  2023, Honolulu, Hawaii, {USA}},
+  series       = {Proceedings of Machine Learning Research},
+  volume       = {202},
+  pages        = {13933--13956},
+  publisher    = {{PMLR}},
+  year         = {2023},
+  url          = {https://proceedings.mlr.press/v202/huang23j.html},
+  timestamp    = {Mon, 28 Aug 2023 17:23:08 +0200},
+  biburl       = {https://dblp.org/rec/conf/icml/HuangJL23.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
+
 @inproceedings{BecchettiBC0S19,
   author    = {Luca Becchetti and
                Marc Bury and
@@ -3159,15 +3296,6 @@ author = "Farid Ablayev"
                {STOC} 2009, Bethesda, MD, USA, May 31 - June 2, 2009},
   pages     = {361--370},
   year      = {2009}
-}
-
-@inproceedings{FeldmanL11,
-	author    = {Dan Feldman and
-	Michael Langberg},
-	title     = {A unified framework for approximating and clustering data},
-	booktitle = {Proceedings of the 43rd {ACM} Symposium on Theory of Computing, {STOC}	2011, San Jose, CA, USA, 6-8 June 2011},
-	pages     = {569--578},
-	year      = {2011}
 }
 
 @inproceedings{FSS13,
@@ -8584,23 +8712,20 @@ eprint = {https://epubs.siam.org/doi/pdf/10.1137/1.9781611977073.63},
   bibsource = {dblp computer science bibliography, https://dblp.org}
 }
 
-@article{CLSSS22,
-  author    = {Vincent Cohen{-}Addad and
-               Kasper Green Larsen and
-               David Saulpic and
-               Chris Schwiegelshohn and
-               Omar Ali Sheikh{-}Omar},
-  title     = {Improved Coresets for Euclidean k-Means},
-  journal   = {CoRR},
-  volume    = {abs/2211.08184},
-  year      = {2022},
-  url       = {https://doi.org/10.48550/arXiv.2211.08184},
-  doi       = {10.48550/arXiv.2211.08184},
-  eprinttype = {arXiv},
-  eprint    = {2211.08184},
-  timestamp = {Wed, 23 Nov 2022 18:03:56 +0100},
-  biburl    = {https://dblp.org/rec/journals/corr/abs-2211-08184.bib},
-  bibsource = {dblp computer science bibliography, https://dblp.org}
+
+@inproceedings{CLSSS22,
+  author       = {Vincent Cohen{-}Addad and
+                  Kasper Green Larsen and
+                  David Saulpic and
+                  Chris Schwiegelshohn and
+                  Omar Ali Sheikh{-}Omar},
+  title        = {Improved Coresets for Euclidean k-Means},
+  booktitle    = {NeurIPS},
+  year         = {2022},
+  url          = {http://papers.nips.cc/paper\_files/paper/2022/hash/120c9ab5c58ba0fa9dd3a22ace1de245-Abstract-Conference.html},
+  timestamp    = {Thu, 11 May 2023 17:08:21 +0200},
+  biburl       = {https://dblp.org/rec/conf/nips/Cohen-AddadLSSS22.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
 }
 
 @inproceedings{MarxP15,
