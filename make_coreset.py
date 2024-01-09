@@ -64,6 +64,8 @@ def get_coreset(sensitivities, m, points, labels, weights=None):
     if m > len(points):
         replace = True
     rng = np.random.default_rng()
+    if m > len(sensitivities):
+        m = len(sensitivities)
     coreset_inds = rng.choice(np.arange(len(sensitivities)), size=m, replace=False, p=sensitivities)
 
     if weights is None:
@@ -92,6 +94,8 @@ def uniform_coreset(points, m, weights=None, **kwargs):
     if weights is None:
         weights = np.ones(n)
     weights_prob_dist = weights / np.sum(weights)
+    if m > n:
+        m = n
     rng = np.random.default_rng()
     coreset_inds = rng.choice(np.arange(n), size=m, replace=False, p=weights_prob_dist)
     q_points = points[coreset_inds]
@@ -185,6 +189,29 @@ def lightweight_coreset(
 
     return r_points, r_weights, r_labels
 
+def stream_kmpp(
+    points,
+    weights,
+    k,
+    m,
+    norm,
+    hst_count_from_norm=True,
+    **kwargs
+):
+    centers, labels, costs = fast_cluster_pp(
+        points,
+        int(m/2), # The kmeans++ algorithm samples 2k points to get an O(1) approximation. We want to sample m points exactly.
+        norm=norm,
+        weights=weights,
+        hst_count_from_norm=hst_count_from_norm,
+    )
+    weights = np.zeros_like(centers)
+    for i, center in tqdm(enumerate(centers), total=len(centers)):
+        for label in labels.astype(np.int32):
+            if label == center:
+                weights[i] += 1
+
+    return points[centers], weights, labels[centers]
 
 def fast_coreset(
     points,
@@ -237,25 +264,21 @@ def evaluate_coreset(points, k, coreset, weights, point_weights=None):
 
 if __name__ == '__main__':
     g_norm = 2
-    g_k = 200
-    g_points, g_labels = get_dataset('mnist', n_points=50000, D=50, num_centers=50, k=g_k, class_imbalance=5)
-    model = PCA(n_components=2)
-    g_embedding = model.fit_transform(g_points)
-    plt.scatter(g_embedding[:, 0], g_embedding[:, 1])
-    plt.show()
-    
-    g_m_scalar = 80
+    g_k = 100
+    g_points, g_labels = get_dataset('nytimes', n_points=50000, D=50, num_centers=50, k=g_k, class_imbalance=5)
+
+    g_m_scalar = 40
     g_allotted_time = 600
     g_hst_count_from_norm = True
     g_kmeans_alg = cluster_pp_slow
     g_points = jl_proj(g_points, g_k, eps=0.5)
 
     # method = 'fast'
-    method = 'lightweight'
+    # method = 'lightweight'
     # method = 'semi_uniform'
     # method = 'sensitivity'
     # method = 'bico'
-    # method = 'uniform'
+    method = 'uniform'
 
     start = time()
     g_weights = np.ones((len(g_points)))
@@ -320,20 +343,20 @@ if __name__ == '__main__':
     print('Coreset cost ratio:', evaluate_coreset(g_points, g_k, fast_points, fast_weights))
 
     # Visualize
-    model = PCA(n_components=2)
-    g_embedding = model.fit_transform(g_points)
-    q_embedding = model.transform(q_points)
-    fast_embedding = model.transform(fast_points)
-    fig, axes = plt.subplots(1, 3)
+    # model = PCA(n_components=2)
+    # g_embedding = model.fit_transform(g_points)
+    # q_embedding = model.transform(q_points)
+    # fast_embedding = model.transform(fast_points)
+    # fig, axes = plt.subplots(1, 3)
 
-    axes[0].scatter(g_embedding[:, 0], g_embedding[:, 1], c=g_labels, alpha=0.5, s=5)
-    axes[1].scatter(q_embedding[:, 0], q_embedding[:, 1], c=q_labels, alpha=0.5, s=5)
-    axes[2].scatter(fast_embedding[:, 0], fast_embedding[:, 1], c=fast_labels, alpha=0.5, s=5)
+    # axes[0].scatter(g_embedding[:, 0], g_embedding[:, 1], c=g_labels, alpha=0.5, s=5)
+    # axes[1].scatter(q_embedding[:, 0], q_embedding[:, 1], c=q_labels, alpha=0.5, s=5)
+    # axes[2].scatter(fast_embedding[:, 0], fast_embedding[:, 1], c=fast_labels, alpha=0.5, s=5)
 
-    axes[0].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-    axes[1].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-    axes[2].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-    axes[0].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
-    axes[1].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
-    axes[2].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
-    plt.show()
+    # axes[0].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+    # axes[1].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+    # axes[2].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+    # axes[0].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+    # axes[1].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+    # axes[2].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+    # plt.show()

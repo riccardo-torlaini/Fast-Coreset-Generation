@@ -1,4 +1,5 @@
 import numpy as np
+from tqdm import tqdm
 from hst import hst_dist, fit_tree, assert_hst_correctness
 
 ### HST code ###
@@ -34,7 +35,9 @@ def assert_multi_hst_correctness(multi_hst, points):
 
 def make_multi_HST(points, weights, num_trees, test=False):
     roots, ptc_dicts = [], []
-    for i in range(num_trees):
+    pbar = tqdm(range(num_trees), total=num_trees)
+    for i in pbar:
+        pbar.set_description('Fitting multi_hst {} of {}'.format(i+1, num_trees))
         root, ptc_dict = fit_tree(points, weights)
         if test:
             assert_hst_correctness(root, ptc_dict, points)

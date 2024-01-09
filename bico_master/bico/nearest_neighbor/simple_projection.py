@@ -34,7 +34,7 @@ class SimpleProjection(NearestNeighbor):
         bucket_values = self.get_bucket_values(proj_values)
         smallest_bucket = min([x[1].get(bucket_values[x[0]], [])
                                for x in enumerate(self.buckets)], key=len)
-        distances = [squared_euclidean_distance(p[0], point) for p in smallest_bucket]
+        distances = [float(squared_euclidean_distance(p[0], point)) for p in smallest_bucket]
         res = [NearestNeighborResult(p[0][0], p[0][1], p[1]) for p in zip(smallest_bucket, distances)]
         return sorted(res, key=lambda x: x.distance)
 

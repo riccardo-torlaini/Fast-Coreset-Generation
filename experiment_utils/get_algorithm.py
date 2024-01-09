@@ -8,7 +8,8 @@ from make_coreset import \
     evaluate_coreset, \
     semi_uniform_coreset, \
     lightweight_coreset, \
-    bico_coreset
+    bico_coreset, \
+    stream_kmpp
 
 RANDOM_DATASETS = ['artificial', 'geometric', 'benchmark', 'blobs']
 
@@ -18,7 +19,8 @@ ALG_DICT = {
     'uniform_sampling': uniform_coreset,
     'semi_uniform': semi_uniform_coreset,
     'lightweight': lightweight_coreset,
-    'bico': bico_coreset
+    'bico': bico_coreset,
+    'stream_kmpp': stream_kmpp
 }
 
 def get_algorithm(algorithm_type):
@@ -109,19 +111,18 @@ def get_results(
     coreset_alg,
     params,
     dataset,
-    iterations=10,
     n_points=50000,
     D=50,
     num_centers=50,
 ):
+    iterations = params['iterations']
     times = np.zeros(iterations)
     accuracies = np.zeros(iterations)
-    print('Iteration:', end=' ')
     for i in range(iterations):
-        print(i, end=' ')
         if dataset in RANDOM_DATASETS or i == 0:
             # Load in dataset each time if it's random and once if it's not
             points, _ = get_dataset(dataset, n_points, D, num_centers)
+            np.random.shuffle(points)
         start = time()
         if params['composition']:
             q_points, q_weights = run_composition_experiments(points, coreset_alg, params)

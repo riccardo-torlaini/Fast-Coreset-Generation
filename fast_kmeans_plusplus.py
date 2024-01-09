@@ -193,9 +193,10 @@ def fast_cluster_pp(points, k, norm=2, weights=None, hst_count_from_norm=True, a
     st_ptc_dict = {i: -1 for i in np.arange(n)}
     sample_tree = create_sample_tree(points, np.arange(n), st_ptc_dict)
     labels = np.ones((n)) * -1
-    if loud:
-        print('Running Fast-Kmeans++...')
-    for i in tqdm(range(2*k), total=2*k):
+
+    pbar = tqdm(range(2*k), total=2*k)
+    pbar.set_description('Running Fast-Kmeans++...')
+    for i in pbar:
         if len(centers) == 0:
             c = np.random.choice(n)
         else:

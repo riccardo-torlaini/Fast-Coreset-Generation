@@ -1,6 +1,6 @@
 import numpy as np
 import sys
-sys.setrecursionlimit(5000)
+sys.setrecursionlimit(10000)
 
 from utils import tree_dist
 

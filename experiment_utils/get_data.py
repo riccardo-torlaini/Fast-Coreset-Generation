@@ -3,9 +3,19 @@ import csv
 import os
 import subprocess
 
+import cv2 as cv
+from PIL import Image
 import numpy as np
+import pandas as pd
+from sklearn.random_projection import SparseRandomProjection
 from sklearn.datasets import make_blobs
 from mnist import MNIST
+
+def normalize(points):
+    points -= np.min(points, axis=0, keepdims=True)
+    points /= np.max(points, axis=0, keepdims=True)
+    return points
+
 
 def get_dataset(dataset_type, n_points=1000, D=50, num_centers=10, k=50, class_imbalance=5.0):
     if dataset_type == 'blobs':
@@ -28,6 +38,18 @@ def get_dataset(dataset_type, n_points=1000, D=50, num_centers=10, k=50, class_i
         return load_darpa_kdd_cup()
     elif dataset_type == 'census':
         return load_census_data()
+    elif dataset_type == 'nytimes':
+        return load_nytimes_data()
+    elif dataset_type == 'caltech':
+        return load_caltech_data()
+    elif dataset_type == 'fraud':
+        return load_fraud_data()
+    elif dataset_type == 'taxi':
+        return load_taxi_data()
+    elif dataset_type == 'star':
+        return load_star_data()
+    elif dataset_type == 'kitti':
+        return load_kitti_data()
     else:
         raise ValueError('Dataset not implemented')
 
@@ -205,6 +227,90 @@ def load_cover_type():
         start_index=start_index
     )
 
+def load_caltech_data():
+    # 101 images dataset found in https://data.caltech.edu/records/mzrjq-6wc02
+    # We find the SIFT features of every image and put the total collection of sift features into a data matrix
+    #   - this results in a 4.1 million points in 128 dimensions
+    directory = os.path.join('data', 'caltech', 'caltech-101')
+    pickled_path = os.path.join(directory, 'pickled_caltech.npy')
+    if os.path.exists(pickled_path):
+        dataset = np.load(pickled_path, allow_pickle=True)[()]
+        return dataset['points'], dataset['labels']
+
+    directory = os.path.join(directory, '101_ObjectCategories')
+    points = []
+    for i, class_path in tqdm(enumerate([d[0] for d in os.walk(directory)][1:]), total=101):
+        label = os.path.split(class_path)[-1]
+        walk = os.walk(class_path)
+        for j, image_name in enumerate(list(walk)[0][2]):
+            image_path = os.path.join(class_path, image_name)
+            img = cv.imread(image_path)
+            gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+            sift = cv.SIFT_create()
+            _, descriptors = sift.detectAndCompute(gray, None)
+            if descriptors is not None:
+                points.append(descriptors)
+
+    points = np.concatenate(points, 0)
+    points = np.unique(points, axis=0)
+    labels = np.arange(len(points))
+    np.save(pickled_path, {'points': points, 'labels': labels})
+    return points, labels
+
+def load_nytimes_data():
+    # NYTimes bag-of-words dataset from https://archive.ics.uci.edu/dataset/164/bag+of+words
+    directory = os.path.join('data', 'nytimes')
+    pickled_path = os.path.join(directory, 'pickled_nytimes.npy')
+    if os.path.exists(pickled_path):
+        dataset = np.load(pickled_path, allow_pickle=True)[()]
+        return dataset['points'], dataset['labels']
+
+    n_words = 102660
+    n_docs = 300000
+    proj_dim = 128
+    high_dim_points = np.zeros([n_docs, n_words])
+    points = np.zeros([n_docs, 128])
+    with open(os.path.join(directory, 'docword.nytimes.txt')) as f:
+        for i, line in tqdm(enumerate(f), total=69679427):
+            if i < 3:
+                continue
+            line_vals = [int(i) for i in line.rstrip().split(' ')]
+            high_dim_points[line_vals[0] - 1, line_vals[1] - 1] = line_vals[2]
+    projector = SparseRandomProjection(128)
+    step = 1000
+    for i in tqdm(range(0, n_docs, step), total=n_docs/step):
+        points[i:i+step] = projector.fit_transform(high_dim_points[i:i+step])
+    points = np.unique(points, axis=0)
+    print(points.shape)
+    labels = np.arange(len(points))
+    np.save(pickled_path, {'points': points, 'labels': labels})
+    return points, labels
+
+def load_fraud_data():
+    # Downloaded from https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud/
+    directory = os.path.join('data', 'fraud')
+    pickled_path = os.path.join(directory, 'pickled_fraud.npy')
+    if os.path.exists(pickled_path):
+        dataset = np.load(pickled_path, allow_pickle=True)[()]
+        return dataset['points'], dataset['labels']
+
+    data_path = os.path.join('data', 'fraud', 'creditcard.csv')
+    rows, columns = 284807, 28
+    points = np.zeros([rows, columns])
+    with open(data_path, 'r') as f:
+        reader = csv.reader(f)
+        for i, line in tqdm(enumerate(reader), total=rows):
+            if i == 0:
+                # First line is junk
+                continue
+            points[i-1] = [float(p) for p in line[1:29]]
+
+    points = np.unique(points, axis=0)
+    points = normalize(points)
+
+    labels = np.arange(len(points))
+    np.save(pickled_path, {'points': points, 'labels': labels})
+    return points, labels
 
 def load_song():
     # Million song dataset found at https://archive.ics.uci.edu/ml/datasets/yearpredictionmsd
@@ -226,11 +332,89 @@ def load_song():
             labels[i] = line[0]
 
     _, labels = np.unique(labels, return_inverse=True)
-    # If there are duplicate points, the HST will recur until segmentation fault
-    # So add tiny noise to put duplicate points in different HST branches
-    points += np.random.rand(rows, columns) / 100000
+    points = np.unique(points, axis=0)
+    points = normalize(points)
+
     np.save(pickled_path, {'points': points, 'labels': labels})
     return points, labels
+
+def load_star_data():
+    directory = os.path.join('data', 'star')
+    pickled_path = os.path.join(directory, 'pickled_star.npy')
+    if os.path.exists(pickled_path):
+        dataset = np.load(pickled_path, allow_pickle=True)[()]
+        return dataset['points'], dataset['labels']
+    print('Could not find pickled dataset at {}. Loading from csv file and pickling...'.format(pickled_path))
+
+    from PIL import Image
+    star_image = Image.open(os.path.join(directory, 'star.jpg'))
+    base_width = 500
+    wpercent = base_width / float(star_image.size[0])
+    hsize = int(star_image.size[1] * wpercent)
+    star_image = star_image.resize((base_width, hsize), Image.Resampling.LANCZOS)
+    points = np.reshape(star_image, [-1, 3]).astype(np.float32)
+    points = normalize(points)
+    print(points.shape)
+
+    # Can't have duplicate points for hst embeddings
+    points += (np.random.rand(*points.shape) - 0.5) * 0.0001 
+
+    labels = np.ones(len(points))
+    np.save(pickled_path, {'points': points, 'labels': labels})
+
+    return points, labels
+
+def load_taxi_data():
+    directory = os.path.join('data', 'taxi')
+    pickled_path = os.path.join(directory, 'pickled_taxi.npy')
+    if os.path.exists(pickled_path):
+        dataset = np.load(pickled_path, allow_pickle=True)[()]
+        return dataset['points'], dataset['labels']
+    print('Could not find pickled dataset at {}. Loading from csv file and pickling...'.format(pickled_path))
+
+
+    taxi_dataset = pd.read_csv(os.path.join(directory, 'train.csv'))
+    str_locations = taxi_dataset['POLYLINE']
+    points = []
+    for i, str_location in enumerate(tqdm(str_locations, total=len(str_locations))):
+        first_comma = str_location.find(',')
+        first_bracket = str_location.find(']')
+        try:
+            x = float(str_location[2:first_comma])
+            y = float(str_location[first_comma+1:first_bracket])
+            points.append([x, y])
+        except ValueError:
+            continue
+
+    points = np.array(points)
+    points = np.unique(points, axis=0)
+    points = normalize(points)
+    labels = np.ones(len(points))
+    np.save(pickled_path, {'points': points, 'labels': labels})
+
+    return points, labels
+
+def load_kitti_data():
+    directory = os.path.join('data', 'kitti')
+    pickled_path = os.path.join(directory, 'pickled_kitti.npy')
+    if os.path.exists(pickled_path):
+        dataset = np.load(pickled_path, allow_pickle=True)[()]
+        return dataset['points'], dataset['labels']
+    print('Could not find pickled dataset at {}. Loading from csv file and pickling...'.format(pickled_path))
+
+
+    dataset_path = os.path.join(directory, 'data.h5')
+    import pykitti
+    dataset = pykitti.raw(directory, '2011_09_26', '0001')
+    velo = np.array(list(dataset.velo))
+    points = velo[0][:, :3]
+
+    points = normalize(points)
+    labels = np.ones(len(points))
+
+    np.save(pickled_path, {'points': points, 'labels': labels})
+    return points, labels
+
 
 def load_mnist():
     mnist_data_path = os.path.join('data', 'mnist')
