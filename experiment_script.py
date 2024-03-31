@@ -78,7 +78,7 @@ def run_sweeps():
         # 'composition': [True, False],
         # 'j_func': ['2', '10', 'log', 'sqrt'],
         # 'sample_method': ['sens', 'uniform'],
-        'm_scalar': [40, 60, 80],
+        'm_scalar': [40, 80],
         # 'allotted_time': [0, 0.5, 1, 3, 5, 7, 10, 20],
         # 'hst_count_from_norm': [True, False], # Only applies to fast_coreset algorithm
     }
@@ -128,7 +128,8 @@ def run_sweeps():
             if not os.path.isdir(dataset_output_path):
                 os.makedirs(dataset_output_path)
 
-            for norm in [2]:
+            # norms 1 and 2 correspond to kmedian and kmeans clustering respectively
+            for norm in [1, 2]:
                 print('\t\tNorm --- {}'.format(str(norm)))
                 norm_output_path = os.path.join(dataset_output_path, str(norm))
                 if not os.path.isdir(norm_output_path):
