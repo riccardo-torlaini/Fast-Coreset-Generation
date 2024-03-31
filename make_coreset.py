@@ -8,10 +8,11 @@ from sklearn.datasets import make_blobs
 from bico_master.bico.core import BICO
 from bico_master.bico.geometry.point import Point
 
+# cluster_pp_slow does kmeans++ without numpy operations. This leads to a fair comparison where
+#   we are comparing non-numpy HSTs (for fast coresets) to non-numpy kmeans++
 from kmeans_plusplus import cluster_pp
 from kmeans_plusplus_slow import cluster_pp_slow
 from fast_kmeans_plusplus import fast_cluster_pp
-# from coreset_sandbox import HST, hst_dist, fit_tree, assert_hst_correctness
 from hst import CubeHST, hst_dist
 from multi_hst import make_multi_HST
 from utils import bound_sensitivities, jl_proj, get_cluster_assignments
@@ -74,7 +75,6 @@ def get_coreset(sensitivities, m, points, labels, weights=None):
     q_points = points[coreset_inds]
     q_labels = labels[coreset_inds]
     q_weights = 1 / sensitivities[coreset_inds]
-    # q_weights = weights[coreset_inds] * new_weights
     # Want our coreset to be an unbiased estimator, so the sum of the new weights
     #   has to equal the sum of the old weights
     q_weights *= np.sum(weights) / np.sum(q_weights)
@@ -268,7 +268,7 @@ def evaluate_coreset(points, k, coreset, weights, point_weights=None):
 if __name__ == '__main__':
     g_norm = 2
     g_k = 100
-    g_points, g_labels = get_dataset('nytimes', n_points=50000, D=50, num_centers=50, k=g_k, class_imbalance=5)
+    g_points, g_labels = get_dataset('blobs', n_points=50000, D=50, num_centers=50, k=g_k, class_imbalance=5)
 
     g_m_scalar = 40
     g_allotted_time = 600
@@ -344,22 +344,3 @@ if __name__ == '__main__':
     )
     print(time() - start)
     print('Coreset cost ratio:', evaluate_coreset(g_points, g_k, fast_points, fast_weights))
-
-    # Visualize
-    # model = PCA(n_components=2)
-    # g_embedding = model.fit_transform(g_points)
-    # q_embedding = model.transform(q_points)
-    # fast_embedding = model.transform(fast_points)
-    # fig, axes = plt.subplots(1, 3)
-
-    # axes[0].scatter(g_embedding[:, 0], g_embedding[:, 1], c=g_labels, alpha=0.5, s=5)
-    # axes[1].scatter(q_embedding[:, 0], q_embedding[:, 1], c=q_labels, alpha=0.5, s=5)
-    # axes[2].scatter(fast_embedding[:, 0], fast_embedding[:, 1], c=fast_labels, alpha=0.5, s=5)
-
-    # axes[0].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-    # axes[1].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-    # axes[2].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-    # axes[0].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
-    # axes[1].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
-    # axes[2].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
-    # plt.show()

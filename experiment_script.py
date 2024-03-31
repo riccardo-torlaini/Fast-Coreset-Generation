@@ -22,29 +22,22 @@ def get_experiment_params(default_values, norm, param, val):
 def run_sweeps():
     results = {}
     datasets = [
-        # 'blobs',
-        # 'artificial',
-        # 'geometric',
-        # 'benchmark',
-        # 'mnist',
-        # 'adult',
+        'blobs',
+        'artificial',
+        'geometric',
+        'benchmark',
+        'mnist',
+        'adult',
         # 'song',
         # 'census',
         # 'cover_type'
         # 'fraud',
         # 'caltech',
         # 'nytimes',
-        'taxi'
+        # 'taxi'
     ]
+    # Other methods that can run are 'sens_sampling', 'stream_kmpp' and 'bico'
     methods = ['fast_coreset', 'uniform_sampling', 'lightweight', 'semi_uniform']
-
-    # Notes for self:
-    #   - Sensitivity sampling on taxi dataset gets 1.5-2 distortion pretty much across the board
-    #   - Fast-Coreset gets 1.5-ish for small values of k (k=50) but significantly worse distortion for larger values of k (k=500)
-    #   - Sampling more points does not seem to improve the distortion of the taxi dataset
-
-
-    # methods = ['stream_kmpp', 'fast_coreset']
 
     # Only apply for Gaussian mixture and 1-outlier datasets
     n_points = 50000
@@ -76,6 +69,9 @@ def run_sweeps():
         'iterations': 3,
     }
 
+    # Parameters that one can change in order to analyze the resulting compressions.
+    # Setting 'm_scalar': [40, 60, 80] in small_sweep_params means that we will run experiments using the small default values
+    #   but substitute the corresponding m_scalar values
     small_sweep_params = {
         # Params to sweep for all coreset algorithms
         # 'k': [50, 100, 200, 400],
@@ -97,7 +93,7 @@ def run_sweeps():
         # 'hst_count_from_norm': [True, False], # Only applies to fast_coreset algorithm
     }
 
-    outputs_path = 'bico_outputs'
+    outputs_path = 'outputs'
     if not os.path.isdir(outputs_path):
         os.makedirs(outputs_path)
 
