@@ -22,12 +22,12 @@ def get_experiment_params(default_values, norm, param, val):
 def run_sweeps():
     results = {}
     datasets = [
-        'blobs',
-        'artificial',
-        'geometric',
-        'benchmark',
+        # 'blobs',
+        # 'artificial',
+        # 'geometric',
+        # 'benchmark',
         'mnist',
-        'adult',
+        # 'adult',
         # 'song',
         # 'census',
         # 'cover_type'
@@ -37,7 +37,8 @@ def run_sweeps():
         # 'taxi'
     ]
     # Other methods that can run are 'sens_sampling', 'stream_kmpp' and 'bico'
-    methods = ['fast_coreset', 'uniform_sampling', 'lightweight', 'semi_uniform']
+    methods = ['fast_coreset']#, 'uniform_sampling', 'lightweight', 'semi_uniform',
+              # 'sens_sampling', 'stream_kmpp', 'bico' ]
 
     # Only apply for Gaussian mixture and 1-outlier datasets
     n_points = 50000
@@ -66,7 +67,7 @@ def run_sweeps():
         'm_scalar': 40,
         'allotted_time': 6000,
         'hst_count_from_norm': True, # Only applies to fast-coreset
-        'iterations': 3,
+        'iterations': 15,
     }
 
     # Parameters that one can change in order to analyze the resulting compressions.
@@ -97,7 +98,7 @@ def run_sweeps():
     if not os.path.isdir(outputs_path):
         os.makedirs(outputs_path)
 
-    pbar = tqdm(methods, total=len(methods))
+    pbar = tqdm(methods, total=len(methods)) #tqdm -> loop progress bar
     pbar_description = 'method --- {} ; dataset --- {} dataset ; norm --- {} norm ; param --- {}; value --- {}'
     for method in pbar:
         print('Method --- {}'.format(method))
@@ -176,6 +177,7 @@ def run_sweeps():
                         coreset_results = {'coreset_points': q_points, 'coreset_weights': q_weights}
                         np.save(os.path.join(val_output_path, 'metrics.npy'), metric_results)
                         np.save(os.path.join(val_output_path, 'coreset.npy'), coreset_results)
-
 if __name__ == '__main__':
+    start_time = time()
     run_sweeps()
+    print("Time elapsed- {}".format(time() - start_time))

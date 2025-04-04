@@ -114,6 +114,7 @@ def get_results(
     n_points=50000,
     D=50,
     num_centers=50,
+    iterations = None,
 ):
     iterations = params['iterations']
     times = np.zeros(iterations)

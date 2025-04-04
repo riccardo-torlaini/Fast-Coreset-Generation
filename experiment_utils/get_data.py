@@ -147,7 +147,7 @@ def load_categorical_dataset(
     with open(data_path, 'r') as f:
         reader = csv.reader(f)
         for i, line in tqdm(enumerate(reader), total=rows):
-            points[i] = np.array(line)[start_index:end_index]
+            points[i] = np.array(line)[start_index:end_index] if len(line) else points[i]
     if skip_first_row:
         points = points[1:]
         rows -= 1

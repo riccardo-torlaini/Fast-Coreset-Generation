@@ -71,13 +71,13 @@ def get_coreset(sensitivities, m, points, labels, weights=None):
     coreset_inds = rng.choice(np.arange(len(sensitivities)), size=m, replace=False, p=sensitivities)
 
     if weights is None:
-        weights = np.ones_like(labels)
-    q_points = points[coreset_inds]
+        weights = np.ones_like(labels) #weights <- init to 1s (if undefined)
+    q_points = points[coreset_inds] 
     q_labels = labels[coreset_inds]
-    q_weights = 1 / sensitivities[coreset_inds]
+    q_weights = 1 / sensitivities[coreset_inds] 
     # Want our coreset to be an unbiased estimator, so the sum of the new weights
     #   has to equal the sum of the old weights
-    q_weights *= np.sum(weights) / np.sum(q_weights)
+    q_weights *= np.sum(weights) / np.sum(q_weights) #if none <- average
  
     return q_points, q_weights, q_labels
 

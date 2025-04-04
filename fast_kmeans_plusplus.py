@@ -182,6 +182,7 @@ def setup_multi_HST(points, norm=2, weights=None, hst_count_from_norm=True, loud
 
     return multi_hst
 
+#IMPORTANT ONE
 def fast_cluster_pp(points, k, norm=2, weights=None, hst_count_from_norm=True, allotted_time=np.inf, loud=False):
     start = time()
     multi_hst = setup_multi_HST(points, norm, weights, hst_count_from_norm, loud)

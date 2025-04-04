@@ -1,0 +1,33 @@
+'blobs','artificial','geometric','benchmark','mnist'
+--ran out of time (SPYDER)
+--ran out of time [free version] (Colab)
+'blobs','artificial','geometric','benchmark'
+--6:49:02 (SPYDER)
+--crashed [free version?] (colab)
+'blobs'
+--2:40:05 (SPYDER)
+-- around 5 hours? (COLAB)
+'artificial'
+--2:35:44 (SPYDER)
+'geometric'
+--33:15 (SPYDER)
+'benchmark'
+--1:26:14 (SPYDER)
+'mnist'
+--20:25:38 (SPYDER)
+'adult'
+--1:36:50 (SPYDER)
+--6:35 (just k-means++ | SPYDER)
+'census'
+--access violation (???) (SPYDER)
+'song'
+--[too much time]
+--5:50:11 (k-means++ only)
+'fraud'
+--23:57:03 (SPYDER)
+
+
+'nytimes'
+-- MemoryError: Unable to allocate 229. GiB for an array with shape (300000, 102660) and data type float64
+'taxi'
+-- [Errno 2] No such file or directory: 'data\\taxi\\train.csv'
